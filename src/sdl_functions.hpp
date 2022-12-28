@@ -26,7 +26,7 @@ void LoadSDLAdresses()
 
   HMODULE hModule = LoadLibrary(TEXT("SDL.DLL"));
   if (!hModule) {
-    spdlog::error("Unale to laod SDL.dll");
+    spdlog::error("Unable to laod SDL.dll");
     exit(2);
   }
 
