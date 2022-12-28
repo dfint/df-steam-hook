@@ -27,7 +27,7 @@ void __fastcall HOOK(addst)(graphicst_* gps, string_* str, unsigned __int8 just,
 
   ORIGINAL(addst)(gps, str, just, space);
 
-  TTFManager::GetSingleton()->DrawString("TEST!!", 50, 50);
+  TTFManager::GetSingleton()->DrawString("ТЕСТ КИРИЛЛИЦЫ!!", 50, 50);
   return;
 }
 

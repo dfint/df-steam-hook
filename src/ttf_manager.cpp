@@ -1,6 +1,21 @@
 #include "ttf_manager.h"
 #include "sdl_functions.hpp"
 
+#include <codecvt> // for std::codecvt_utf8
+#include <iostream>
+#include <locale> // for std::wstring_convert
+
+std::u16string utf_to_unicode(const std::string& str)
+{
+  std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> ucs2conv;
+  try {
+    std::u16string ucs2 = ucs2conv.from_bytes(str);
+    return ucs2;
+  } catch (const std::range_error& e) {
+    spdlog::error("some error while encoding from utf8 to ucs2");
+  }
+}
+
 void TTFManager::Init()
 {
   if (TTF_Init() == -1) {
@@ -31,17 +46,14 @@ void TTFManager::LoadScreen()
 SDL_Surface* TTFManager::CreateTexture(const std::string& str,
                                        SDL_Color font_color = { 255, 255, 255 })
 {
-  // bad conversation
-  // TODO: make encoding utf-8 to UCS-2 (Unicode)
-  std::wstring widestr = std::wstring(str.begin(), str.end());
-  const wchar_t* widecstr = widestr.c_str();
+  auto ucs = utf_to_unicode(str);
 
   if (this->font == nullptr) {
     spdlog::error("Trying create texture before setting font");
     exit(2);
   }
   auto texture = TTF_RenderUNICODE_Blended(
-    this->font, reinterpret_cast<const Uint16*>(widecstr), font_color);
+    this->font, reinterpret_cast<const uint16_t*>(&ucs[0]), font_color);
   return texture;
 }
 
