@@ -43,8 +43,7 @@ void TTFManager::LoadScreen()
   spdlog::debug("load screen 0x{:x}", (uintptr_t)this->screen);
 }
 
-SDL_Surface* TTFManager::CreateTexture(const std::string& str,
-                                       SDL_Color font_color = { 255, 255, 255 })
+SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 })
 {
   auto ucs = utf_to_unicode(str);
 
@@ -52,8 +51,7 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str,
     spdlog::error("Trying create texture before setting font");
     exit(2);
   }
-  auto texture = TTF_RenderUNICODE_Blended(
-    this->font, reinterpret_cast<const uint16_t*>(&ucs[0]), font_color);
+  auto texture = TTF_RenderUNICODE_Blended(this->font, reinterpret_cast<const uint16_t*>(&ucs[0]), font_color);
   return texture;
 }
 

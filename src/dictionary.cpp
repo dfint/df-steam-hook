@@ -1,7 +1,6 @@
 #include "dictionary.h"
 
-void replace_all(std::string& subject, const std::string& search,
-                 const std::string& replace)
+void replace_all(std::string& subject, const std::string& search, const std::string& replace)
 {
   size_t pos = 0;
   while ((pos = subject.find(search, pos)) != std::string::npos) {

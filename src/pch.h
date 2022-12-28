@@ -36,7 +36,7 @@
 #define NOMINMAX         // Macros min(a,b) and max(a,b)
 #define NOOPENFILE       // OpenFile(), OemToAnsi, AnsiToOem, and OF_*
 #define NOSCROLL         // SB_* and scrolling routines
-#define NOSERVICE // All Service Controller routines, SERVICE_ equates, etc.
+#define NOSERVICE        // All Service Controller routines, SERVICE_ equates, etc.
 #include <windows.h>
 
 #include "SDL/SDL_ttf.h"
