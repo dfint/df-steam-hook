@@ -1,7 +1,10 @@
 #pragma once
 
 #include <format>
-#include <iostream>
+#include <fstream>
+// #include <iostream> // dont forget to remove if unneededs
+// #include <regex> // remove if regex dont needed
+#include <unordered_map>
 
 /* disable unused headers from Windows.h */
 #define WIN32_LEAN_AND_MEAN

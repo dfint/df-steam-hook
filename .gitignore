@@ -8,3 +8,5 @@ build/
 # workspace
 .vscode/
 
+# temp
+*.bak

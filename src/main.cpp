@@ -1,3 +1,4 @@
+#include "dictionary.h"
 #include "hooks.h"
 #include "logger.hpp"
 
@@ -11,6 +12,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
   switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH: {
       InitLogger();
+      Dictionary::GetSingleton()->LoadCsv("df_translation.csv");
 
       DetourRestoreAfterWith();
       DetourTransactionBegin();

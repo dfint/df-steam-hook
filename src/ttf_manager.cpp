@@ -18,14 +18,14 @@ void TTFManager::LoadFont(const std::string& file, int ptsize)
   }
   auto font = TTF_OpenFont(file.c_str(), ptsize);
   this->font = font;
-  spdlog::debug("load font {}", (uintptr_t)this->font);
+  spdlog::debug("load font 0x{:x}", (uintptr_t)this->font);
 }
 
 void TTFManager::LoadScreen()
 {
   auto screen = SDL_GetVideoSurface_ptr();
   this->screen = screen;
-  spdlog::debug("load screen {}", (uintptr_t)this->screen);
+  spdlog::debug("load screen 0x{:x}", (uintptr_t)this->screen);
 }
 
 SDL_Surface* TTFManager::CreateTexture(const std::string& str,

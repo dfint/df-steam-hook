@@ -37,8 +37,8 @@ SETUP_ORIG_FUNC(create_screen, 0x5BB540);
 bool __fastcall HOOK(create_screen)(__int64 a1, unsigned int width,
                                     unsigned int height)
 {
-  spdlog::info("create screen width {}, height {}, ptr {}", width, height,
-               (uintptr_t)a1);
+  spdlog::debug("create screen width {}, height {}, ptr 0x{:x}", width, height,
+                (uintptr_t)a1);
   return ORIGINAL(create_screen)(a1, width, height);
 }
 
