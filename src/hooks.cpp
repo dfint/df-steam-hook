@@ -1,4 +1,6 @@
 #include "hooks.h"
+#include "cache.hpp"
+#include "dictionary.h"
 #include "ttf_manager.h"
 
 // int char_height = 12;
@@ -13,6 +15,8 @@ ScreenCharTile* screen_ptr = nullptr;
 
 // const after creation
 SDL_Surface* SAMPLE = nullptr;
+
+LRUCache<std::string, std::string> cache(100);
 
 // with ttf this hook unneeded
 // not used now
@@ -36,16 +40,25 @@ void __fastcall HOOK(addst)(graphicst_* gps, string_* str, justification_ justif
     text = std::string(str->buf);
   }
 
-  if (my_screen != nullptr && g_textures_ptr != nullptr) {
-    for (int i = 0; i < text.size(); i++) {
-      long tex_pos = ORIGINAL(add_texture)(g_textures_ptr, SAMPLE);
-      unsigned long* s = my_screen + (gps->screenx + i) * gps->dimy * 4 + gps->screeny * 4 + 4;
-      *s = tex_pos;
-
-      // auto* s = screen_ptr + (gps->screenx + i) * gps->dimy + gps->screeny;
-      // s->tex_pos = tex_pos;
+  auto translated = Dictionary::GetSingleton()->Get(text);
+  if (translated) {
+    auto c = cache.Get(text);
+    if (c != nullptr) {
+      spdlog::debug("cache search {}", *c);
     }
+    cache.Put(text, translated.value());
   }
+
+  // if (my_screen != nullptr && g_textures_ptr != nullptr) {
+  //   for (int i = 0; i < text.size(); i++) {
+  //     long tex_pos = ORIGINAL(add_texture)(g_textures_ptr, SAMPLE);
+  //     unsigned long* s = my_screen + (gps->screenx + i) * gps->dimy * 4 + gps->screeny * 4 + 4;
+  //     *s = tex_pos;
+
+  //     // auto* s = screen_ptr + (gps->screenx + i) * gps->dimy + gps->screeny;
+  //     // s->tex_pos = tex_pos;
+  //   }
+  // }
 
   ORIGINAL(addst)(gps, str, justify, space);
   return;
@@ -71,9 +84,9 @@ void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> m
   // char_width = renderer->dispx_z;
   // TTFManager::GetSingleton()->LoadFont("terminus_bold.ttf", char_height);
   // resize font to ptr->dipsx/y
-  spdlog::info("reshape dimx {} dimy {} dispx {} dispy {} dispx_z {} dispy_z {} screen 0x{:x}", renderer->dimx,
-               renderer->dimy, renderer->dispx, renderer->dispy, renderer->dispx_z, renderer->dispy_z,
-               (uintptr_t)renderer->screen);
+  spdlog::debug("reshape dimx {} dimy {} dispx {} dispy {} dispx_z {} dispy_z {} screen 0x{:x}", renderer->dimx,
+                renderer->dimy, renderer->dispx, renderer->dispy, renderer->dispx_z, renderer->dispy_z,
+                (uintptr_t)renderer->screen);
 }
 
 // allocate screen array, get ptr here
@@ -140,6 +153,10 @@ void InstallHooks()
   auto ttf = TTFManager::GetSingleton();
   ttf->Init();
   ttf->LoadFont("terminus_bold.ttf", 14);
+
+  // erase callback test
+  cache.SetEraseCallback(
+    [](const std::string& key, const std::string& value) { spdlog::debug("callback key {} value {}", key, value); });
 
   // temp tex for testing
   SAMPLE = ttf->CreateTexture("Я").texture;

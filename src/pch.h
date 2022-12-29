@@ -1,11 +1,14 @@
 #pragma once
 
-#include <format>
-#include <fstream>
 // #include <iostream> // dont forget to remove if unneeded
 // #include <regex> // remove if regex dont needed
 // #include <codecvt> // for std::codecvt_utf8 - myabe not needed cause we can render utf8
 // #include <locale>  // for std::wstring_convert - myabe not needed cause we can render utf8
+#include <cstddef>
+#include <format>
+#include <fstream>
+#include <list>
+#include <stdexcept>
 #include <unordered_map>
 
 /* disable unused headers from Windows.h */

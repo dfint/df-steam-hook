@@ -1,6 +1,6 @@
 #include "dictionary.h"
 
-void replace_all(std::string& subject, const std::string& search, const std::string& replace)
+void ReplaceAll(std::string& subject, const std::string& search, const std::string& replace)
 {
   size_t pos = 0;
   while ((pos = subject.find(search, pos)) != std::string::npos) {
@@ -9,13 +9,13 @@ void replace_all(std::string& subject, const std::string& search, const std::str
   }
 }
 
-std::string sanitize(std::string& str)
+std::string Sanitize(std::string& str)
 {
-  replace_all(str, R"(\\)", "\\");
-  replace_all(str, R"(\t)", "\t");
-  replace_all(str, R"(\r)", "\r");
-  replace_all(str, R"(\n)", "\n");
-  replace_all(str, R"(")", "\"");
+  ReplaceAll(str, R"(\\)", "\\");
+  ReplaceAll(str, R"(\t)", "\t");
+  ReplaceAll(str, R"(\r)", "\r");
+  ReplaceAll(str, R"(\n)", "\n");
+  ReplaceAll(str, R"(")", "\"");
   return str;
 }
 
@@ -30,14 +30,14 @@ std::string sanitize(std::string& str)
 //   }
 // }
 
-std::pair<std::string, std::string> split(const std::string& str)
+std::pair<std::string, std::string> Split(const std::string& str)
 {
   std::string delimiter = "\",\"";
   auto delimiter_pos = str.find(delimiter);
   auto key = str.substr(1, delimiter_pos - 1);
   // value length = str-key-1(for fisrt ")-1(for last ")-3(for delimiter)
   auto value = str.substr(delimiter_pos + 3, str.length() - key.length() - 5);
-  return std::make_pair(sanitize(key), sanitize(value));
+  return std::make_pair(Sanitize(key), Sanitize(value));
 }
 
 // C code would be faster here, but we need to load just once
@@ -46,21 +46,21 @@ void Dictionary::LoadCsv(const std::string& filename)
   std::ifstream file(filename);
   if (!file.is_open()) {
     spdlog::error("Unable to open csv file {}", filename);
-    // do we need exit here?
+    // do we need exit(2) here?
     return;
   }
 
   std::string line;
   int i = 0;
   while (std::getline(file, line)) {
-    auto pair = split(line);
-    this->add(pair);
+    auto pair = Split(line);
+    this->Add(pair);
   }
   file.close();
-  spdlog::info("csv dictionary loaded, total lines {}", this->size());
+  spdlog::info("csv dictionary loaded, total lines {}", this->Size());
 }
 
-std::optional<std::string> Dictionary::get(std::string& key)
+std::optional<std::string> Dictionary::Get(std::string& key)
 {
   if (this->dict.find(key) == this->dict.end()) {
     return std::nullopt;
@@ -69,22 +69,22 @@ std::optional<std::string> Dictionary::get(std::string& key)
   return value;
 }
 
-bool Dictionary::exist(std::string& key)
+bool Dictionary::Exist(std::string& key)
 {
   return this->dict.find(key) != this->dict.end();
 }
 
-void Dictionary::add(std::string& key, std::string& value)
+void Dictionary::Add(std::string& key, std::string& value)
 {
   this->dict.emplace(std::make_pair(key, value));
 }
 
-void Dictionary::add(std::pair<std::string, std::string>& pair)
+void Dictionary::Add(std::pair<std::string, std::string>& pair)
 {
   this->dict.emplace(pair);
 }
 
-size_t Dictionary::size()
+size_t Dictionary::Size()
 {
   return this->dict.size();
 }
