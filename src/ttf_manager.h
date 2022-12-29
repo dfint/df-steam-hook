@@ -33,7 +33,7 @@ public:
   void Init();
   void LoadFont(const std::string& file, int ptsize);
   void LoadScreen();
-  StringTexture CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 });
+  std::shared_ptr<StringTexture> CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 });
   void DrawString(const std::string& str, int x, int y, int width, int height, Justify justify = Justify::LEFT,
                   SDL_Surface* screen = nullptr);
 

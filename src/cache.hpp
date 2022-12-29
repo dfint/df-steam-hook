@@ -17,6 +17,13 @@ public:
   {
   }
 
+  ~LRUCache()
+  {
+    this->items_list.clear();
+    this->items_map.clear();
+    delete this;
+  };
+
   void Put(const KeyType& key, const ValueType& value)
   {
     auto it = items_map.find(key);

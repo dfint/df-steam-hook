@@ -1,11 +1,4 @@
 #pragma once
-struct ScreenTile
-{
-  long unk;
-  long tex_pos;
-  long unk2;
-  long unk3;
-};
 
 enum curses_color_ : uint8_t
 {

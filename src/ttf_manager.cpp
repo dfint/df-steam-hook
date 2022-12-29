@@ -1,17 +1,6 @@
 #include "ttf_manager.h"
 #include "sdl_functions.hpp"
 
-// std::u16string utf_to_unicode(const std::string& str)
-// {
-//   std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> ucs2conv;
-//   try {
-//     std::u16string ucs2 = ucs2conv.from_bytes(str);
-//     return ucs2;
-//   } catch (const std::range_error& e) {
-//     spdlog::error("some error while encoding from utf8 to ucs2");
-//   }
-// }
-
 void TTFManager::Init()
 {
   if (TTF_Init() == -1) {
@@ -39,7 +28,7 @@ void TTFManager::LoadScreen()
   spdlog::debug("load screen 0x{:x}", (uintptr_t)this->screen);
 }
 
-StringTexture TTFManager::CreateTexture(const std::string& str, SDL_Color font_color)
+std::shared_ptr<StringTexture> TTFManager::CreateTexture(const std::string& str, SDL_Color font_color)
 {
   // auto ucs = utf_to_unicode(str);
 
@@ -53,7 +42,7 @@ StringTexture TTFManager::CreateTexture(const std::string& str, SDL_Color font_c
   int width, height;
   TTF_SizeUTF8(this->font, str.c_str(), &width, &height);
 
-  return StringTexture(texture, width, height);
+  return std::make_shared<StringTexture>(texture, width, height);
 }
 
 void TTFManager::DrawString(const std::string& str, int x, int y, int width, int height, Justify justify,
@@ -71,14 +60,14 @@ void TTFManager::DrawString(const std::string& str, int x, int y, int width, int
 
   SDL_Rect dest;
   dest.x = x;
-  dest.y = y + string_texture.height - height;
+  dest.y = y + string_texture->height - height;
 
   if (justify == Justify::CENTER) {
-    dest.x = x + (width - string_texture.width) / 2;
+    dest.x = x + (width - string_texture->width) / 2;
   }
 
   // spdlog::debug("str {},w {},  h {}, tex w {}, tex h {},", str, width, height, string_texture.width,
   //               string_texture.height);
-  SDL_UpperBlit_ptr(string_texture.texture, NULL, screen != nullptr ? screen : this->screen, &dest);
-  SDL_FreeSurface_ptr(string_texture.texture);
+  SDL_UpperBlit_ptr(string_texture->texture, NULL, screen != nullptr ? screen : this->screen, &dest);
+  SDL_FreeSurface_ptr(string_texture->texture);
 }

@@ -1,4 +1,4 @@
-typedef void* (*SDL_DisplayFormat_)(void* buf);
+typedef SDL_Surface* (*SDL_DisplayFormat_)(void* buf);
 typedef SDL_Surface* (*SDL_CreateRGBSurface_)(Uint32 flags, int width, int height, int depth, Uint32 Rmask,
                                               Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
 typedef Uint32 (*SDL_MapRGB_)(const SDL_PixelFormat* const format, const Uint8 r, const Uint8 g, const Uint8 b);
@@ -28,7 +28,6 @@ void LoadSDLAdresses()
 
   SDL_DisplayFormat_ptr = (SDL_DisplayFormat_)GetProcAddress(hModule, "SDL_DisplayFormat");
   SDL_CreateRGBSurface_ptr = (SDL_CreateRGBSurface_)GetProcAddress(hModule, "SDL_CreateRGBSurface");
-
   SDL_MapRGB_ptr = (SDL_MapRGB_)GetProcAddress(hModule, "SDL_MapRGB");
   SDL_FreeSurface_ptr = (SDL_FreeSurface_)GetProcAddress(hModule, "SDL_FreeSurface");
   SDL_FillRect_ptr = (SDL_FillRect_)GetProcAddress(hModule, "SDL_FillRect");
