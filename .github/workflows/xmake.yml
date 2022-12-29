@@ -13,6 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: clang-format Check
+      uses: jidicula/clang-format-action@v4.10.1
 
     - name: Configure XMake
       uses: xmake-io/github-action-setup-xmake@v1
