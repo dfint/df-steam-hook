@@ -65,7 +65,7 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
     //   strcpy(str->buf, translation.value().c_str());
     // }
 
-    CreateDFString(&translated_str, translation.value());
+    CreateDFString(translated_str, translation.value());
 
     ORIGINAL(addst)(gps, &translated_str, justify, space);
     return;
