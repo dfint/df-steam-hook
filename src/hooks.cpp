@@ -2,6 +2,7 @@
 #include "cache.hpp"
 #include "dictionary.h"
 #include "ttf_manager.h"
+#include "utils.hpp"
 
 // int char_height = 12;
 // int char_width = 8;
@@ -11,7 +12,7 @@ graphicst_* g_graphics_ptr = nullptr;
 unsigned long* my_screen = nullptr;
 
 // screen screen array
-ScreenCharTile* screen_ptr = nullptr;
+ScreenTile* screen_ptr = nullptr;
 
 // const after creation
 SDL_Surface* SAMPLE = nullptr;
@@ -29,7 +30,7 @@ long __fastcall HOOK(add_texture)(void* ptr, void* a2)
 
 // string can be catched here
 SETUP_ORIG_FUNC(addst, 0x784C60);
-void __fastcall HOOK(addst)(graphicst_* gps, string_* str, justification_ justify, int space)
+void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ justify, int space)
 {
   g_graphics_ptr = gps;
 
@@ -40,13 +41,34 @@ void __fastcall HOOK(addst)(graphicst_* gps, string_* str, justification_ justif
     text = std::string(str->buf);
   }
 
-  auto translated = Dictionary::GetSingleton()->Get(text);
-  if (translated) {
+  auto translation = Dictionary::GetSingleton()->Get(text);
+  if (translation) {
     auto c = cache.Get(text);
     if (c) {
       spdlog::debug("cache search {}", c.value().get());
     }
-    cache.Put(text, translated.value());
+    cache.Put(text, translation.value());
+
+    // leak?
+    DFString_ translated_str{};
+
+    // just path does'n work
+    // auto translated_len = translation.value().size();
+    // str->len = translated_len;
+
+    // if (translated_len > 15) {
+    //   std::vector<char> cstr(translation.value().c_str(), translation.value().c_str() + translation.value().size() +
+    //   1); str->ptr = cstr.data(); str->capa = translated_len;
+    // } else {
+    //   str->pad = 0;
+    //   str->capa = 15;
+    //   strcpy(str->buf, translation.value().c_str());
+    // }
+
+    CreateDFString(&translated_str, translation.value());
+
+    ORIGINAL(addst)(gps, &translated_str, justify, space);
+    return;
   }
 
   // if (my_screen != nullptr && g_textures_ptr != nullptr) {
