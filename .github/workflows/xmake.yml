@@ -20,4 +20,4 @@ jobs:
         xmake-version: latest
 
     - name: Build
-      run: xmake
+      run: xmake -y
