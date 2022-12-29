@@ -1,3 +1,26 @@
+enum Justify : uint8_t
+{
+  LEFT,
+  CENTER,
+  RIGHT,
+  CONT,
+  NOT_TRUETYPE
+};
+
+struct StringTexture
+{
+  SDL_Surface* texture;
+  int width;
+  int height;
+
+  StringTexture(SDL_Surface* texture, int width, int height)
+    : texture(texture)
+    , width(width)
+    , height(height)
+  {
+  }
+};
+
 class TTFManager
 {
 public:
@@ -10,8 +33,9 @@ public:
   void Init();
   void LoadFont(const std::string& file, int ptsize);
   void LoadScreen();
-  SDL_Surface* CreateTexture(const std::string& str, SDL_Color font_color);
-  void DrawString(const std::string& str, int x, int y);
+  StringTexture CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 });
+  void DrawString(const std::string& str, int x, int y, int width, int height, Justify justify = Justify::LEFT,
+                  SDL_Surface* screen = nullptr);
 
 private:
   TTFManager() {}

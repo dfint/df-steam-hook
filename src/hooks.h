@@ -1,5 +1,24 @@
+struct ScreenCharTile
+{
+  long unk;
+  long tex_pos;
+  long unk2;
+  long unk3;
+};
 
-enum justification : unsigned char
+enum curses_color_ : uint8_t
+{
+  Black,
+  Blue,
+  Green,
+  Cyan,
+  Red,
+  Magenta,
+  Yellow,
+  White,
+};
+
+enum justification_ : uint8_t
 {
   justify_left,
   justify_center,
@@ -25,18 +44,101 @@ struct graphicst_
   char dump[129];
   long screenx;
   long screeny;
-  char screenf, screenb;
-  char screenbright;
+  curses_color_ screenf;
+  curses_color_ screenb;
+  bool screenbright;
   char dump2[336];
-  unsigned char* screen;
+  uint8_t* screen;
   char dump3[1028];
-  int dimx, dimy;
+  int32_t dimx;
+  int32_t dimy;
 };
 
 struct renderer_2d_base_
 {
-  char dump[280];
-  int dispx_z, dispy_z;
+  char dump[240];
+  SDL_Surface* screen;          // 8
+  char pad16[16];               // 16
+  int32_t dispx;                // 4
+  int32_t dispy;                // 4
+  int32_t dimx;                 // 4
+  int32_t dimy;                 // 4
+  int32_t dispx_z;              // 4
+  int32_t dispy_z;              // 4
+  int32_t origin_x;             // 4
+  int32_t origin_y;             // 4
+  bool use_viewport_zoom;       // 1
+  int32_t viewport_zoom_factor; // 4
+  char pad24[24];               // 24
+  int32_t zoom_steps;           // 4
+  int32_t forced_steps;         // 4
+  int32_t natural_w;            // 4
+  int32_t natural_h;            // 4
+};
+
+class renderer_
+{
+public:
+  unsigned char* screen;
+  long* screentexpos;
+  char* screentexpos_addcolor;
+  unsigned char* screentexpos_grayscale;
+  unsigned char* screentexpos_cf;
+  unsigned char* screentexpos_cbr;
+  // For partial printing:
+  unsigned char* screen_old;
+  long* screentexpos_old;
+  char* screentexpos_addcolor_old;
+  unsigned char* screentexpos_grayscale_old;
+  unsigned char* screentexpos_cf_old;
+  unsigned char* screentexpos_cbr_old;
+};
+
+struct texture_fullid
+{
+  int texpos;
+  float r, g, b;
+  float br, bg, bb;
+
+  bool operator<(const struct texture_fullid& other) const
+  {
+    if (texpos != other.texpos)
+      return texpos < other.texpos;
+    if (r != other.r)
+      return r < other.r;
+    if (g != other.g)
+      return g < other.g;
+    if (b != other.b)
+      return b < other.b;
+    if (br != other.br)
+      return br < other.br;
+    if (bg != other.bg)
+      return bg < other.bg;
+    return bb < other.bb;
+  }
+};
+
+typedef int texture_ttfid; // Just the texpos
+
+template <typename L, typename R>
+struct Either
+{
+  bool isL;
+  union
+  {
+    L left;
+    R right;
+  };
+  Either(const L& l)
+  {
+    isL = true;
+    left = l;
+  }
+  Either(const R& r)
+  {
+    isL = false;
+    right = r;
+  }
 };
 
 #define SETUP_ORIG_FUNC(fn_name, shift) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + shift);
@@ -57,5 +159,8 @@ typedef void(__fastcall* cleanup_arrays)(void* ptr);
 typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
 typedef bool(__fastcall* create_screen)(__int64 a1, unsigned int width, unsigned int height);
 typedef void(__fastcall* reshape)(renderer_2d_base_* ptr, std::pair<int, int> max_grid);
+typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
+typedef void(__fastcall* cleanup_arrays)(void* ptr);
+typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(renderer_* a1, __int64 a2, int a3, int a4);
 
 void InstallHooks();
