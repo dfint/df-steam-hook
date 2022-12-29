@@ -43,8 +43,8 @@ void __fastcall HOOK(addst)(graphicst_* gps, string_* str, justification_ justif
   auto translated = Dictionary::GetSingleton()->Get(text);
   if (translated) {
     auto c = cache.Get(text);
-    if (c != nullptr) {
-      spdlog::debug("cache search {}", *c);
+    if (c) {
+      spdlog::debug("cache search {}", c.value().get());
     }
     cache.Put(text, translated.value());
   }
