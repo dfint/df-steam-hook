@@ -2,6 +2,8 @@
 
 void ScreenManager::AllocateScreen(int x, int y)
 {
+  this->dimx = x;
+  this->dimy = y;
   this->screen = new ScreenTile[x * y * 4];
 }
 
@@ -13,10 +15,9 @@ void ScreenManager::ClearScreen()
   this->screen = nullptr;
 }
 
-// found way to store dimy in instanse? maybe on allocate?
-ScreenTile* ScreenManager::GetTile(int x, int y, int dimy)
+ScreenTile* ScreenManager::GetTile(int x, int y)
 {
-  return this->screen + x * dimy * 4 + y * 4;
+  return this->screen + x * this->dimy * 4 + y * 4;
 }
 
 ScreenTile* ScreenManager::GetOffset(int offset)

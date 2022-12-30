@@ -1,3 +1,5 @@
+#include "cache.hpp"
+
 enum Justify : uint8_t
 {
   LEFT,
@@ -7,6 +9,7 @@ enum Justify : uint8_t
   NOT_TRUETYPE
 };
 
+// we need width nd height, if we decide build textures for whole string
 struct StringTexture
 {
   SDL_Surface* texture;
@@ -50,6 +53,9 @@ private:
     delete this;
   };
 
+  // try to fingure the best size of cache
+  LRUCache<std::string, std::shared_ptr<StringTexture>> cache =
+    LRUCache<std::string, std::shared_ptr<StringTexture>>(100);
   TTF_Font* font;
   SDL_Surface* screen;
 };

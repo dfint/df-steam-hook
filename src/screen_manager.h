@@ -15,7 +15,7 @@ public:
     return &singleton;
   }
 
-  ScreenTile* GetTile(int x, int y, int dimy);
+  ScreenTile* GetTile(int x, int y);
   ScreenTile* GetOffset(int offset);
   void AllocateScreen(int x, int y);
   void ClearScreen();
@@ -32,5 +32,7 @@ private:
     delete this;
   };
 
+  int32_t dimx;
+  int32_t dimy;
   ScreenTile* screen;
 };

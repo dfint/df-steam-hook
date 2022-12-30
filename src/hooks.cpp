@@ -20,8 +20,9 @@ SDL_Surface* SAMPLE = nullptr;
 
 std::shared_ptr<LRUCache<std::string, std::string>> cache;
 
-// with ttf this hook unneeded
-// not used now
+bool g_ttf_replaced = false;
+
+// take g_textures_ptr here to call original, produce high cpu usage?
 SETUP_ORIG_FUNC(add_texture, 0xE827F0);
 long __fastcall HOOK(add_texture)(void* ptr, void* a2)
 {
@@ -75,26 +76,51 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
 
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
     for (int i = 0; i < text.size(); i++) {
-      long tex_pos = ORIGINAL(add_texture)(g_textures_ptr, SAMPLE);
+      long tex_pos =
+        ORIGINAL(add_texture)(g_textures_ptr, TTFManager::GetSingleton()->CreateTexture(text.substr(i, 1))->texture);
       // unsigned long* s = my_screen + (gps->screenx + i) * gps->dimy * 4 + gps->screeny * 4 + 4;
       // *s = tex_pos;
 
-      auto s = ScreenManager::GetSingleton()->GetTile(gps->screenx + i, gps->screeny, gps->dimy);
+      auto s = ScreenManager::GetSingleton()->GetTile(gps->screenx + i, gps->screeny);
       s->tex_pos = tex_pos;
     }
+    g_ttf_replaced = true;
+    ORIGINAL(addst)(gps, str, justify, space);
+    g_ttf_replaced = false;
+    return;
   }
 
   ORIGINAL(addst)(gps, str, justify, space);
   return;
 }
 
+SETUP_ORIG_FUNC(addchar, 0x55D80);
+void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char a2, char a3)
+{
+  // if (my_screen) {
+  //   if (g_ttf_replaced) {
+  //     // printf("addchar %s\n", &a2);
+  //   } else {
+  //     unsigned long* s = my_screen + gps->screenx * gps->dimy * 4 + gps->screeny * 4 + 4;
+  //     *s++ = 0;
+  //     // auto s = ScreenManager::GetSingleton()->GetTile(gps->screenx, gps->screeny * 4);
+  //     // s->tex_pos = 0;
+  //   }
+  // }
+
+  // unsigned long* s = my_screen + gps->screenx * gps->dimy * 4 + gps->screeny * 4 + 4;
+  // *s++ = 0;
+
+  ORIGINAL(addchar)(gps, a2, a3);
+}
+
 // screen size can be catched here
 // not used for now
 SETUP_ORIG_FUNC(create_screen, 0x5BB540);
-bool __fastcall HOOK(create_screen)(__int64 a1, unsigned int width, unsigned int height)
+bool __fastcall HOOK(create_screen)(__int64 a1, unsigned int screen_width, unsigned int screen_height)
 {
-  spdlog::debug("create screen width {}, height {}, ptr 0x{:x}", width, height, (uintptr_t)a1);
-  return ORIGINAL(create_screen)(a1, width, height);
+  spdlog::debug("create screen width {}, height {}, ptr 0x{:x}", screen_width, screen_height, (uintptr_t)a1);
+  return ORIGINAL(create_screen)(a1, screen_width, screen_height);
 }
 
 // resizing font
@@ -104,10 +130,6 @@ void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> m
 {
   ORIGINAL(reshape)(renderer, max_grid);
 
-  // char_height = renderer->dispy_z;
-  // char_width = renderer->dispx_z;
-  // TTFManager::GetSingleton()->LoadFont("terminus_bold.ttf", char_height);
-  // resize font to ptr->dipsx/y
   spdlog::debug("reshape dimx {} dimy {} dispx {} dispy {} dispx_z {} dispy_z {} screen 0x{:x}", renderer->dimx,
                 renderer->dimy, renderer->dispx, renderer->dispy, renderer->dispx_z, renderer->dispy_z,
                 (uintptr_t)renderer->screen);
@@ -115,20 +137,23 @@ void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> m
 
 // allocate screen array, get ptr here
 SETUP_ORIG_FUNC(gps_allocate, 0x5C2AB0);
-void __fastcall HOOK(gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7)
+void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z,
+                                   int dispy_z)
 {
 
-  spdlog::debug("gps allocate: {} {} {} {} {} {}", a2, a3, a4, a5, a6, a7);
-  ORIGINAL(gps_allocate)(ptr, a2, a3, a4, a5, a6, a7);
+  spdlog::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy,
+                screen_width, screen_height, dispx_z, dispy_z);
+  ORIGINAL(gps_allocate)(ptr, dimx, dimy, screen_width, screen_height, dispx_z, dispy_z);
 
-  // my_screen = new unsigned long[a2 * a3 * 12];
-  ScreenManager::GetSingleton()->AllocateScreen(a2, a3);
+  // my_screen = new unsigned long[dimx * dimy * 12];
+  ScreenManager::GetSingleton()->AllocateScreen(dimx, dimy);
 }
 
 // clean screen array here
 SETUP_ORIG_FUNC(cleanup_arrays, 0x5C28D0);
 void __fastcall HOOK(cleanup_arrays)(void* ptr)
 {
+  // spdlog::debug("cleanup arrays");
   // if (my_screen) {
   //   delete[] my_screen;
   // }
@@ -173,7 +198,7 @@ void InstallHooks()
   // then should load font for drawing text
   auto ttf = TTFManager::GetSingleton();
   ttf->Init();
-  ttf->LoadFont("terminus_bold.ttf", 14);
+  ttf->LoadFont("terminus_bold.ttf", 12);
 
   cache = std::make_shared<LRUCache<std::string, std::string>>(100);
   // erase callback test
@@ -181,10 +206,11 @@ void InstallHooks()
     [](const std::string& key, const std::string& value) { spdlog::debug("callback key {} value {}", key, value); });
 
   // temp tex for testing
-  SAMPLE = ttf->CreateTexture("Я")->texture;
+  SAMPLE = ttf->CreateTexture("A")->texture;
 
   ATTACH(add_texture);
   ATTACH(addst);
+  ATTACH(addchar);
   ATTACH(create_screen);
   ATTACH(reshape);
   ATTACH(screen_to_texid);

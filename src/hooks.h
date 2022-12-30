@@ -149,6 +149,7 @@ struct Either
 
 typedef long(__fastcall* add_texture)(void* ptr, void* a2);
 typedef void(__fastcall* addst)(graphicst_* gps, DFString_* str, unsigned __int8 just, int space);
+typedef void(__fastcall* addchar)(graphicst_* gps, unsigned char a2, char a3);
 typedef void(__fastcall* cleanup_arrays)(void* ptr);
 typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
 typedef bool(__fastcall* create_screen)(__int64 a1, unsigned int width, unsigned int height);

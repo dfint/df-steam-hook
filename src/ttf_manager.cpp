@@ -30,19 +30,27 @@ void TTFManager::LoadScreen()
 
 std::shared_ptr<StringTexture> TTFManager::CreateTexture(const std::string& str, SDL_Color font_color)
 {
-  // auto ucs = utf_to_unicode(str);
+  // checkout cache and return if exist
+  auto cached = this->cache.Get(str);
+  if (cached) {
+    return cached.value();
+  }
 
   if (this->font == nullptr) {
     spdlog::error("Trying create texture before setting font");
     exit(2);
   }
-  // use background during testing
-  // TODO: switch to textures without background
+
+  // create texture
   auto texture = TTF_RenderUTF8_Blended(this->font, str.c_str(), font_color);
   int width, height;
   TTF_SizeUTF8(this->font, str.c_str(), &width, &height);
 
-  return std::make_shared<StringTexture>(texture, width, height);
+  // create struct and put it to cache
+  auto string_texture = std::make_shared<StringTexture>(texture, width, height);
+  this->cache.Put(str, string_texture);
+
+  return string_texture;
 }
 
 void TTFManager::DrawString(const std::string& str, int x, int y, int width, int height, Justify justify,
