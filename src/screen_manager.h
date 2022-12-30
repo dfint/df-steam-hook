@@ -32,5 +32,5 @@ private:
     delete this;
   };
 
-  unsigned long* screen;
+  ScreenTile* screen;
 };
