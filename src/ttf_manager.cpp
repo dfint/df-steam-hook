@@ -4,7 +4,7 @@
 // @raydan scaling methods
 // TODO: rework it to look more prettier
 
-Uint32 ReadPixel(SDL_Surface* surface, int x, int y)
+Uint32 TTFManager::ReadPixel(SDL_Surface* surface, int x, int y)
 {
   int bpp = surface->format->BytesPerPixel;
   /* Here p is the address to the pixel we want to retrieve */
@@ -35,7 +35,7 @@ Uint32 ReadPixel(SDL_Surface* surface, int x, int y)
   }
 }
 
-void DrawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel)
+void TTFManager::DrawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel)
 {
   int bpp = surface->format->BytesPerPixel;
   /* Here p is the address to the pixel we want to set */
@@ -45,11 +45,9 @@ void DrawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel)
     case 1:
       *p = pixel;
       break;
-
     case 2:
       *(Uint16*)p = pixel;
       break;
-
     case 3:
       if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
         p[0] = (pixel >> 16) & 0xff;
@@ -61,14 +59,13 @@ void DrawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel)
         p[2] = (pixel >> 16) & 0xff;
       }
       break;
-
     case 4:
       *(Uint32*)p = pixel;
       break;
   }
 }
 
-SDL_Surface* ScaleSurface(SDL_Surface* Surface, Uint16 Width, Uint16 Height)
+SDL_Surface* TTFManager::ScaleSurface(SDL_Surface* Surface, Uint16 Width, Uint16 Height)
 {
   if (!Surface || !Width || !Height)
     return 0;
@@ -90,6 +87,31 @@ SDL_Surface* ScaleSurface(SDL_Surface* Surface, Uint16 Width, Uint16 Height)
   return _ret;
 }
 
+SDL_Surface* TTFManager::ResizeSurface(SDL_Surface* surface, int width, int height, int shift_frame_from_up)
+{
+  // should check cause it may crashed
+  if (!surface || !width || !height) {
+    return 0;
+  }
+
+  SDL_Surface* sized_texture =
+    SDL_CreateRGBSurface_ptr(surface->flags, width, height, surface->format->BitsPerPixel, surface->format->Rmask,
+                             surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
+
+  for (int y = shift_frame_from_up; y < surface->h; y++) {
+    for (int x = 0; x < surface->w; x++) {
+      if (x < width && y - shift_frame_from_up < height) {
+        DrawPixel(sized_texture, x, y - shift_frame_from_up, ReadPixel(surface, x, y));
+      }
+    }
+  }
+
+  // clear source surface
+  SDL_FreeSurface_ptr(surface);
+
+  return sized_texture;
+}
+
 void TTFManager::Init()
 {
   if (TTF_Init() == -1) {
@@ -102,13 +124,14 @@ void TTFManager::Init()
   spdlog::info("TTFManager loaded");
 }
 
-void TTFManager::LoadFont(const std::string& file, int ptsize)
+void TTFManager::LoadFont(const std::string& file, int ptsize, int shift_frame_from_up)
 {
   if (this->font != nullptr) {
     TTF_CloseFont(this->font);
   }
   auto font = TTF_OpenFont(file.c_str(), ptsize);
   this->font = font;
+  this->shift_frame_from_up = shift_frame_from_up;
   spdlog::debug("load font 0x{:x}", (uintptr_t)this->font);
 }
 
@@ -128,13 +151,19 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_co
     return cached.value().get();
   }
   if (this->font == nullptr) {
-    spdlog::error("Trying create texture before setting font");
+    spdlog::error("trying to create texture before setting font");
     exit(2);
   }
   // create texture
   auto texture = TTF_RenderUTF8_Blended(this->font, str.c_str(), font_color);
+
+  // TODO: rework missing utf8 chars  and font glyphs
+  if (texture == NULL) {
+    spdlog::error("texture generation error on str {}", str);
+    texture = TTF_RenderUTF8_Blended(this->font, "x", font_color);
+  }
   // scale to target tile size
-  texture = ScaleSurface(texture, 8, 12);
+  texture = ResizeSurface(texture, 8, 12, this->shift_frame_from_up);
 
   // TODO: remove cached response flag
   if (this->cached_response) {
@@ -142,33 +171,6 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_co
   }
   return texture;
 }
-
-// void TTFManager::DrawString(const std::string& str, int x, int y, int width, int height, Justify justify,
-//                             SDL_Surface* screen)
-// {
-//   auto string_texture = this->CreateTexture(str);
-
-//   if (this->screen == nullptr) {
-//     this->LoadScreen();
-//     if (this->screen == nullptr) {
-//       spdlog::error("Unable to get VideoSurface");
-//       exit(2);
-//     }
-//   }
-
-//   SDL_Rect dest;
-//   dest.x = x;
-//   dest.y = y + string_texture->height - height;
-
-//   if (justify == Justify::CENTER) {
-//     dest.x = x + (width - string_texture->width) / 2;
-//   }
-
-//   // spdlog::debug("str {},w {},  h {}, tex w {}, tex h {},", str, width, height, string_texture.width,
-//   //               string_texture.height);
-//   SDL_UpperBlit_ptr(string_texture->texture, NULL, screen != nullptr ? screen : this->screen, &dest);
-//   SDL_FreeSurface_ptr(string_texture->texture);
-// }
 
 void TTFManager::ClearCache()
 {

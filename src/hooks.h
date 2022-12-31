@@ -158,5 +158,6 @@ typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5
 typedef void(__fastcall* cleanup_arrays)(void* ptr);
 typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(renderer_* a1, __int64 a2, int a3, int a4);
 typedef void(__fastcall* main_init)();
+typedef void(__fastcall* upload_textures)(__int64 a1);
 
 void InstallHooks();

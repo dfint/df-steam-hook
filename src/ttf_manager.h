@@ -1,29 +1,5 @@
 #include "cache.hpp"
 
-enum Justify : uint8_t
-{
-  LEFT,
-  CENTER,
-  RIGHT,
-  CONT,
-  NOT_TRUETYPE
-};
-
-// we need width nd height, if we decide build textures for whole string
-struct StringTexture
-{
-  SDL_Surface* texture;
-  int width;
-  int height;
-
-  StringTexture(SDL_Surface* texture, int width, int height)
-    : texture(texture)
-    , width(width)
-    , height(height)
-  {
-  }
-};
-
 class TTFManager
 {
 public:
@@ -34,11 +10,9 @@ public:
   }
 
   void Init();
-  void LoadFont(const std::string& file, int ptsize);
+  void LoadFont(const std::string& file, int ptsize, int shift_frame_from_up = 0);
   void LoadScreen();
   SDL_Surface* CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 });
-  // void DrawString(const std::string& str, int x, int y, int width, int height, Justify justify = Justify::LEFT,
-  //                 SDL_Surface* screen = nullptr);
   void ClearCache();
 
   // TODO: remove this when find texture reset point
@@ -57,8 +31,14 @@ private:
     delete this;
   };
 
+  SDL_Surface* ResizeSurface(SDL_Surface* surface, int width, int height, int shift_frame_from_up);
+  SDL_Surface* ScaleSurface(SDL_Surface* Surface, Uint16 Width, Uint16 Height);
+  void DrawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel);
+  Uint32 ReadPixel(SDL_Surface* surface, int x, int y);
+
   // try to figure out the best size of cache
   LRUCache<std::string, SDL_Surface*> cache = LRUCache<std::string, SDL_Surface*>(100);
   TTF_Font* font;
   SDL_Surface* screen;
+  int shift_frame_from_up = 0;
 };

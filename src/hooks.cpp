@@ -6,22 +6,56 @@
 #include "utils.hpp"
 
 void* g_textures_ptr = nullptr;
+graphicst_* g_graphics_ptr = nullptr;
+bool is_string_replace = false;
+
 // cache for textures id
 LRUCache<std::string, long> texture_id_cache(500);
 
+// setup texture to texture vector and recieve tex_pos
 SETUP_ORIG_FUNC(add_texture, 0xE827F0);
 long __fastcall HOOK(add_texture)(void* ptr, SDL_Surface* texture)
 {
   g_textures_ptr = ptr;
-  auto ret = ORIGINAL(add_texture)(ptr, texture);
+  auto texture_id = ORIGINAL(add_texture)(ptr, texture);
   // spdlog::debug("add texture id {}", ret);
-  return ret;
+  return texture_id;
+}
+
+// inject ttf texture every char in string to screen array
+bool InjectTTFTile(std::string& text, int x, int y)
+{
+  if (!ScreenManager::GetSingleton()->isInitialized() || g_textures_ptr == nullptr) {
+    return false;
+  }
+
+  for (int i = 0; i < text.size(); i++) {
+    auto texture = TTFManager::GetSingleton()->CreateTexture(text.substr(i, 1));
+    auto cached_texture_id = texture_id_cache.Get(text.substr(i, 1));
+    long tex_pos = 0;
+    if (cached_texture_id) {
+      tex_pos = cached_texture_id.value().get();
+      // spdlog::debug("texture id from cache {}", cached_texture_id.value().get());
+    } else {
+      tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
+      if (TTFManager::GetSingleton()->cached_response) {
+        texture_id_cache.Put(text.substr(i, 1), tex_pos);
+      }
+      // spdlog::debug("new texture id {}", tex_pos);
+    }
+    auto tile = ScreenManager::GetSingleton()->GetTile(x + i, y);
+    tile->tex_pos = tex_pos;
+  }
+
+  return true;
 }
 
 // string can be catched here
 SETUP_ORIG_FUNC(addst, 0x784C60);
 void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ justify, int space)
 {
+  g_graphics_ptr = gps;
+
   std::string text;
   if (str->len > 15) {
     text = std::string(str->ptr);
@@ -63,25 +97,11 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
   //   return;
   // }
 
-  // ttf inject segment
-  if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
-    for (int i = 0; i < text.size(); i++) {
-      auto texture = TTFManager::GetSingleton()->CreateTexture(text.substr(i, 1));
-      auto cached_texture_id = texture_id_cache.Get(text.substr(i, 1));
-      long tex_pos;
-      if (cached_texture_id) {
-        tex_pos = cached_texture_id.value().get();
-        // spdlog::debug("texture id from cache {}", cached_texture_id.value().get());
-      } else {
-        tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
-        if (TTFManager::GetSingleton()->cached_response) {
-          texture_id_cache.Put(text.substr(i, 1), tex_pos);
-        }
-        spdlog::debug("new texture id {}", tex_pos);
-      }
-      auto s = ScreenManager::GetSingleton()->GetTile(gps->screenx + i, gps->screeny);
-      s->tex_pos = tex_pos;
-    }
+  if (InjectTTFTile(text, gps->screenx, gps->screeny)) {
+    is_string_replace = true;
+    ORIGINAL(addst)(gps, str, justify, space);
+    is_string_replace = false;
+    return;
   }
 
   ORIGINAL(addst)(gps, str, justify, space);
@@ -92,6 +112,11 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
 SETUP_ORIG_FUNC(addchar, 0x55D80);
 void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char a2, char a3)
 {
+  if (ScreenManager::GetSingleton()->isInitialized() && !is_string_replace) {
+    auto tile = ScreenManager::GetSingleton()->GetTile(gps->screenx, gps->screeny);
+    tile->tex_pos = 0;
+  }
+
   ORIGINAL(addchar)(gps, a2, a3);
 }
 
@@ -138,14 +163,14 @@ void __fastcall HOOK(cleanup_arrays)(void* ptr)
 SETUP_ORIG_FUNC(screen_to_texid, 0x5BAB40);
 Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y)
 {
-  Either<texture_fullid, texture_ttfid>* ret = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
-  if (ScreenManager::GetSingleton()->isInitialized()) {
-    auto s = ScreenManager::GetSingleton()->GetTile(x, y);
-    if (s->tex_pos > 0) {
-      ret->left.texpos = s->tex_pos;
+  Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
+  if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
+    auto tile = ScreenManager::GetSingleton()->GetTile(x, y);
+    if (tile->tex_pos > 0) {
+      texture_by_id->left.texpos = tile->tex_pos;
     }
   }
-  return ret;
+  return texture_by_id;
 }
 
 // loading main menu (start game)
@@ -172,11 +197,21 @@ void __fastcall HOOK(load_multi_pdim_2)(void* ptr, DFString_* filename, long* te
 }
 
 // game init
+// not used
 SETUP_ORIG_FUNC(main_init, 0x87A3C0);
 void __fastcall HOOK(main_init)()
 {
   spdlog::debug("main init");
   ORIGINAL(main_init)();
+}
+
+// catch Resetting textures in enabler asycn_wait loop
+// not here, not used
+SETUP_ORIG_FUNC(upload_textures, 0xE82020);
+void __fastcall HOOK(upload_textures)(__int64 a1)
+{
+  spdlog::debug("upload_textures");
+  ORIGINAL(upload_textures)(a1);
 }
 
 void InstallHooks()
@@ -186,7 +221,7 @@ void InstallHooks()
   // then should load font for drawing text
   auto ttf = TTFManager::GetSingleton();
   ttf->Init();
-  ttf->LoadFont("terminus.ttf", 14);
+  ttf->LoadFont("terminus_bold.ttf", 14, 2);
 
   ATTACH(add_texture);
   ATTACH(addst);
@@ -199,6 +234,7 @@ void InstallHooks()
   ATTACH(gps_allocate);
   ATTACH(cleanup_arrays);
   ATTACH(main_init);
+  ATTACH(upload_textures);
 
   spdlog::info("hooks installed");
 }
