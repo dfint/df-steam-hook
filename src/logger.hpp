@@ -4,5 +4,6 @@ void InitLogger()
   spdlog::set_level(spdlog::level::trace);
   logger->flush_on(spdlog::level::trace);
   spdlog::set_default_logger(logger);
+  spdlog::set_pattern("[%H:%M:%S.%e] [%l] %v");
   spdlog::info("logger init");
 }

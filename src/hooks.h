@@ -136,14 +136,10 @@ struct Either
 };
 
 #define SETUP_ORIG_FUNC(fn_name, shift) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + shift);
-
 #define SETUP_ORIG_FUNC_FNAME(fn_name, module_name)                                                                    \
   fn_name fn_name##_orig = (fn_name)(GetProcAddress(GetModuleHandle(#module_name), #fn_name));
-
 #define GET_ADDR(shift) (PVOID)((UINT64)GetModuleHandle(0) + shift)
-
 #define ATTACH(fn_name) DetourAttach(&(PVOID&)(fn_name##_orig), (PVOID)fn_name##_hook)
-
 #define HOOK(fn_name) fn_name##_hook
 #define ORIGINAL(fn_name) fn_name##_orig
 
@@ -154,8 +150,13 @@ typedef void(__fastcall* cleanup_arrays)(void* ptr);
 typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
 typedef bool(__fastcall* create_screen)(__int64 a1, unsigned int width, unsigned int height);
 typedef void(__fastcall* reshape)(renderer_2d_base_* ptr, std::pair<int, int> max_grid);
+typedef void(__fastcall* load_multi_pdim)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
+                                          bool convert_magenta, long* disp_x, long* disp_y);
+typedef void(__fastcall* load_multi_pdim_2)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
+                                            bool convert_magenta, long* disp_x, long* disp_y);
 typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
 typedef void(__fastcall* cleanup_arrays)(void* ptr);
 typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(renderer_* a1, __int64 a2, int a3, int a4);
+typedef void(__fastcall* main_init)();
 
 void InstallHooks();

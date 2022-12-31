@@ -36,9 +36,13 @@ public:
   void Init();
   void LoadFont(const std::string& file, int ptsize);
   void LoadScreen();
-  std::shared_ptr<StringTexture> CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 });
-  void DrawString(const std::string& str, int x, int y, int width, int height, Justify justify = Justify::LEFT,
-                  SDL_Surface* screen = nullptr);
+  SDL_Surface* CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 });
+  // void DrawString(const std::string& str, int x, int y, int width, int height, Justify justify = Justify::LEFT,
+  //                 SDL_Surface* screen = nullptr);
+  void ClearCache();
+
+  // TODO: remove this when find texture reset point
+  bool cached_response = false;
 
 private:
   TTFManager() {}
@@ -53,9 +57,8 @@ private:
     delete this;
   };
 
-  // try to fingure the best size of cache
-  LRUCache<std::string, std::shared_ptr<StringTexture>> cache =
-    LRUCache<std::string, std::shared_ptr<StringTexture>>(100);
+  // try to figure out the best size of cache
+  LRUCache<std::string, SDL_Surface*> cache = LRUCache<std::string, SDL_Surface*>(100);
   TTF_Font* font;
   SDL_Surface* screen;
 };

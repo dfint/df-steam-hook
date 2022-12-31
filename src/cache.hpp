@@ -24,7 +24,7 @@ public:
     delete this;
   };
 
-  void Put(const KeyType& key, const ValueType& value)
+  void Put(const KeyType& key, ValueType& value)
   {
     auto it = items_map.find(key);
     items_list.push_front(KeyValuePairType(key, value));
@@ -56,7 +56,7 @@ public:
     }
   }
 
-  void SetEraseCallback(std::function<void(const KeyType& key, const ValueType& value)> callback)
+  void SetEraseCallback(std::function<void(const KeyType& key, ValueType& value)> callback)
   {
     this->erase_callback = callback;
   }
@@ -65,11 +65,17 @@ public:
 
   size_t Size() const { return items_map.size(); }
 
+  void Clear() noexcept
+  {
+    items_map.clear();
+    items_list.clear();
+  }
+
 private:
   std::list<KeyValuePairType> items_list;
   std::unordered_map<KeyType, ListIteratorType> items_map;
   size_t max_size;
-  std::function<void(const KeyType& key, const ValueType& value)> erase_callback;
+  std::function<void(const KeyType& key, ValueType& value)> erase_callback;
 };
 
 #endif /* _LRUCACHE_HPP_INCLUDED_ */

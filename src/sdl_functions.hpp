@@ -26,6 +26,7 @@ void LoadSDLAdresses()
     exit(2);
   }
 
+  // instant crash on call, why?
   SDL_DisplayFormat_ptr = (SDL_DisplayFormat_)GetProcAddress(hModule, "SDL_DisplayFormat");
   SDL_CreateRGBSurface_ptr = (SDL_CreateRGBSurface_)GetProcAddress(hModule, "SDL_CreateRGBSurface");
   SDL_MapRGB_ptr = (SDL_MapRGB_)GetProcAddress(hModule, "SDL_MapRGB");
