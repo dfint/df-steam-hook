@@ -23,5 +23,13 @@ jobs:
         xmake-version: latest
         actions-cache-folder: '.xmake-cache'
 
+    - name: cache xmake
+      uses: actions/cache@v2
+      with:
+        path: |
+          ${{github.workspace}}/build/.build_cache
+          .xmake-cache
+        key: ${{ runner.os }}-xmake-${{ hashFiles('**/xmake.lua') }}
+
     - name: Build
       run: xmake -y
