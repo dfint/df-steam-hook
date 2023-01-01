@@ -7,7 +7,7 @@
 
 void* g_textures_ptr = nullptr;
 graphicst_* g_graphics_ptr = nullptr;
-bool is_string_replace = false;
+std::atomic_flag ttf_injection_lock = ATOMIC_FLAG_INIT;
 
 // cache for textures id
 LRUCache<std::string, long> texture_id_cache(500);
@@ -20,34 +20,6 @@ long __fastcall HOOK(add_texture)(void* ptr, SDL_Surface* texture)
   auto texture_id = ORIGINAL(add_texture)(ptr, texture);
   // spdlog::debug("add texture id {}", ret);
   return texture_id;
-}
-
-// inject ttf texture every char in string to screen array
-bool InjectTTFTile(std::string& text, int x, int y)
-{
-  if (!ScreenManager::GetSingleton()->isInitialized() || g_textures_ptr == nullptr) {
-    return false;
-  }
-
-  for (int i = 0; i < text.size(); i++) {
-    auto texture = TTFManager::GetSingleton()->CreateTexture(text.substr(i, 1));
-    auto cached_texture_id = texture_id_cache.Get(text.substr(i, 1));
-    long tex_pos = 0;
-    if (cached_texture_id) {
-      tex_pos = cached_texture_id.value().get();
-      // spdlog::debug("texture id from cache {}", cached_texture_id.value().get());
-    } else {
-      tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
-      if (TTFManager::GetSingleton()->cached_response) {
-        texture_id_cache.Put(text.substr(i, 1), tex_pos);
-      }
-      // spdlog::debug("new texture id {}", tex_pos);
-    }
-    auto tile = ScreenManager::GetSingleton()->GetTile(x + i, y);
-    tile->tex_pos = tex_pos;
-  }
-
-  return true;
 }
 
 // string can be catched here
@@ -97,27 +69,45 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
   //   return;
   // }
 
-  if (InjectTTFTile(text, gps->screenx, gps->screeny)) {
-    is_string_replace = true;
-    ORIGINAL(addst)(gps, str, justify, space);
-    is_string_replace = false;
-    return;
-  }
-
+  ttf_injection_lock.test_and_set(std::memory_order_acquire);
   ORIGINAL(addst)(gps, str, justify, space);
+  ttf_injection_lock.clear(std::memory_order_release);
   return;
 }
 
-// we dont need it at all?
+// ttf texture injection to tiles
 SETUP_ORIG_FUNC(addchar, 0x55D80);
-void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char a2, char a3)
+void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char symbol, char advance)
 {
-  if (ScreenManager::GetSingleton()->isInitialized() && !is_string_replace) {
-    auto tile = ScreenManager::GetSingleton()->GetTile(gps->screenx, gps->screeny);
+  if (!ScreenManager::GetSingleton()->isInitialized() || g_textures_ptr == nullptr) {
+    ORIGINAL(addchar)(gps, symbol, advance);
+    return;
+  }
+
+  auto tile = ScreenManager::GetSingleton()->GetTile(gps->screenx, gps->screeny);
+
+  // we use it only on tagert hooked functions, not for all tiles on screen
+  if (ttf_injection_lock.test()) {
+    std::string str(1, symbol);
+    auto texture = TTFManager::GetSingleton()->CreateTexture(str);
+    auto cached_texture_id = texture_id_cache.Get(str);
+    long tex_pos = 0;
+    if (cached_texture_id) {
+      tex_pos = cached_texture_id.value().get();
+      // spdlog::debug("texture id from cache {}", cached_texture_id.value().get());
+    } else {
+      tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
+      if (TTFManager::GetSingleton()->cached_response) {
+        texture_id_cache.Put(str, tex_pos);
+      }
+      // spdlog::debug("new texture id {}", tex_pos);
+    }
+    tile->tex_pos = tex_pos;
+  } else {
     tile->tex_pos = 0;
   }
 
-  ORIGINAL(addchar)(gps, a2, a3);
+  ORIGINAL(addchar)(gps, symbol, advance);
 }
 
 // screen size can be catched here

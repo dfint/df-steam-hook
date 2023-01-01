@@ -124,6 +124,11 @@ void TTFManager::Init()
   spdlog::info("TTFManager loaded");
 }
 
+void TTFManager::ClearCache()
+{
+  this->cache.Clear();
+}
+
 void TTFManager::LoadFont(const std::string& file, int ptsize, int shift_frame_from_up)
 {
   if (this->font != nullptr) {
@@ -170,9 +175,4 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_co
     this->cache.Put(str, texture);
   }
   return texture;
-}
-
-void TTFManager::ClearCache()
-{
-  this->cache.Clear();
 }
