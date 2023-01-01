@@ -129,6 +129,17 @@ void TTFManager::ClearCache()
   this->cache.Clear();
 }
 
+bool TTFManager::CachedResponse(bool cached)
+{
+  this->cached_response = cached;
+  return this->cached_response;
+}
+
+bool TTFManager::CachedResponse()
+{
+  return this->cached_response;
+}
+
 void TTFManager::LoadFont(const std::string& file, int ptsize, int shift_frame_from_up)
 {
   if (this->font != nullptr) {

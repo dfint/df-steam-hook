@@ -14,9 +14,11 @@ public:
   void LoadScreen();
   SDL_Surface* CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 });
   void ClearCache();
+  bool CachedResponse(bool cached);
+  bool CachedResponse();
 
   // TODO: remove this when find texture reset point
-  bool cached_response = false;
+  bool cached_response = true;
 
 private:
   TTFManager() {}

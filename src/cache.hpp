@@ -67,8 +67,8 @@ public:
 
   void Clear() noexcept
   {
-    items_map.clear();
-    items_list.clear();
+    this->items_map.clear();
+    this->items_list.clear();
   }
 
 private:
