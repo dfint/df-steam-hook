@@ -73,6 +73,7 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
   ttf_injection_lock.test_and_set(std::memory_order_acquire);
   ORIGINAL(addst)(gps, str, justify, space);
   ttf_injection_lock.clear(std::memory_order_release);
+
   return;
 }
 
@@ -167,9 +168,9 @@ SETUP_ORIG_FUNC(load_multi_pdim, 0xE82890);
 void __fastcall HOOK(load_multi_pdim)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
                                       bool convert_magenta, long* disp_x, long* disp_y)
 {
-  spdlog::debug("load_multi_pdim: filename {} text_pos {} dimx {} dimy {} convert_magenta {}, disp_x {} disp_y {}",
-                filename->ptr, *tex_pos, dimx, dimy, convert_magenta, *disp_x, *disp_y);
-  // TTFManager::GetSingleton()->cached_response = true;
+  // spdlog::debug("load_multi_pdim: filename {} text_pos {} dimx {} dimy {} convert_magenta {}, disp_x {} disp_y {}",
+  //               filename->ptr, *tex_pos, dimx, dimy, convert_magenta, *disp_x, *disp_y);
+
   ORIGINAL(load_multi_pdim)(ptr, filename, tex_pos, dimx, dimy, convert_magenta, disp_x, disp_y);
 }
 
@@ -178,8 +179,8 @@ SETUP_ORIG_FUNC(load_multi_pdim_2, 0xE82AD0);
 void __fastcall HOOK(load_multi_pdim_2)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
                                         bool convert_magenta, long* disp_x, long* disp_y)
 {
-  spdlog::debug("load_multi_pdim2: filename {} text_pos {} dimx {} dimy {} convert_magenta {}, disp_x {} disp_y {}",
-                filename->ptr, *tex_pos, dimx, dimy, convert_magenta, *disp_x, *disp_y);
+  // spdlog::debug("load_multi_pdim2: filename {} text_pos {} dimx {} dimy {} convert_magenta {}, disp_x {} disp_y {}",
+  //               filename->ptr, *tex_pos, dimx, dimy, convert_magenta, *disp_x, *disp_y);
   // if we turn on cache here, game works... but during main menu stage it leaking
   // TODO: find new game/load game global texture reset
 
@@ -201,22 +202,22 @@ SETUP_ORIG_FUNC(upload_textures, 0xE82020);
 void __fastcall HOOK(upload_textures)(__int64 a1)
 {
   ORIGINAL(upload_textures)(a1);
-  spdlog::debug("upload_textures");
+  // spdlog::debug("upload_textures");
 }
 
 // loading main
 SETUP_ORIG_FUNC(loading_main, 0xA0CA70);
 void* __fastcall HOOK(loading_main)(void* a1)
 {
-  StateManager::GetSingleton()->State(StateManager::Loading);
   return ORIGINAL(loading_main)(a1);
 }
 
-// loading_world_new_game_loop interface loop
+// loading_data_new_game_loop interface loop
 SETUP_ORIG_FUNC(loading_world_new_game_loop, 0x9FD2E0);
 void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
 {
   ORIGINAL(loading_world_new_game_loop)(a1);
+  // offset of stage may changed!
   auto state = (int*)((uintptr_t)a1 + 292);
   if (*state >= 1 && *state <= 29) {
     StateManager::GetSingleton()->State(StateManager::Game);
@@ -228,7 +229,23 @@ SETUP_ORIG_FUNC(loading_world_continuing_game_loop, 0x566F40);
 void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
 {
   ORIGINAL(loading_world_continuing_game_loop)(a1);
-  spdlog::debug("loading_world_continuing_game_loop");
+  // offset of stage may changed!
+  auto state = (int*)((uintptr_t)a1 + 32);
+  if (*state > 0 && *state < 50) {
+    StateManager::GetSingleton()->State(StateManager::Game);
+  }
+}
+
+// loading_world_start_new_game_loop interface loop
+SETUP_ORIG_FUNC(loading_world_start_new_game_loop, 0x5652C0);
+void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
+{
+  ORIGINAL(loading_world_start_new_game_loop)(a1);
+  // offset of stage may changed!
+  auto state = (int*)((uintptr_t)a1 + 360);
+  if (*state > 0 && *state < 34) {
+    StateManager::GetSingleton()->State(StateManager::Game);
+  }
 }
 
 // menu_interface_loop main menu interface loop
@@ -250,11 +267,11 @@ void InstallHooks()
 
   // init StateManager, set callback to reset textures cache;
   auto state = StateManager::GetSingleton();
-  state->SetCallback(StateManager::Menu, [&](void) { spdlog::debug("game state changed to Menu"); });
+  state->SetCallback(StateManager::Menu, [&](void) { spdlog::debug("game state changed to StateManager::Menu"); });
   state->SetCallback(StateManager::Game, [&](void) {
     TTFManager::GetSingleton()->ClearCache();
     texture_id_cache.Clear();
-    spdlog::debug("game state changed to Game");
+    spdlog::debug("game state changed to StateManager::Game, clearing texture cache");
   });
 
   ATTACH(add_texture);
@@ -272,6 +289,7 @@ void InstallHooks()
   ATTACH(loading_main);
   ATTACH(loading_world_new_game_loop);
   ATTACH(loading_world_continuing_game_loop);
+  ATTACH(loading_world_start_new_game_loop);
   ATTACH(menu_interface_loop);
 
   spdlog::info("hooks installed");

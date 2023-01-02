@@ -161,7 +161,8 @@ typedef void(__fastcall* main_init)();
 typedef void(__fastcall* upload_textures)(__int64 a1);
 typedef void(__fastcall* loading_world_new_game_loop)(void* a1);
 typedef void(__fastcall* loading_world_continuing_game_loop)(__int64 a1);
-typedef void*(__fastcall* loading_main)(void* a1);
+typedef void(__fastcall* loading_world_start_new_game_loop)(__int64 a1);
 typedef void(__fastcall* menu_interface_loop)(__int64 a1);
+typedef void*(__fastcall* loading_main)(void* a1);
 
 void InstallHooks();

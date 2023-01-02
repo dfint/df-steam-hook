@@ -129,17 +129,6 @@ void TTFManager::ClearCache()
   this->cache.Clear();
 }
 
-bool TTFManager::CachedResponse(bool cached)
-{
-  this->cached_response = cached;
-  return this->cached_response;
-}
-
-bool TTFManager::CachedResponse()
-{
-  return this->cached_response;
-}
-
 void TTFManager::LoadFont(const std::string& file, int ptsize, int shift_frame_from_up)
 {
   if (this->font != nullptr) {
@@ -180,10 +169,7 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_co
   }
   // scale to target tile size
   texture = ResizeSurface(texture, 8, 12, this->shift_frame_from_up);
+  this->cache.Put(str, texture);
 
-  // TODO: remove cached response flag
-  if (this->cached_response) {
-    this->cache.Put(str, texture);
-  }
   return texture;
 }
