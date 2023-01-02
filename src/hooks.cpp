@@ -23,7 +23,57 @@ long __fastcall HOOK(add_texture)(void* ptr, SDL_Surface* texture)
   return texture_id;
 }
 
-// string can be catched here
+// swap texture of specific char in chosen screen matrix (main/top)
+template <auto T>
+void InjectTTFChar(unsigned char symbol, int x, int y)
+{
+  auto tile = ScreenManager::GetSingleton()->GetTile<T>(x, y);
+
+  // we use it only on tagert hooked functions, not for all tiles on screen
+  if (ttf_injection_lock.test()) {
+    std::string str(1, symbol);
+    auto texture = TTFManager::GetSingleton()->CreateTexture(str);
+    auto cached_texture_id = texture_id_cache.Get(str);
+    long tex_pos = 0;
+    if (cached_texture_id) {
+      tex_pos = cached_texture_id.value().get();
+      // spdlog::debug("texture id from cache {}", cached_texture_id.value().get());
+    } else {
+      tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
+      texture_id_cache.Put(str, tex_pos);
+      // spdlog::debug("new texture id {}", tex_pos);
+    }
+    tile->tex_pos = tex_pos;
+  } else {
+    tile->tex_pos = 0;
+  }
+}
+
+// addchar used fot main windows chars drawing
+SETUP_ORIG_FUNC(addchar, 0x55D80);
+void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char symbol, char advance)
+{
+  if (!ScreenManager::GetSingleton()->isInitialized() || g_textures_ptr == nullptr) {
+    ORIGINAL(addchar)(gps, symbol, advance);
+    return;
+  }
+  InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
+  ORIGINAL(addchar)(gps, symbol, advance);
+}
+
+// addchar_top used for dialog windows
+SETUP_ORIG_FUNC(addchar_top, 0xE9D60);
+void __fastcall HOOK(addchar_top)(graphicst_* gps, unsigned char symbol, char advance)
+{
+  if (!ScreenManager::GetSingleton()->isInitialized() || g_textures_ptr == nullptr) {
+    ORIGINAL(addchar_top)(gps, symbol, advance);
+    return;
+  }
+  InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
+  ORIGINAL(addchar_top)(gps, symbol, advance);
+}
+
+// main strings handling
 SETUP_ORIG_FUNC(addst, 0x784C60);
 void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ justify, int space)
 {
@@ -73,41 +123,15 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
   ttf_injection_lock.test_and_set(std::memory_order_acquire);
   ORIGINAL(addst)(gps, str, justify, space);
   ttf_injection_lock.clear(std::memory_order_release);
-
-  return;
 }
 
-// ttf texture injection to tiles
-SETUP_ORIG_FUNC(addchar, 0x55D80);
-void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char symbol, char advance)
+// strings handling for dialog windows
+SETUP_ORIG_FUNC(addst_top, 0x784DB0);
+void __fastcall HOOK(addst_top)(graphicst_* gps, __int64 a2, __int64 a3)
 {
-  if (!ScreenManager::GetSingleton()->isInitialized() || g_textures_ptr == nullptr) {
-    ORIGINAL(addchar)(gps, symbol, advance);
-    return;
-  }
-
-  auto tile = ScreenManager::GetSingleton()->GetTile(gps->screenx, gps->screeny);
-
-  // we use it only on tagert hooked functions, not for all tiles on screen
-  if (ttf_injection_lock.test()) {
-    std::string str(1, symbol);
-    auto texture = TTFManager::GetSingleton()->CreateTexture(str);
-    auto cached_texture_id = texture_id_cache.Get(str);
-    long tex_pos = 0;
-    if (cached_texture_id) {
-      tex_pos = cached_texture_id.value().get();
-      // spdlog::debug("texture id from cache {}", cached_texture_id.value().get());
-    } else {
-      tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
-      texture_id_cache.Put(str, tex_pos);
-      // spdlog::debug("new texture id {}", tex_pos);
-    }
-    tile->tex_pos = tex_pos;
-  } else {
-    tile->tex_pos = 0;
-  }
-
-  ORIGINAL(addchar)(gps, symbol, advance);
+  ttf_injection_lock.test_and_set(std::memory_order_acquire);
+  ORIGINAL(addst_top)(gps, a2, a3);
+  ttf_injection_lock.clear(std::memory_order_release);
 }
 
 // screen size can be catched here
@@ -150,12 +174,28 @@ void __fastcall HOOK(cleanup_arrays)(void* ptr)
   ORIGINAL(cleanup_arrays)(ptr);
 }
 
+// render for main matrix
 SETUP_ORIG_FUNC(screen_to_texid, 0x5BAB40);
 Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y)
 {
   Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
   if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
-    auto tile = ScreenManager::GetSingleton()->GetTile(x, y);
+    auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Main>(x, y);
+    if (tile->tex_pos > 0) {
+      texture_by_id->left.texpos = tile->tex_pos;
+    }
+  }
+  return texture_by_id;
+}
+
+// renderer for top screen matrix
+SETUP_ORIG_FUNC(screen_to_texid_top, 0x5BAD30);
+Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(renderer_* renderer, __int64 a2, int x,
+                                                                            int y)
+{
+  Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid_top)(renderer, a2, x, y);
+  if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
+    auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Top>(x, y);
     if (tile->tex_pos > 0) {
       texture_by_id->left.texpos = tile->tex_pos;
     }
@@ -274,23 +314,33 @@ void InstallHooks()
     spdlog::debug("game state changed to StateManager::Game, clearing texture cache");
   });
 
+  // ttf inject and translate here
   ATTACH(add_texture);
-  ATTACH(addst);
   ATTACH(addchar);
-  ATTACH(create_screen);
+  ATTACH(addchar_top);
+  ATTACH(addst);
+  ATTACH(addst_top);
+  ATTACH(screen_to_texid);
+  ATTACH(screen_to_texid_top);
+  ATTACH(gps_allocate);
+  ATTACH(cleanup_arrays);
+
+  // maybe scaling for bigger font pt?
   ATTACH(reshape);
   ATTACH(load_multi_pdim);
   ATTACH(load_multi_pdim_2);
-  ATTACH(screen_to_texid);
-  ATTACH(gps_allocate);
-  ATTACH(cleanup_arrays);
-  ATTACH(main_init);
-  ATTACH(upload_textures);
-  ATTACH(loading_main);
+
+  // game state tracking
   ATTACH(loading_world_new_game_loop);
   ATTACH(loading_world_continuing_game_loop);
   ATTACH(loading_world_start_new_game_loop);
   ATTACH(menu_interface_loop);
+
+  // unused now
+  ATTACH(create_screen);
+  ATTACH(main_init);
+  ATTACH(upload_textures);
+  ATTACH(loading_main);
 
   spdlog::info("hooks installed");
 }

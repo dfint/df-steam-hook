@@ -42,8 +42,24 @@ struct graphicst_
   curses_color_ screenb;
   bool screenbright;
   char dump2[336];
-  uint8_t* screen;
-  char dump3[1028];
+  uint8_t* screen;                   // 8 default 1028 to dimx/y
+  uint8_t* screen_limit;             // 8
+  long* screentexpos;                // 8
+  long* screentexpos_lower;          // 8
+  long* screentexpos_anchored;       // 8
+  long* screentexpos_anchored_x;     // 8
+  long* screentexpos_anchored_y;     // 8
+  uint32_t* screentexpos_flag;       // 8
+  bool top_in_use;                   // 1 to 8
+  uint8_t* screen_top;               // 8
+  uint8_t* screen_limit_top;         // 8
+  long* screentexpos_top_lower;      // 8
+  long* screentexpos_top_anchored;   // 8
+  long* screentexpos_top;            // 8
+  long* screentexpos_top_anchored_x; // 8
+  long* screentexpos_top_anchored_y; // 8
+  uint32_t* screentexpos_top_flag;   // 8
+  char dump3[900];
   int32_t dimx;
   int32_t dimy;
 };
@@ -61,7 +77,7 @@ struct renderer_2d_base_
   int32_t dispy_z;              // 4
   int32_t origin_x;             // 4
   int32_t origin_y;             // 4
-  bool use_viewport_zoom;       // 1
+  bool use_viewport_zoom;       // 1 to 4
   int32_t viewport_zoom_factor; // 4
   char pad24[24];               // 24
   int32_t zoom_steps;           // 4
@@ -145,7 +161,9 @@ struct Either
 
 typedef long(__fastcall* add_texture)(void* ptr, void* a2);
 typedef void(__fastcall* addst)(graphicst_* gps, DFString_* str, unsigned __int8 just, int space);
+typedef void(__fastcall* addst_top)(graphicst_* gps, __int64 a2, __int64 a3);
 typedef void(__fastcall* addchar)(graphicst_* gps, unsigned char a2, char a3);
+typedef void(__fastcall* addchar_top)(graphicst_* gps, unsigned char symbol, char advance);
 typedef void(__fastcall* cleanup_arrays)(void* ptr);
 typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
 typedef bool(__fastcall* create_screen)(__int64 a1, unsigned int width, unsigned int height);
@@ -157,6 +175,8 @@ typedef void(__fastcall* load_multi_pdim_2)(void* ptr, DFString_* filename, long
 typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
 typedef void(__fastcall* cleanup_arrays)(void* ptr);
 typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(renderer_* a1, __int64 a2, int a3, int a4);
+typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid_top)(renderer_* a1, __int64 a2, int a3,
+                                                                                int a4);
 typedef void(__fastcall* main_init)();
 typedef void(__fastcall* upload_textures)(__int64 a1);
 typedef void(__fastcall* loading_world_new_game_loop)(void* a1);
