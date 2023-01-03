@@ -155,20 +155,20 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_co
   if (cached) {
     return cached.value().get();
   }
+
   if (this->font == nullptr) {
     spdlog::error("trying to create texture before setting font");
     exit(2);
   }
-  // create texture
-  auto texture = TTF_RenderUTF8_Blended(this->font, str.c_str(), font_color);
 
+  auto texture = TTF_RenderUTF8_Blended(this->font, str.c_str(), font_color);
   // TODO: rework missing utf8 chars  and font glyphs
   if (texture == NULL) {
-    spdlog::error("texture generation error on str {}", str);
+    spdlog::error("texture generation error on string {}", str);
     texture = TTF_RenderUTF8_Blended(this->font, "x", font_color);
   }
   // scale to target tile size
-  texture = ResizeSurface(texture, 8, 12, this->shift_frame_from_up);
+  texture = ResizeSurface(texture, TTFManager::frame_width, TTFManager::frame_height, this->shift_frame_from_up);
   this->cache.Put(str, texture);
 
   return texture;

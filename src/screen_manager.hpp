@@ -10,12 +10,14 @@ public:
   // TODO: figure out exact struct
   struct ScreenTile
   {
-    long symbol;
+    uint8_t screen;
+    uint8_t screen_limit;
     long tex_pos;
-    uint8_t unk2;
-    uint8_t unk3;
-    uint8_t unk4;
-    uint8_t unk5;
+    long texpos_lower;
+    long texpos_anchored;
+    long texpos_anchored_x;
+    long texpos_anchored_y;
+    uint32_t texpos_flag;
   };
 
   enum ScreenType

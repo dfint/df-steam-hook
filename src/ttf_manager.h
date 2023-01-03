@@ -34,8 +34,11 @@ private:
   Uint32 ReadPixel(SDL_Surface* surface, int x, int y);
 
   // try to figure out the best size of cache
-  LRUCache<std::string, SDL_Surface*> cache = LRUCache<std::string, SDL_Surface*>(100);
+  LRUCache<std::string, SDL_Surface*> cache = LRUCache<std::string, SDL_Surface*>(300);
   TTF_Font* font;
   SDL_Surface* screen;
   int shift_frame_from_up = 0;
+
+  static const int frame_width = 8;
+  static const int frame_height = 12;
 };

@@ -8,7 +8,15 @@
 
 void* g_textures_ptr = nullptr;
 graphicst_* g_graphics_ptr = nullptr;
+
+enum LockType
+{
+  Common,
+  Interface
+};
+
 std::atomic_flag ttf_injection_lock = ATOMIC_FLAG_INIT;
+std::atomic_flag ttf_injection_intefacte_lock = ATOMIC_FLAG_INIT;
 
 // cache for textures id
 LRUCache<std::string, long> texture_id_cache(500);
@@ -23,6 +31,20 @@ long __fastcall HOOK(add_texture)(void* ptr, SDL_Surface* texture)
   return texture_id;
 }
 
+template <LockType type, typename T, typename... Args>
+void LockedInject(T& func, Args&&... args)
+{
+  if (type == LockType::Common) {
+    ttf_injection_lock.test_and_set(std::memory_order_acquire);
+    func(args...);
+    ttf_injection_lock.clear(std::memory_order_release);
+  } else if (type == LockType::Interface) {
+    ttf_injection_intefacte_lock.test_and_set(std::memory_order_acquire);
+    func(args...);
+    ttf_injection_intefacte_lock.clear(std::memory_order_release);
+  }
+}
+
 // swap texture of specific char in chosen screen matrix (main/top)
 template <auto T>
 void InjectTTFChar(unsigned char symbol, int x, int y)
@@ -30,7 +52,7 @@ void InjectTTFChar(unsigned char symbol, int x, int y)
   auto tile = ScreenManager::GetSingleton()->GetTile<T>(x, y);
 
   // we use it only on tagert hooked functions, not for all tiles on screen
-  if (ttf_injection_lock.test()) {
+  if (symbol > 0 && (ttf_injection_lock.test() || ttf_injection_intefacte_lock.test())) {
     std::string str(1, symbol);
     auto texture = TTFManager::GetSingleton()->CreateTexture(str);
     auto cached_texture_id = texture_id_cache.Get(str);
@@ -53,11 +75,9 @@ void InjectTTFChar(unsigned char symbol, int x, int y)
 SETUP_ORIG_FUNC(addchar, 0x55D80);
 void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char symbol, char advance)
 {
-  if (!ScreenManager::GetSingleton()->isInitialized() || g_textures_ptr == nullptr) {
-    ORIGINAL(addchar)(gps, symbol, advance);
-    return;
+  if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
+    InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
   }
-  InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
   ORIGINAL(addchar)(gps, symbol, advance);
 }
 
@@ -65,11 +85,9 @@ void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char symbol, char advanc
 SETUP_ORIG_FUNC(addchar_top, 0xE9D60);
 void __fastcall HOOK(addchar_top)(graphicst_* gps, unsigned char symbol, char advance)
 {
-  if (!ScreenManager::GetSingleton()->isInitialized() || g_textures_ptr == nullptr) {
-    ORIGINAL(addchar_top)(gps, symbol, advance);
-    return;
+  if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
+    InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
   }
-  InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
   ORIGINAL(addchar_top)(gps, symbol, advance);
 }
 
@@ -119,39 +137,46 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
   //   ORIGINAL(addst)(gps, &translated_str, justify, space);
   //   return;
   // }
-
-  ttf_injection_lock.test_and_set(std::memory_order_acquire);
-  ORIGINAL(addst)(gps, str, justify, space);
-  ttf_injection_lock.clear(std::memory_order_release);
+  // ORIGINAL(addst)(gps, str, justify, space);
+  LockedInject<LockType::Common>(ORIGINAL(addst), gps, str, justify, space);
 }
 
 // strings handling for dialog windows
 SETUP_ORIG_FUNC(addst_top, 0x784DB0);
 void __fastcall HOOK(addst_top)(graphicst_* gps, __int64 a2, __int64 a3)
 {
-  ttf_injection_lock.test_and_set(std::memory_order_acquire);
-  ORIGINAL(addst_top)(gps, a2, a3);
-  ttf_injection_lock.clear(std::memory_order_release);
+  LockedInject<LockType::Common>(ORIGINAL(addst_top), gps, a2, a3);
 }
 
-// screen size can be catched here
-SETUP_ORIG_FUNC(create_screen, 0x5BB540);
-bool __fastcall HOOK(create_screen)(__int64 a1, unsigned int screen_width, unsigned int screen_height)
+// some colored string with color not from enum
+// not see it
+SETUP_ORIG_FUNC(addcoloredst, 0x784890);
+void __fastcall HOOK(addcoloredst)(graphicst_* gps, __int64 a2, __int64 a3)
 {
-  spdlog::debug("create screen width {}, height {}, ptr 0x{:x}", screen_width, screen_height, (uintptr_t)a1);
-  return ORIGINAL(create_screen)(a1, screen_width, screen_height);
+  spdlog::debug("colored str {}", (char*)a2);
+  LockedInject<LockType::Common>(ORIGINAL(addcoloredst), gps, a2, a3);
 }
 
-// resizing font
-// can be used to set current font size settings in ttfmanager
-SETUP_ORIG_FUNC(reshape, 0x5C0930);
-void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> max_grid)
+// render through different procedure, not like addst or addst_top
+SETUP_ORIG_FUNC(addst_flag, 0x784970);
+void __fastcall HOOK(addst_flag)(graphicst_* gps, DFString_* str, __int64 a3, __int64 a4, int some_flag)
 {
-  ORIGINAL(reshape)(renderer, max_grid);
 
-  spdlog::debug("reshape dimx {} dimy {} dispx {} dispy {} dispx_z {} dispy_z {} screen 0x{:x}", renderer->dimx,
-                renderer->dimy, renderer->dispx, renderer->dispy, renderer->dispx_z, renderer->dispy_z,
-                (uintptr_t)renderer->screen);
+  std::string text;
+  if (str->len > 15) {
+    text = std::string(str->ptr);
+  } else {
+    text = std::string(str->buf);
+  }
+
+  // spdlog::debug("addst 3, text {}, a3 {}, a4 {}, some_flag {}", text, a3, a4, some_flag);
+  // for (int i = 0; i < text.size(); i++) {
+  //   // spdlog::debug("injecting ttf symbol {}, x {}, y {}", text[i], gps->screenx + i, gps->screeny);
+  //   InjectTTFChar<ScreenManager::ScreenType::Main>(text[i], gps->screenx + i, gps->screeny);
+  // }
+
+  ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
+  // LockedInject(ORIGINAL(addst), gps, str, a3, a4);
 }
 
 // allocate screen array
@@ -178,6 +203,7 @@ void __fastcall HOOK(cleanup_arrays)(void* ptr)
 SETUP_ORIG_FUNC(screen_to_texid, 0x5BAB40);
 Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y)
 {
+  // spdlog::debug("screen_to_texid x {} y {}", x, y);
   Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
   if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
     auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Main>(x, y);
@@ -203,6 +229,36 @@ Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(rend
   return texture_by_id;
 }
 
+// whole screen?
+// not used
+SETUP_ORIG_FUNC(screen_to_texid_parent, 0x5BBA10);
+__int64 __fastcall HOOK(screen_to_texid_parent)(renderer_* renderer, int x, int y)
+{
+  // spdlog::debug("screen_to_texid_parent x {} y {}", x, y);
+  return ORIGINAL(screen_to_texid_parent)(renderer, x, y);
+}
+
+// renderer_2d_base update_tile 5BB610 - every tile every frame = expensive
+// not used
+SETUP_ORIG_FUNC(update_tile, 0x5BB610);
+void __fastcall HOOK(update_tile)(renderer_* renderer, int x, int y)
+{
+  spdlog::debug("update_tile x {} y {}", x, y);
+  ORIGINAL(update_tile)(renderer, x, y);
+}
+
+// resizing font
+// can be used to set current font size settings in ttfmanager
+SETUP_ORIG_FUNC(reshape, 0x5C0930);
+void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> max_grid)
+{
+  ORIGINAL(reshape)(renderer, max_grid);
+
+  spdlog::debug("reshape dimx {} dimy {} dispx {} dispy {} dispx_z {} dispy_z {} screen 0x{:x}", renderer->dimx,
+                renderer->dimy, renderer->dispx, renderer->dispy, renderer->dispx_z, renderer->dispy_z,
+                (uintptr_t)renderer->screen);
+}
+
 // loading main menu (start game)
 SETUP_ORIG_FUNC(load_multi_pdim, 0xE82890);
 void __fastcall HOOK(load_multi_pdim)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
@@ -222,18 +278,7 @@ void __fastcall HOOK(load_multi_pdim_2)(void* ptr, DFString_* filename, long* te
   // spdlog::debug("load_multi_pdim2: filename {} text_pos {} dimx {} dimy {} convert_magenta {}, disp_x {} disp_y {}",
   //               filename->ptr, *tex_pos, dimx, dimy, convert_magenta, *disp_x, *disp_y);
   // if we turn on cache here, game works... but during main menu stage it leaking
-  // TODO: find new game/load game global texture reset
-
   ORIGINAL(load_multi_pdim_2)(ptr, filename, tex_pos, dimx, dimy, convert_magenta, disp_x, disp_y);
-}
-
-// game init
-// not used
-SETUP_ORIG_FUNC(main_init, 0x87A3C0);
-void __fastcall HOOK(main_init)()
-{
-  ORIGINAL(main_init)();
-  spdlog::debug("main init");
 }
 
 // catch Resetting textures in enabler asycn_wait loop
@@ -245,14 +290,8 @@ void __fastcall HOOK(upload_textures)(__int64 a1)
   // spdlog::debug("upload_textures");
 }
 
-// loading main
-SETUP_ORIG_FUNC(loading_main, 0xA0CA70);
-void* __fastcall HOOK(loading_main)(void* a1)
-{
-  return ORIGINAL(loading_main)(a1);
-}
-
 // loading_data_new_game_loop interface loop
+// need for tracking game state
 SETUP_ORIG_FUNC(loading_world_new_game_loop, 0x9FD2E0);
 void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
 {
@@ -265,6 +304,7 @@ void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
 }
 
 // loading_world_continuing_game_loop interface loop
+// need for tracking game state
 SETUP_ORIG_FUNC(loading_world_continuing_game_loop, 0x566F40);
 void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
 {
@@ -277,6 +317,7 @@ void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
 }
 
 // loading_world_start_new_game_loop interface loop
+// need for tracking game state
 SETUP_ORIG_FUNC(loading_world_start_new_game_loop, 0x5652C0);
 void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
 {
@@ -289,11 +330,19 @@ void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
 }
 
 // menu_interface_loop main menu interface loop
+// need for tracking game state
 SETUP_ORIG_FUNC(menu_interface_loop, 0x1678A0);
 void __fastcall HOOK(menu_interface_loop)(__int64 a1)
 {
   ORIGINAL(menu_interface_loop)(a1);
   StateManager::GetSingleton()->State(StateManager::Menu);
+}
+
+// UI main ingame ui window rendering loop
+SETUP_ORIG_FUNC(interface_main_windows, 0x248EB0);
+void __fastcall HOOK(interface_main_windows)(__int64 a1, unsigned int a2, unsigned int a3, unsigned int a4)
+{
+  LockedInject<LockType::Interface>(ORIGINAL(interface_main_windows), a1, a2, a3, a4);
 }
 
 void InstallHooks()
@@ -320,15 +369,19 @@ void InstallHooks()
   ATTACH(addchar_top);
   ATTACH(addst);
   ATTACH(addst_top);
+  ATTACH(addcoloredst);
+  ATTACH(addst_flag);
   ATTACH(screen_to_texid);
   ATTACH(screen_to_texid_top);
   ATTACH(gps_allocate);
   ATTACH(cleanup_arrays);
 
   // maybe scaling for bigger font pt?
+  // not used now
   ATTACH(reshape);
   ATTACH(load_multi_pdim);
   ATTACH(load_multi_pdim_2);
+  ATTACH(upload_textures);
 
   // game state tracking
   ATTACH(loading_world_new_game_loop);
@@ -336,11 +389,12 @@ void InstallHooks()
   ATTACH(loading_world_start_new_game_loop);
   ATTACH(menu_interface_loop);
 
-  // unused now
-  ATTACH(create_screen);
-  ATTACH(main_init);
-  ATTACH(upload_textures);
-  ATTACH(loading_main);
+  // ingame ui windows
+  ATTACH(interface_main_windows);
+
+  // experiments
+  // ATTACH(update_tile);
+  // ATTACH(screen_to_texid_parent);
 
   spdlog::info("hooks installed");
 }

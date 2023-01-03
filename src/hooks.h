@@ -160,29 +160,37 @@ struct Either
 #define ORIGINAL(fn_name) fn_name##_orig
 
 typedef long(__fastcall* add_texture)(void* ptr, void* a2);
-typedef void(__fastcall* addst)(graphicst_* gps, DFString_* str, unsigned __int8 just, int space);
-typedef void(__fastcall* addst_top)(graphicst_* gps, __int64 a2, __int64 a3);
 typedef void(__fastcall* addchar)(graphicst_* gps, unsigned char a2, char a3);
 typedef void(__fastcall* addchar_top)(graphicst_* gps, unsigned char symbol, char advance);
-typedef void(__fastcall* cleanup_arrays)(void* ptr);
+typedef void(__fastcall* addst)(graphicst_* gps, DFString_* str, unsigned __int8 just, int space);
+typedef void(__fastcall* addst_top)(graphicst_* gps, __int64 a2, __int64 a3);
+typedef void(__fastcall* addcoloredst)(graphicst_* gps, __int64 a2, __int64 a3);
+typedef void(__fastcall* addst_flag)(graphicst_* a1, DFString_* str, __int64 a3, __int64 a4, int a5);
+
 typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
-typedef bool(__fastcall* create_screen)(__int64 a1, unsigned int width, unsigned int height);
+typedef void(__fastcall* cleanup_arrays)(void* ptr);
+
 typedef void(__fastcall* reshape)(renderer_2d_base_* ptr, std::pair<int, int> max_grid);
+typedef void(__fastcall* upload_textures)(__int64 a1);
 typedef void(__fastcall* load_multi_pdim)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
                                           bool convert_magenta, long* disp_x, long* disp_y);
 typedef void(__fastcall* load_multi_pdim_2)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
                                             bool convert_magenta, long* disp_x, long* disp_y);
-typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
-typedef void(__fastcall* cleanup_arrays)(void* ptr);
+
 typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(renderer_* a1, __int64 a2, int a3, int a4);
 typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid_top)(renderer_* a1, __int64 a2, int a3,
                                                                                 int a4);
-typedef void(__fastcall* main_init)();
-typedef void(__fastcall* upload_textures)(__int64 a1);
+
+typedef void(__fastcall* update_tile)(renderer_* renderer, int x, int y);
+typedef __int64(__fastcall* screen_to_texid_parent)(renderer_* renderer, int x, int y);
+
+// ingame ui windows
+typedef void(__fastcall* interface_main_windows)(__int64 a1, unsigned int a2, unsigned int a3, unsigned int a4);
+
+// tracking game state
 typedef void(__fastcall* loading_world_new_game_loop)(void* a1);
 typedef void(__fastcall* loading_world_continuing_game_loop)(__int64 a1);
 typedef void(__fastcall* loading_world_start_new_game_loop)(__int64 a1);
 typedef void(__fastcall* menu_interface_loop)(__int64 a1);
-typedef void*(__fastcall* loading_main)(void* a1);
 
 void InstallHooks();
