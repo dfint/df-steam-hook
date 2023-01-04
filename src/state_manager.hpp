@@ -11,6 +11,7 @@ public:
   {
     Init,
     Menu,
+    Loading,
     Game
   };
 

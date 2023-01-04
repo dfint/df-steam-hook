@@ -9,14 +9,7 @@
 void* g_textures_ptr = nullptr;
 graphicst_* g_graphics_ptr = nullptr;
 
-enum LockType
-{
-  Common,
-  Interface
-};
-
 std::atomic_flag ttf_injection_lock = ATOMIC_FLAG_INIT;
-std::atomic_flag ttf_injection_intefacte_lock = ATOMIC_FLAG_INIT;
 
 // cache for textures id
 LRUCache<std::string, long> texture_id_cache(500);
@@ -26,23 +19,15 @@ SETUP_ORIG_FUNC(add_texture, 0xE827F0);
 long __fastcall HOOK(add_texture)(void* ptr, SDL_Surface* texture)
 {
   g_textures_ptr = ptr;
-  auto texture_id = ORIGINAL(add_texture)(ptr, texture);
-  // spdlog::debug("add texture id {}", ret);
-  return texture_id;
+  return ORIGINAL(add_texture)(ptr, texture);
 }
 
-template <LockType type, typename T, typename... Args>
+template <typename T, typename... Args>
 void LockedInject(T& func, Args&&... args)
 {
-  if (type == LockType::Common) {
-    ttf_injection_lock.test_and_set(std::memory_order_acquire);
-    func(args...);
-    ttf_injection_lock.clear(std::memory_order_release);
-  } else if (type == LockType::Interface) {
-    ttf_injection_intefacte_lock.test_and_set(std::memory_order_acquire);
-    func(args...);
-    ttf_injection_intefacte_lock.clear(std::memory_order_release);
-  }
+  ttf_injection_lock.test_and_set(std::memory_order_acquire);
+  func(args...);
+  ttf_injection_lock.clear(std::memory_order_release);
 }
 
 // swap texture of specific char in chosen screen matrix (main/top)
@@ -51,8 +36,8 @@ void InjectTTFChar(unsigned char symbol, int x, int y)
 {
   auto tile = ScreenManager::GetSingleton()->GetTile<T>(x, y);
 
-  // we use it only on tagert hooked functions, not for all tiles on screen
-  if (symbol > 0 && (ttf_injection_lock.test() || ttf_injection_intefacte_lock.test())) {
+  if (symbol > 0) {
+    // spdlog::debug("addchar char {} int {}", symbol, (int)symbol);
     std::string str(1, symbol);
     auto texture = TTFManager::GetSingleton()->CreateTexture(str);
     auto cached_texture_id = texture_id_cache.Get(str);
@@ -75,6 +60,7 @@ void InjectTTFChar(unsigned char symbol, int x, int y)
 SETUP_ORIG_FUNC(addchar, 0x55D80);
 void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char symbol, char advance)
 {
+  g_graphics_ptr = gps;
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
     InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
   }
@@ -138,14 +124,14 @@ void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ just
   //   return;
   // }
   // ORIGINAL(addst)(gps, str, justify, space);
-  LockedInject<LockType::Common>(ORIGINAL(addst), gps, str, justify, space);
+  ORIGINAL(addst)(gps, str, justify, space);
 }
 
 // strings handling for dialog windows
 SETUP_ORIG_FUNC(addst_top, 0x784DB0);
 void __fastcall HOOK(addst_top)(graphicst_* gps, __int64 a2, __int64 a3)
 {
-  LockedInject<LockType::Common>(ORIGINAL(addst_top), gps, a2, a3);
+  ORIGINAL(addst_top)(gps, a2, a3);
 }
 
 // some colored string with color not from enum
@@ -154,7 +140,7 @@ SETUP_ORIG_FUNC(addcoloredst, 0x784890);
 void __fastcall HOOK(addcoloredst)(graphicst_* gps, __int64 a2, __int64 a3)
 {
   spdlog::debug("colored str {}", (char*)a2);
-  LockedInject<LockType::Common>(ORIGINAL(addcoloredst), gps, a2, a3);
+  ORIGINAL(addcoloredst)(gps, a2, a3);
 }
 
 // render through different procedure, not like addst or addst_top
@@ -195,7 +181,8 @@ void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_wid
 SETUP_ORIG_FUNC(cleanup_arrays, 0x5C28D0);
 void __fastcall HOOK(cleanup_arrays)(void* ptr)
 {
-  ScreenManager::GetSingleton()->ClearScreen();
+  ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Main>();
+  ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Top>();
   ORIGINAL(cleanup_arrays)(ptr);
 }
 
@@ -227,24 +214,6 @@ Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(rend
     }
   }
   return texture_by_id;
-}
-
-// whole screen?
-// not used
-SETUP_ORIG_FUNC(screen_to_texid_parent, 0x5BBA10);
-__int64 __fastcall HOOK(screen_to_texid_parent)(renderer_* renderer, int x, int y)
-{
-  // spdlog::debug("screen_to_texid_parent x {} y {}", x, y);
-  return ORIGINAL(screen_to_texid_parent)(renderer, x, y);
-}
-
-// renderer_2d_base update_tile 5BB610 - every tile every frame = expensive
-// not used
-SETUP_ORIG_FUNC(update_tile, 0x5BB610);
-void __fastcall HOOK(update_tile)(renderer_* renderer, int x, int y)
-{
-  spdlog::debug("update_tile x {} y {}", x, y);
-  ORIGINAL(update_tile)(renderer, x, y);
 }
 
 // resizing font
@@ -298,12 +267,16 @@ void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
   ORIGINAL(loading_world_new_game_loop)(a1);
   // offset of stage may changed!
   auto state = (int*)((uintptr_t)a1 + 292);
-  if (*state >= 1 && *state <= 29) {
+  if (*state == 1) {
+    StateManager::GetSingleton()->State(StateManager::Loading);
+  }
+  if (*state > 1 && *state <= 29) {
     StateManager::GetSingleton()->State(StateManager::Game);
   }
 }
 
 // loading_world_continuing_game_loop interface loop
+// Loading world and continuing active game
 // need for tracking game state
 SETUP_ORIG_FUNC(loading_world_continuing_game_loop, 0x566F40);
 void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
@@ -311,12 +284,16 @@ void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
   ORIGINAL(loading_world_continuing_game_loop)(a1);
   // offset of stage may changed!
   auto state = (int*)((uintptr_t)a1 + 32);
-  if (*state > 0 && *state < 50) {
+  if (*state > 0 && *state <= 2) {
+    StateManager::GetSingleton()->State(StateManager::Loading);
+  }
+  if (*state > 2 && *state < 50) {
     StateManager::GetSingleton()->State(StateManager::Game);
   }
 }
 
 // loading_world_start_new_game_loop interface loop
+// Loading world to start new game
 // need for tracking game state
 SETUP_ORIG_FUNC(loading_world_start_new_game_loop, 0x5652C0);
 void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
@@ -324,7 +301,10 @@ void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
   ORIGINAL(loading_world_start_new_game_loop)(a1);
   // offset of stage may changed!
   auto state = (int*)((uintptr_t)a1 + 360);
-  if (*state > 0 && *state < 34) {
+  if (*state > 0 && *state <= 4) {
+    StateManager::GetSingleton()->State(StateManager::Loading);
+  }
+  if (*state > 4 && *state < 34) {
     StateManager::GetSingleton()->State(StateManager::Game);
   }
 }
@@ -338,12 +318,7 @@ void __fastcall HOOK(menu_interface_loop)(__int64 a1)
   StateManager::GetSingleton()->State(StateManager::Menu);
 }
 
-// UI main ingame ui window rendering loop
-SETUP_ORIG_FUNC(interface_main_windows, 0x248EB0);
-void __fastcall HOOK(interface_main_windows)(__int64 a1, unsigned int a2, unsigned int a3, unsigned int a4)
-{
-  LockedInject<LockType::Interface>(ORIGINAL(interface_main_windows), a1, a2, a3, a4);
-}
+// experiments
 
 void InstallHooks()
 {
@@ -357,24 +332,31 @@ void InstallHooks()
   // init StateManager, set callback to reset textures cache;
   auto state = StateManager::GetSingleton();
   state->SetCallback(StateManager::Menu, [&](void) { spdlog::debug("game state changed to StateManager::Menu"); });
+  state->SetCallback(StateManager::Loading, [&](void) {
+    TTFManager::GetSingleton()->ClearCache();
+    texture_id_cache.Clear();
+    spdlog::debug("game state changed to StateManager::Loading, clearing texture cache");
+  });
   state->SetCallback(StateManager::Game, [&](void) {
     TTFManager::GetSingleton()->ClearCache();
     texture_id_cache.Clear();
     spdlog::debug("game state changed to StateManager::Game, clearing texture cache");
   });
 
-  // ttf inject and translate here
+  // ttf inject, we swap get every char and swap it to our texture
   ATTACH(add_texture);
   ATTACH(addchar);
   ATTACH(addchar_top);
-  ATTACH(addst);
-  ATTACH(addst_top);
-  ATTACH(addcoloredst);
-  ATTACH(addst_flag);
   ATTACH(screen_to_texid);
   ATTACH(screen_to_texid_top);
+  // our screen matrix
   ATTACH(gps_allocate);
   ATTACH(cleanup_arrays);
+
+  // ATTACH(addst);
+  // ATTACH(addst_top);
+  // ATTACH(addcoloredst);
+  // ATTACH(addst_flag);
 
   // maybe scaling for bigger font pt?
   // not used now
@@ -388,9 +370,6 @@ void InstallHooks()
   ATTACH(loading_world_continuing_game_loop);
   ATTACH(loading_world_start_new_game_loop);
   ATTACH(menu_interface_loop);
-
-  // ingame ui windows
-  ATTACH(interface_main_windows);
 
   // experiments
   // ATTACH(update_tile);

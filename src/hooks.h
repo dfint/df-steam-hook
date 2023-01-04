@@ -181,16 +181,12 @@ typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(rend
 typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid_top)(renderer_* a1, __int64 a2, int a3,
                                                                                 int a4);
 
-typedef void(__fastcall* update_tile)(renderer_* renderer, int x, int y);
-typedef __int64(__fastcall* screen_to_texid_parent)(renderer_* renderer, int x, int y);
-
-// ingame ui windows
-typedef void(__fastcall* interface_main_windows)(__int64 a1, unsigned int a2, unsigned int a3, unsigned int a4);
-
 // tracking game state
 typedef void(__fastcall* loading_world_new_game_loop)(void* a1);
 typedef void(__fastcall* loading_world_continuing_game_loop)(__int64 a1);
 typedef void(__fastcall* loading_world_start_new_game_loop)(__int64 a1);
 typedef void(__fastcall* menu_interface_loop)(__int64 a1);
+
+// experiments
 
 void InstallHooks();

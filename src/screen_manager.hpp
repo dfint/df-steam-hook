@@ -50,20 +50,35 @@ public:
   {
     this->dimx = x;
     this->dimy = y;
-    this->screen = new unsigned long[x * y * 12];
-    this->screen_top = new unsigned long[x * y * 12];
+    this->screen = new unsigned long[x * y * 14];
+    this->screen_top = new unsigned long[x * y * 14];
   }
 
+  template <ScreenType screen_type>
   void ClearScreen()
   {
-    if (this->screen != nullptr) {
-      delete[] this->screen;
+    if (screen_type == ScreenType::Top) {
+      if (this->screen_top != nullptr) {
+        delete[] this->screen_top;
+      }
+      this->screen_top = nullptr;
+    } else {
+      if (this->screen != nullptr) {
+        delete[] this->screen;
+      }
+      this->screen = nullptr;
     }
-    this->screen = nullptr;
-    if (this->screen_top != nullptr) {
-      delete[] this->screen_top;
+  }
+
+  template <ScreenType screen_type>
+  void ResetScreen()
+  {
+    this->ClearScreen<screen_type>();
+    if (screen_type == ScreenType::Top) {
+      this->screen_top = new unsigned long[this->dimx * this->dimy * 14];
+    } else {
+      this->screen = new unsigned long[this->dimx * this->dimy * 14];
     }
-    this->screen_top = nullptr;
   }
 
   bool isInitialized() { return this->screen != nullptr && this->screen_top != nullptr; }
