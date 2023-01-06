@@ -15,7 +15,7 @@ std::atomic_flag ttf_injection_lock = ATOMIC_FLAG_INIT;
 LRUCache<std::string, long> texture_id_cache(500);
 
 // setup texture to texture vector and recieve tex_pos
-SETUP_ORIG_FUNC(add_texture, 0xE827F0);
+SETUP_ORIG_FUNC(add_texture);
 long __fastcall HOOK(add_texture)(void* ptr, SDL_Surface* texture)
 {
   g_textures_ptr = ptr;
@@ -57,7 +57,7 @@ void InjectTTFChar(unsigned char symbol, int x, int y)
 }
 
 // addchar used fot main windows chars drawing
-SETUP_ORIG_FUNC(addchar, 0x55D80);
+SETUP_ORIG_FUNC(addchar);
 void __fastcall HOOK(addchar)(graphicst_* gps, wchar_t symbol, char advance)
 {
   g_graphics_ptr = gps;
@@ -68,7 +68,7 @@ void __fastcall HOOK(addchar)(graphicst_* gps, wchar_t symbol, char advance)
 }
 
 // addchar_top used for dialog windows
-SETUP_ORIG_FUNC(addchar_top, 0xE9D60);
+SETUP_ORIG_FUNC(addchar_top);
 void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance)
 {
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
@@ -100,7 +100,7 @@ void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance)
 //   ORIGINAL(addst)(gps, str, justify, space);
 // }
 
-SETUP_ORIG_FUNC(string_copy, 0xB5B0);
+SETUP_ORIG_FUNC(string_copy);
 char* __cdecl HOOK(string_copy)(char* dst, const char* src)
 {
   // spdlog::debug("strcpy {}", src);
@@ -114,7 +114,7 @@ char* __cdecl HOOK(string_copy)(char* dst, const char* src)
 }
 
 // strncpy
-SETUP_ORIG_FUNC(string_copy_n, 0xB5D0);
+SETUP_ORIG_FUNC(string_copy_n);
 char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
 {
   auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
@@ -125,7 +125,7 @@ char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
 }
 
 // strncat
-SETUP_ORIG_FUNC(string_append_n, 0xB710);
+SETUP_ORIG_FUNC(string_append_n);
 char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
 {
   auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
@@ -135,7 +135,7 @@ char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
   return ORIGINAL(string_append_n)(dst, src, size);
 }
 
-SETUP_ORIG_FUNC(addst, 0x784C60);
+SETUP_ORIG_FUNC(addst);
 void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
 {
   auto translation = Dictionary::GetSingleton()->Get(str);
@@ -147,7 +147,7 @@ void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ ju
 }
 
 // strings handling for dialog windows
-SETUP_ORIG_FUNC(addst_top, 0x784DB0);
+SETUP_ORIG_FUNC(addst_top);
 void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
 {
   auto translation = Dictionary::GetSingleton()->Get(str);
@@ -160,7 +160,7 @@ void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
 
 // some colored string with color not from enum
 // not see it
-SETUP_ORIG_FUNC(addcoloredst, 0x784890);
+SETUP_ORIG_FUNC(addcoloredst);
 void __fastcall HOOK(addcoloredst)(graphicst_* gps, char* str, __int64 a3)
 {
   auto translation = Dictionary::GetSingleton()->Get(std::string(str));
@@ -172,7 +172,7 @@ void __fastcall HOOK(addcoloredst)(graphicst_* gps, char* str, __int64 a3)
 }
 
 // render through different procedure, not like addst or addst_top
-SETUP_ORIG_FUNC(addst_flag, 0x784970);
+SETUP_ORIG_FUNC(addst_flag);
 void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, __int64 a4, int some_flag)
 {
   auto translation = Dictionary::GetSingleton()->Get(str);
@@ -184,7 +184,7 @@ void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, 
 }
 
 // dynamic template string
-SETUP_ORIG_FUNC(addst_template, 0x96E710);
+SETUP_ORIG_FUNC(addst_template);
 void __fastcall HOOK(addst_template)(renderer_2d_base_* renderer, std::string& str)
 {
   spdlog::debug("addst_template {}", str);
@@ -192,7 +192,7 @@ void __fastcall HOOK(addst_template)(renderer_2d_base_* renderer, std::string& s
 }
 
 // allocate screen array
-SETUP_ORIG_FUNC(gps_allocate, 0x5C2AB0);
+SETUP_ORIG_FUNC(gps_allocate);
 void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z,
                                    int dispy_z)
 {
@@ -204,7 +204,7 @@ void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_wid
 }
 
 // clean screen array here
-SETUP_ORIG_FUNC(cleanup_arrays, 0x5C28D0);
+SETUP_ORIG_FUNC(cleanup_arrays);
 void __fastcall HOOK(cleanup_arrays)(void* ptr)
 {
   ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Main>();
@@ -213,7 +213,7 @@ void __fastcall HOOK(cleanup_arrays)(void* ptr)
 }
 
 // render for main matrix
-SETUP_ORIG_FUNC(screen_to_texid, 0x5BAB40);
+SETUP_ORIG_FUNC(screen_to_texid);
 Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y)
 {
   Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
@@ -227,7 +227,7 @@ Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer
 }
 
 // renderer for top screen matrix
-SETUP_ORIG_FUNC(screen_to_texid_top, 0x5BAD30);
+SETUP_ORIG_FUNC(screen_to_texid_top);
 Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(renderer_* renderer, __int64 a2, int x,
                                                                             int y)
 {
@@ -243,7 +243,7 @@ Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(rend
 
 // resizing font
 // can be used to set current font size settings in ttfmanager
-SETUP_ORIG_FUNC(reshape, 0x5C0930);
+SETUP_ORIG_FUNC(reshape);
 void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> max_grid)
 {
   ORIGINAL(reshape)(renderer, max_grid);
@@ -253,7 +253,7 @@ void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> m
 }
 
 // loading main menu (start game)
-SETUP_ORIG_FUNC(load_multi_pdim, 0xE82890);
+SETUP_ORIG_FUNC(load_multi_pdim);
 void __fastcall HOOK(load_multi_pdim)(void* ptr, std::string& filename, long* tex_pos, long dimx, long dimy,
                                       bool convert_magenta, long* disp_x, long* disp_y)
 {
@@ -261,7 +261,7 @@ void __fastcall HOOK(load_multi_pdim)(void* ptr, std::string& filename, long* te
 }
 
 // loading mods
-SETUP_ORIG_FUNC(load_multi_pdim_2, 0xE82AD0);
+SETUP_ORIG_FUNC(load_multi_pdim_2);
 void __fastcall HOOK(load_multi_pdim_2)(void* ptr, std::string& filename, long* tex_pos, long dimx, long dimy,
                                         bool convert_magenta, long* disp_x, long* disp_y)
 {
@@ -269,14 +269,14 @@ void __fastcall HOOK(load_multi_pdim_2)(void* ptr, std::string& filename, long* 
 }
 
 // upload textures
-SETUP_ORIG_FUNC(upload_textures, 0xE82020);
+SETUP_ORIG_FUNC(upload_textures);
 void __fastcall HOOK(upload_textures)(__int64 a1)
 {
   ORIGINAL(upload_textures)(a1);
 }
 
 // loading_data_new_game_loop interface loop
-SETUP_ORIG_FUNC(loading_world_new_game_loop, 0x9FD2E0);
+SETUP_ORIG_FUNC(loading_world_new_game_loop);
 void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
 {
   ORIGINAL(loading_world_new_game_loop)(a1);
@@ -292,7 +292,7 @@ void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
 
 // loading_world_continuing_game_loop interface loop
 // Loading world and continuing active game
-SETUP_ORIG_FUNC(loading_world_continuing_game_loop, 0x566F40);
+SETUP_ORIG_FUNC(loading_world_continuing_game_loop);
 void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
 {
   ORIGINAL(loading_world_continuing_game_loop)(a1);
@@ -308,7 +308,7 @@ void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
 
 // loading_world_start_new_game_loop interface loop
 // Loading world to start new game
-SETUP_ORIG_FUNC(loading_world_start_new_game_loop, 0x5652C0);
+SETUP_ORIG_FUNC(loading_world_start_new_game_loop);
 void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
 {
   ORIGINAL(loading_world_start_new_game_loop)(a1);
@@ -323,7 +323,7 @@ void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
 }
 
 // menu_interface_loop main menu interface loop
-SETUP_ORIG_FUNC(menu_interface_loop, 0x1678A0);
+SETUP_ORIG_FUNC(menu_interface_loop);
 void __fastcall HOOK(menu_interface_loop)(__int64 a1)
 {
   ORIGINAL(menu_interface_loop)(a1);
@@ -372,7 +372,7 @@ void LowerCast(char& s)
 }
 
 // main handler for input from keyboard
-SETUP_ORIG_FUNC(standardstringentry, 0x87ED50);
+SETUP_ORIG_FUNC(standardstringentry);
 int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag,
                                          std::set<InterfaceKey>& events)
 {
@@ -462,7 +462,7 @@ int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned 
   // ORIGINAL(standardstringentry)(str, maxlen, flag, events);
 }
 
-SETUP_ORIG_FUNC(simplify_string, 0x35C7A0);
+SETUP_ORIG_FUNC(simplify_string);
 void __fastcall HOOK(simplify_string)(std::string& str)
 {
   for (int s = 0; s < str.size(); s++) {
@@ -521,7 +521,7 @@ void __fastcall HOOK(simplify_string)(std::string& str)
   }
 }
 
-SETUP_ORIG_FUNC(upper_case_string, 0x35CAE0);
+SETUP_ORIG_FUNC(upper_case_string);
 void __fastcall HOOK(upper_case_string)(std::string& str)
 {
   for (int s = 0; s < str.size(); s++) {
@@ -555,7 +555,7 @@ void __fastcall HOOK(upper_case_string)(std::string& str)
   }
 }
 
-SETUP_ORIG_FUNC(lower_case_string, 0x35C940);
+SETUP_ORIG_FUNC(lower_case_string);
 void __fastcall HOOK(lower_case_string)(std::string& str)
 {
   for (int s = 0; s < str.size(); s++) {
@@ -589,7 +589,7 @@ void __fastcall HOOK(lower_case_string)(std::string& str)
   }
 }
 
-SETUP_ORIG_FUNC(capitalize_string_words, 0x35CC80);
+SETUP_ORIG_FUNC(capitalize_string_words);
 void __fastcall HOOK(capitalize_string_words)(std::string& str)
 {
   for (int s = 0; s < str.size(); s++) {
@@ -638,7 +638,7 @@ void __fastcall HOOK(capitalize_string_words)(std::string& str)
   }
 }
 
-SETUP_ORIG_FUNC(capitalize_string_first_word, 0x35CF00);
+SETUP_ORIG_FUNC(capitalize_string_first_word);
 void __fastcall HOOK(capitalize_string_first_word)(std::string& str)
 {
   // spdlog::debug("capitalize_string_first_word str {}", str);

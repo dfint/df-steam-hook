@@ -1,6 +1,7 @@
 #pragma once
 
 #include "keybindings.h"
+#include "offsets.h"
 
 enum curses_color_ : uint8_t
 {
@@ -141,7 +142,8 @@ struct Either
   }
 };
 
-#define SETUP_ORIG_FUNC(fn_name, shift) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + shift);
+// #define SETUP_ORIG_FUNC(fn_name, shift) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + shift);
+#define SETUP_ORIG_FUNC(fn_name) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + Offset::fn_name);
 #define SETUP_ORIG_FUNC_FNAME(fn_name, module_name)                                                                    \
   fn_name fn_name##_orig = (fn_name)(GetProcAddress(GetModuleHandle(#module_name), #fn_name));
 #define GET_ADDR(shift) (PVOID)((UINT64)GetModuleHandle(0) + shift)
