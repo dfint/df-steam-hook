@@ -4,7 +4,7 @@
 #include "screen_manager.hpp"
 #include "state_manager.hpp"
 #include "ttf_manager.h"
-#include "utils.hpp"
+// #include "utils.hpp"
 
 void* g_textures_ptr = nullptr;
 graphicst_* g_graphics_ptr = nullptr;
@@ -34,21 +34,21 @@ void LockedInject(T& func, Args&&... args)
 template <auto T>
 void InjectTTFChar(unsigned char symbol, int x, int y)
 {
+  if (ttf_injection_lock.test())
+    return;
+
   auto tile = ScreenManager::GetSingleton()->GetTile<T>(x, y);
 
   if (symbol > 0) {
-    // spdlog::debug("addchar char {} int {}", symbol, (int)symbol);
     std::string str(1, symbol);
     auto texture = TTFManager::GetSingleton()->CreateTexture(str);
     auto cached_texture_id = texture_id_cache.Get(str);
     long tex_pos = 0;
     if (cached_texture_id) {
       tex_pos = cached_texture_id.value().get();
-      // spdlog::debug("texture id from cache {}", cached_texture_id.value().get());
     } else {
       tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
       texture_id_cache.Put(str, tex_pos);
-      // spdlog::debug("new texture id {}", tex_pos);
     }
     tile->tex_pos = tex_pos;
   } else {
@@ -58,111 +58,137 @@ void InjectTTFChar(unsigned char symbol, int x, int y)
 
 // addchar used fot main windows chars drawing
 SETUP_ORIG_FUNC(addchar, 0x55D80);
-void __fastcall HOOK(addchar)(graphicst_* gps, unsigned char symbol, char advance)
+void __fastcall HOOK(addchar)(graphicst_* gps, wchar_t symbol, char advance)
 {
   g_graphics_ptr = gps;
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
-    InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
+    // InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
   }
   ORIGINAL(addchar)(gps, symbol, advance);
 }
 
 // addchar_top used for dialog windows
 SETUP_ORIG_FUNC(addchar_top, 0xE9D60);
-void __fastcall HOOK(addchar_top)(graphicst_* gps, unsigned char symbol, char advance)
+void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance)
 {
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
-    InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
+    // InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
   }
   ORIGINAL(addchar_top)(gps, symbol, advance);
 }
 
 // main strings handling
-SETUP_ORIG_FUNC(addst, 0x784C60);
-void __fastcall HOOK(addst)(graphicst_* gps, DFString_* str, justification_ justify, int space)
+// ttf swap option
+// SETUP_ORIG_FUNC(addst, 0x784C60);
+// void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
+// {
+//   // translation test segment
+//   // spdlog::debug("addst text {} len {} capa {}", text, str->len, str->capa);
+
+//   auto translation = Dictionary::GetSingleton()->Get(str);
+//   if (translation) {
+//     auto tstr = translation.value();
+//     auto wstr = s2ws(translation.value());
+//     for (int i = 0; i < wstr.size(); i++) {
+//       InjectTTFChar<ScreenManager::ScreenType::Main>(wstr[i], gps->screenx + i, gps->screeny);
+//     }
+//     tstr.resize(wstr.size());
+//     LockedInject(ORIGINAL(addst), gps, tstr, justify, space);
+//     return;
+//   }
+
+//   ORIGINAL(addst)(gps, str, justify, space);
+// }
+
+SETUP_ORIG_FUNC(string_copy, 0xB5B0);
+char* __cdecl HOOK(string_copy)(char* dst, const char* src)
 {
-  g_graphics_ptr = gps;
-
-  std::string text;
-  if (str->len > 15) {
-    text = std::string(str->ptr);
-  } else {
-    text = std::string(str->buf);
+  // spdlog::debug("strcpy {}", src);
+  if (strlen(src) > 0) {
+    auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+    if (tstr) {
+      return ORIGINAL(string_copy)(dst, tstr.value().c_str());
+    }
   }
+  return ORIGINAL(string_copy)(dst, src);
+}
 
-  // translation test segment
+// strncpy
+SETUP_ORIG_FUNC(string_copy_n, 0xB5D0);
+char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
+{
+  auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+  if (tstr) {
+    return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
+  }
+  return ORIGINAL(string_copy_n)(dst, src, size);
+}
 
-  // auto translation = Dictionary::GetSingleton()->Get(text);
-  // if (translation) {
-  //   auto cached = cache->Get(text);
-  //   if (cached) {
-  //     spdlog::debug("cache search {}", cached.value().get());
-  //   }
-  //   cache->Put(text, translation.value());
+// strncat
+SETUP_ORIG_FUNC(string_append_n, 0xB710);
+char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
+{
+  auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+  if (tstr) {
+    return ORIGINAL(string_append_n)(dst, tstr.value().c_str(), tstr.value().size());
+  }
+  return ORIGINAL(string_append_n)(dst, src, size);
+}
 
-  //   // leak?
-  //   DFString_ translated_str{};
-
-  //   // just path does'n work
-  //   // auto translated_len = translation.value().size();
-  //   // str->len = translated_len;
-
-  //   // if (translated_len > 15) {
-  //   //   std::vector<char> cstr(translation.value().c_str(), translation.value().c_str() +
-  //   translation.value().size()
-
-  //   //   1); str->ptr = cstr.data(); str->capa = translated_len;
-  //   // } else {
-  //   //   str->pad = 0;
-  //   //   str->capa = 15;
-  //   //   strcpy(str->buf, translation.value().c_str());
-  //   // }
-
-  //   CreateDFString(translated_str, translation.value());
-
-  //   ORIGINAL(addst)(gps, &translated_str, justify, space);
-  //   return;
-  // }
-  // ORIGINAL(addst)(gps, str, justify, space);
+SETUP_ORIG_FUNC(addst, 0x784C60);
+void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
+{
+  auto translation = Dictionary::GetSingleton()->Get(str);
+  if (translation) {
+    ORIGINAL(addst)(gps, translation.value(), justify, space);
+    return;
+  }
   ORIGINAL(addst)(gps, str, justify, space);
 }
 
 // strings handling for dialog windows
 SETUP_ORIG_FUNC(addst_top, 0x784DB0);
-void __fastcall HOOK(addst_top)(graphicst_* gps, __int64 a2, __int64 a3)
+void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
 {
-  ORIGINAL(addst_top)(gps, a2, a3);
+  auto translation = Dictionary::GetSingleton()->Get(str);
+  if (translation) {
+    ORIGINAL(addst_top)(gps, translation.value(), a3);
+    return;
+  }
+  ORIGINAL(addst_top)(gps, str, a3);
 }
 
 // some colored string with color not from enum
 // not see it
 SETUP_ORIG_FUNC(addcoloredst, 0x784890);
-void __fastcall HOOK(addcoloredst)(graphicst_* gps, __int64 a2, __int64 a3)
+void __fastcall HOOK(addcoloredst)(graphicst_* gps, char* str, __int64 a3)
 {
-  spdlog::debug("colored str {}", (char*)a2);
-  ORIGINAL(addcoloredst)(gps, a2, a3);
+  auto translation = Dictionary::GetSingleton()->Get(std::string(str));
+  if (translation) {
+    ORIGINAL(addcoloredst)(gps, translation.value().c_str(), a3);
+    return;
+  }
+  ORIGINAL(addcoloredst)(gps, str, a3);
 }
 
 // render through different procedure, not like addst or addst_top
 SETUP_ORIG_FUNC(addst_flag, 0x784970);
-void __fastcall HOOK(addst_flag)(graphicst_* gps, DFString_* str, __int64 a3, __int64 a4, int some_flag)
+void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, __int64 a4, int some_flag)
 {
-
-  std::string text;
-  if (str->len > 15) {
-    text = std::string(str->ptr);
-  } else {
-    text = std::string(str->buf);
+  auto translation = Dictionary::GetSingleton()->Get(str);
+  if (translation) {
+    ORIGINAL(addst_flag)(gps, translation.value(), a3, a4, some_flag);
+    return;
   }
-
-  // spdlog::debug("addst 3, text {}, a3 {}, a4 {}, some_flag {}", text, a3, a4, some_flag);
-  // for (int i = 0; i < text.size(); i++) {
-  //   // spdlog::debug("injecting ttf symbol {}, x {}, y {}", text[i], gps->screenx + i, gps->screeny);
-  //   InjectTTFChar<ScreenManager::ScreenType::Main>(text[i], gps->screenx + i, gps->screeny);
-  // }
-
   ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
-  // LockedInject(ORIGINAL(addst), gps, str, a3, a4);
+}
+
+// dynamic template string
+SETUP_ORIG_FUNC(addst_template, 0x96E710);
+void __fastcall HOOK(addst_template)(renderer_2d_base_* renderer, std::string& str)
+{
+  spdlog::debug("addst_template {}", str);
+  ORIGINAL(addst_template)(renderer, str);
 }
 
 // allocate screen array
@@ -190,7 +216,6 @@ void __fastcall HOOK(cleanup_arrays)(void* ptr)
 SETUP_ORIG_FUNC(screen_to_texid, 0x5BAB40);
 Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y)
 {
-  // spdlog::debug("screen_to_texid x {} y {}", x, y);
   Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
   if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
     auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Main>(x, y);
@@ -222,7 +247,6 @@ SETUP_ORIG_FUNC(reshape, 0x5C0930);
 void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> max_grid)
 {
   ORIGINAL(reshape)(renderer, max_grid);
-
   spdlog::debug("reshape dimx {} dimy {} dispx {} dispy {} dispx_z {} dispy_z {} screen 0x{:x}", renderer->dimx,
                 renderer->dimy, renderer->dispx, renderer->dispy, renderer->dispx_z, renderer->dispy_z,
                 (uintptr_t)renderer->screen);
@@ -230,37 +254,28 @@ void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> m
 
 // loading main menu (start game)
 SETUP_ORIG_FUNC(load_multi_pdim, 0xE82890);
-void __fastcall HOOK(load_multi_pdim)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
+void __fastcall HOOK(load_multi_pdim)(void* ptr, std::string& filename, long* tex_pos, long dimx, long dimy,
                                       bool convert_magenta, long* disp_x, long* disp_y)
 {
-  // spdlog::debug("load_multi_pdim: filename {} text_pos {} dimx {} dimy {} convert_magenta {}, disp_x {} disp_y {}",
-  //               filename->ptr, *tex_pos, dimx, dimy, convert_magenta, *disp_x, *disp_y);
-
   ORIGINAL(load_multi_pdim)(ptr, filename, tex_pos, dimx, dimy, convert_magenta, disp_x, disp_y);
 }
 
 // loading mods
 SETUP_ORIG_FUNC(load_multi_pdim_2, 0xE82AD0);
-void __fastcall HOOK(load_multi_pdim_2)(void* ptr, DFString_* filename, long* tex_pos, long dimx, long dimy,
+void __fastcall HOOK(load_multi_pdim_2)(void* ptr, std::string& filename, long* tex_pos, long dimx, long dimy,
                                         bool convert_magenta, long* disp_x, long* disp_y)
 {
-  // spdlog::debug("load_multi_pdim2: filename {} text_pos {} dimx {} dimy {} convert_magenta {}, disp_x {} disp_y {}",
-  //               filename->ptr, *tex_pos, dimx, dimy, convert_magenta, *disp_x, *disp_y);
-  // if we turn on cache here, game works... but during main menu stage it leaking
   ORIGINAL(load_multi_pdim_2)(ptr, filename, tex_pos, dimx, dimy, convert_magenta, disp_x, disp_y);
 }
 
-// catch Resetting textures in enabler asycn_wait loop
-// not here, not used
+// upload textures
 SETUP_ORIG_FUNC(upload_textures, 0xE82020);
 void __fastcall HOOK(upload_textures)(__int64 a1)
 {
   ORIGINAL(upload_textures)(a1);
-  // spdlog::debug("upload_textures");
 }
 
 // loading_data_new_game_loop interface loop
-// need for tracking game state
 SETUP_ORIG_FUNC(loading_world_new_game_loop, 0x9FD2E0);
 void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
 {
@@ -277,7 +292,6 @@ void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
 
 // loading_world_continuing_game_loop interface loop
 // Loading world and continuing active game
-// need for tracking game state
 SETUP_ORIG_FUNC(loading_world_continuing_game_loop, 0x566F40);
 void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
 {
@@ -294,7 +308,6 @@ void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
 
 // loading_world_start_new_game_loop interface loop
 // Loading world to start new game
-// need for tracking game state
 SETUP_ORIG_FUNC(loading_world_start_new_game_loop, 0x5652C0);
 void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
 {
@@ -304,13 +317,12 @@ void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
   if (*state > 0 && *state <= 4) {
     StateManager::GetSingleton()->State(StateManager::Loading);
   }
-  if (*state > 4 && *state < 34) {
+  if (*state > 3 && *state < 34) {
     StateManager::GetSingleton()->State(StateManager::Game);
   }
 }
 
 // menu_interface_loop main menu interface loop
-// need for tracking game state
 SETUP_ORIG_FUNC(menu_interface_loop, 0x1678A0);
 void __fastcall HOOK(menu_interface_loop)(__int64 a1)
 {
@@ -318,18 +330,380 @@ void __fastcall HOOK(menu_interface_loop)(__int64 a1)
   StateManager::GetSingleton()->State(StateManager::Menu);
 }
 
-// experiments
-
-void InstallHooks()
+// search section below
+void Capitalize(char& s)
 {
-  // init TTFManager
-  // should call init() for TTFInit and SDL function load from dll
-  // then should load font for drawing text
+  if (s >= 'a' && s <= 'z') {
+    s -= 'a';
+    s += 'A';
+  }
+  if ((BYTE)s >= 0xE0 && (BYTE)s <= 0xFF) {
+    s -= 0xE0;
+    s += 0xC0;
+  }
+  if ((BYTE)s >= (BYTE)'à' && (BYTE)s <= (BYTE)'ÿ') {
+    s -= (BYTE)'à';
+    s += (BYTE)'À';
+  }
+  if ((BYTE)s == (BYTE)'¸') {
+    s -= (BYTE)'¸';
+    s += (BYTE)'¨';
+  }
+}
+
+void LowerCast(char& s)
+{
+  if (s >= 'A' && s <= 'Z') {
+    s -= 'A';
+    s += 'a';
+  }
+  if ((BYTE)s >= 0xC0 && (BYTE)s <= 0xDF) {
+    s -= 0xC0;
+    s += 0xE0;
+  }
+  if ((BYTE)s >= (BYTE)'À' && (BYTE)s <= (BYTE)'ß') {
+    s -= (BYTE)'À';
+    s += (BYTE)'à';
+  }
+  if ((BYTE)s == (BYTE)'¨') {
+    s -= (BYTE)'¨';
+    s += (BYTE)'¸';
+  }
+}
+
+// main handler for input from keyboard
+SETUP_ORIG_FUNC(standardstringentry, 0x87ED50);
+int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag,
+                                         std::set<InterfaceKey>& events)
+{
+  spdlog::debug("entry hook str {}, maxlen {}, flags {}, events {}", str, maxlen, flag, events.size());
+  for (auto it = events.begin(); it != events.end(); it++) {
+    spdlog::debug("events i {}", *it);
+  }
+
+  char entry = char(1);
+
+  if (flag & STRINGENTRY_SYMBOLS) {
+    for (short int item = INTERFACEKEY_STRING_A000; item <= INTERFACEKEY_STRING_A255; item++) {
+      if (events.count(item)) {
+        entry = char(item - 357);
+        break;
+      }
+    }
+  }
+  if (flag & STRINGENTRY_LETTERS) {
+    // latin capitals
+    for (short int item = INTERFACEKEY_STRING_A065; item <= INTERFACEKEY_STRING_A090; item++) {
+      if (events.count(item)) {
+        entry = char(item - 357);
+        break;
+      }
+    }
+    // latin small
+    for (short int item = INTERFACEKEY_STRING_A097; item <= INTERFACEKEY_STRING_A122; item++) {
+      if (events.count(item)) {
+        entry = char(item - 357);
+        break;
+      }
+    }
+    // cyrillic
+    for (short int item = INTERFACEKEY_STRING_A192; item <= INTERFACEKEY_STRING_A255; item++) {
+      if (events.count(item)) {
+        entry = char(item - 356);
+        break;
+      }
+    }
+  }
+  if (flag & STRINGENTRY_SPACE) {
+    if (events.count(INTERFACEKEY_STRING_A032)) {
+      entry = ' ';
+    }
+  }
+  if (events.count(INTERFACEKEY_STRING_A000)) {
+    entry = char(0);
+  }
+  if (flag & STRINGENTRY_NUMBERS) {
+    // numbers
+    for (short int item = INTERFACEKEY_STRING_A048; item <= INTERFACEKEY_STRING_A057; item++) {
+      if (events.count(item)) {
+        entry = char(item - 357);
+        break;
+      }
+    }
+  }
+
+  if (entry != 1) {
+    if (entry == 0) {
+      if (str.size() > 0) {
+        str.resize(str.size() - 1);
+      }
+    } else {
+      int cursor = str.size();
+      if (cursor >= maxlen) {
+        cursor = maxlen - 1;
+      }
+      if (cursor < 0) {
+        cursor = 0;
+      }
+      if (str.size() < cursor + 1) {
+        str.resize(cursor + 1);
+      }
+      if (flag & STRINGENTRY_CAPS) {
+        Capitalize(entry);
+      }
+
+      str[cursor] = entry;
+    }
+    events.clear();
+    return 1;
+  }
+
+  return 0;
+  // ORIGINAL(standardstringentry)(str, maxlen, flag, events);
+}
+
+SETUP_ORIG_FUNC(simplify_string, 0x35C7A0);
+void __fastcall HOOK(simplify_string)(std::string& str)
+{
+  for (int s = 0; s < str.size(); s++) {
+    LowerCast(str[s]);
+    switch (str[s]) {
+      case (char)129:
+      case (char)150:
+      case (char)151:
+      case (char)154:
+      case (char)163:
+        str[s] = 'u';
+        break;
+      case (char)152:
+        str[s] = 'y';
+        break;
+      case (char)164:
+      case (char)165:
+        str[s] = 'n';
+        break;
+      case (char)131:
+      case (char)132:
+      case (char)133:
+      case (char)134:
+      case (char)142:
+      case (char)143:
+      case (char)145:
+      case (char)146:
+      case (char)160:
+        str[s] = 'a';
+        break;
+      case (char)130:
+      case (char)136:
+      case (char)137:
+      case (char)138:
+      case (char)144:
+        str[s] = 'e';
+        break;
+      case (char)139:
+      case (char)140:
+      case (char)141:
+      case (char)161:
+        str[s] = 'i';
+        break;
+      case (char)147:
+      case (char)148:
+      case (char)149:
+      case (char)153:
+      case (char)162:
+        str[s] = 'o';
+        break;
+      case (char)128:
+      case (char)135:
+        str[s] = 'c';
+        break;
+    }
+  }
+}
+
+SETUP_ORIG_FUNC(upper_case_string, 0x35CAE0);
+void __fastcall HOOK(upper_case_string)(std::string& str)
+{
+  for (int s = 0; s < str.size(); s++) {
+    Capitalize(str[s]);
+    switch (str[s]) {
+      case (char)129:
+        str[s] = (char)154;
+        break;
+      case (char)164:
+        str[s] = (char)165;
+        break;
+      case (char)132:
+        str[s] = (char)142;
+        break;
+      case (char)134:
+        str[s] = (char)143;
+        break;
+      case (char)130:
+        str[s] = (char)144;
+        break;
+      case (char)148:
+        str[s] = (char)153;
+        break;
+      case (char)135:
+        str[s] = (char)128;
+        break;
+      case (char)145:
+        str[s] = (char)146;
+        break;
+    }
+  }
+}
+
+SETUP_ORIG_FUNC(lower_case_string, 0x35C940);
+void __fastcall HOOK(lower_case_string)(std::string& str)
+{
+  for (int s = 0; s < str.size(); s++) {
+    LowerCast(str[s]);
+    switch (str[s]) {
+      case (char)154:
+        str[s] = (char)129;
+        break;
+      case (char)165:
+        str[s] = (char)164;
+        break;
+      case (char)142:
+        str[s] = (char)132;
+        break;
+      case (char)143:
+        str[s] = (char)134;
+        break;
+      case (char)144:
+        str[s] = (char)130;
+        break;
+      case (char)153:
+        str[s] = (char)148;
+        break;
+      case (char)128:
+        str[s] = (char)135;
+        break;
+      case (char)146:
+        str[s] = (char)145;
+        break;
+    }
+  }
+}
+
+SETUP_ORIG_FUNC(capitalize_string_words, 0x35CC80);
+void __fastcall HOOK(capitalize_string_words)(std::string& str)
+{
+  for (int s = 0; s < str.size(); s++) {
+    char conf = 0;
+    if (s > 0) {
+      if (str[s - 1] == ' ' || str[s - 1] == '\"')
+        conf = 1;
+      if (str[s - 1] == '\'') {
+        if (s <= 0)
+          conf = 1;
+        else if (s >= 2) {
+          if (str[s - 2] == ' ' || str[s - 2] == ',')
+            conf = 1;
+        }
+      }
+    }
+    if (s == 0 || conf) {
+      Capitalize(str[s]);
+      switch (str[s]) {
+        case (char)129:
+          str[s] = (char)154;
+          break;
+        case (char)164:
+          str[s] = (char)165;
+          break;
+        case (char)132:
+          str[s] = (char)142;
+          break;
+        case (char)134:
+          str[s] = (char)143;
+          break;
+        case (char)130:
+          str[s] = (char)144;
+          break;
+        case (char)148:
+          str[s] = (char)153;
+          break;
+        case (char)135:
+          str[s] = (char)128;
+          break;
+        case (char)145:
+          str[s] = (char)146;
+          break;
+      }
+    }
+  }
+}
+
+SETUP_ORIG_FUNC(capitalize_string_first_word, 0x35CF00);
+void __fastcall HOOK(capitalize_string_first_word)(std::string& str)
+{
+  // spdlog::debug("capitalize_string_first_word str {}", str);
+  for (int s = 0; s < str.size(); s++) {
+    char conf = 0;
+    if (s > 0) {
+      if (str[s - 1] == ' ' || str[s - 1] == '\"')
+        conf = 1;
+      if (str[s - 1] == '\'') {
+        if (s <= 0)
+          conf = 1;
+        else if (s >= 2) {
+          if (str[s - 2] == ' ' || str[s - 2] == ',')
+            conf = 1;
+        }
+      }
+    }
+    if (s == 0 || conf) {
+      Capitalize(str[s]);
+      switch (str[s]) {
+        case (char)129:
+          str[s] = (char)154;
+          return;
+        case (char)164:
+          str[s] = (char)165;
+          return;
+        case (char)132:
+          str[s] = (char)142;
+          return;
+        case (char)134:
+          str[s] = (char)143;
+          return;
+        case (char)130:
+          str[s] = (char)144;
+          return;
+        case (char)148:
+          str[s] = (char)153;
+          return;
+        case (char)135:
+          str[s] = (char)128;
+          return;
+        case (char)145:
+          str[s] = (char)146;
+          return;
+      }
+      if (str[s] != ' ' && str[s] != '\"')
+        return;
+    }
+  }
+}
+
+// init TTFManager
+// should call init() for TTFInit and SDL function load from dll
+// then should load font for drawing text
+void InstallTTFInjection()
+{
   auto ttf = TTFManager::GetSingleton();
   ttf->Init();
   ttf->LoadFont("terminus_bold.ttf", 14, 2);
+}
 
-  // init StateManager, set callback to reset textures cache;
+// init StateManager, set callback to reset textures cache;
+// StateManager used for tracking game state in case of ttf usage (resetting cache)
+void InstallStateManager()
+{
   auto state = StateManager::GetSingleton();
   state->SetCallback(StateManager::Menu, [&](void) { spdlog::debug("game state changed to StateManager::Menu"); });
   state->SetCallback(StateManager::Loading, [&](void) {
@@ -342,38 +716,49 @@ void InstallHooks()
     texture_id_cache.Clear();
     spdlog::debug("game state changed to StateManager::Game, clearing texture cache");
   });
+}
+
+void InstallHooks()
+{
 
   // ttf inject, we swap get every char and swap it to our texture
-  ATTACH(add_texture);
-  ATTACH(addchar);
-  ATTACH(addchar_top);
-  ATTACH(screen_to_texid);
-  ATTACH(screen_to_texid_top);
+  // ATTACH(add_texture);
+  // ATTACH(addchar);
+  // ATTACH(addchar_top);
+  // ATTACH(screen_to_texid);
+  // ATTACH(screen_to_texid_top);
   // our screen matrix
-  ATTACH(gps_allocate);
-  ATTACH(cleanup_arrays);
-
-  // ATTACH(addst);
-  // ATTACH(addst_top);
-  // ATTACH(addcoloredst);
-  // ATTACH(addst_flag);
-
+  // ATTACH(gps_allocate);
+  // ATTACH(cleanup_arrays);
   // maybe scaling for bigger font pt?
-  // not used now
-  ATTACH(reshape);
-  ATTACH(load_multi_pdim);
-  ATTACH(load_multi_pdim_2);
-  ATTACH(upload_textures);
+  // ATTACH(reshape);
+  // ATTACH(load_multi_pdim);
+  // ATTACH(load_multi_pdim_2);
+  // ATTACH(upload_textures);
+
+  // translation
+  // ATTACH(string_copy); // dont work with other hook, crash on loading save, why?
+  ATTACH(string_copy_n);
+  ATTACH(string_append_n);
+  ATTACH(addst);
+  ATTACH(addst_top);
+  ATTACH(addst_flag);
+  ATTACH(addcoloredst);
+  //  ATTACH(addst_template);
+
+  // search handling
+  ATTACH(standardstringentry);
+  ATTACH(simplify_string);
+  ATTACH(upper_case_string);
+  ATTACH(lower_case_string);
+  ATTACH(capitalize_string_words);
+  ATTACH(capitalize_string_first_word);
 
   // game state tracking
   ATTACH(loading_world_new_game_loop);
   ATTACH(loading_world_continuing_game_loop);
   ATTACH(loading_world_start_new_game_loop);
   ATTACH(menu_interface_loop);
-
-  // experiments
-  // ATTACH(update_tile);
-  // ATTACH(screen_to_texid_parent);
 
   spdlog::info("hooks installed");
 }

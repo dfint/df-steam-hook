@@ -8,7 +8,7 @@ public:
   }
 
   void LoadCsv(const std::string& filename);
-  std::optional<std::string> Get(std::string& key);
+  std::optional<std::string> Get(const std::string& key);
   bool Exist(std::string& key);
   void Add(std::string& key, std::string& value);
   void Add(std::pair<std::string, std::string>& pair);

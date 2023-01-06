@@ -11,12 +11,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
   switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH: {
       InitLogger();
-      Dictionary::GetSingleton()->LoadCsv("df_translation.csv");
+      Dictionary::GetSingleton()->LoadCsv("df_translation_cp1251.csv");
 
       DetourRestoreAfterWith();
       DetourTransactionBegin();
       DetourUpdateThread(GetCurrentThread());
       InstallHooks();
+      // InstallTTFInjection();
+      // InstallStateManager();
       DetourTransactionCommit();
     }
     case DLL_THREAD_ATTACH:

@@ -60,7 +60,7 @@ void Dictionary::LoadCsv(const std::string& filename)
   spdlog::info("csv dictionary loaded, total lines {}", this->Size());
 }
 
-std::optional<std::string> Dictionary::Get(std::string& key)
+std::optional<std::string> Dictionary::Get(const std::string& key)
 {
   if (this->dict.find(key) == this->dict.end()) {
     return std::nullopt;

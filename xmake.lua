@@ -1,6 +1,20 @@
-add_rules("mode.release")
+-- project
+set_project("dfint-hook")
 set_languages("c++20")
 
+
+-- allowed
+set_allowedarchs("windows|x64")
+set_allowedmodes("release")
+-- default
+set_defaultarchs("windows|x64")
+set_defaultmode("release")
+
+-- rules
+add_rules("plugin.vsxmake.autoupdate")
+add_rules("mode.release")
+
+-- deps
 --3rd party local libs
 add_linkdirs("deps/lib")
 add_includedirs("deps/include")
@@ -14,5 +28,5 @@ target("df-hook")
     -- set_targetdir("E:\\Games\\Dwarf Fortress Steam 50.04\\") -- build to DF dir, handy for testing
     set_pcxxheader("src/pch.h")
     add_files("src/*.cpp")
-    add_packages("spdlog")
-    add_packages("vcpkg::detours")
+    add_packages("spdlog", "vcpkg::detours")
+
