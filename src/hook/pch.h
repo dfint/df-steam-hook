@@ -45,6 +45,7 @@
 #define NOSCROLL         // SB_* and scrolling routines
 #define NOSERVICE        // All Service Controller routines, SERVICE_ equates, etc.
 #include <Windows.h>
+#pragma comment(lib, "User32.lib")
 
 #include "SDL/SDL_ttf.h"
 #pragma comment(lib, "SDL_ttf.lib")

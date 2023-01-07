@@ -15,6 +15,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
       if (Config::Metadata::name != "dfint localization hook") {
         spdlog::critical("unable to find config file");
+        MessageBoxA(nullptr, "unable to find config file", "dfint hook error", MB_ICONERROR);
         exit(2);
       }
       if (Config::Metadata::checksum != checksum("Dwarf Fortress.exe")) {
