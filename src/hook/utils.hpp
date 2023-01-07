@@ -1,3 +1,5 @@
+#ifndef _UTILS_INCLUDED_
+#define _UTILS_INCLUDED_
 
 std::u16string cp437_to_unicode(const std::string& str)
 {
@@ -28,8 +30,19 @@ std::string ws2s(const std::wstring& wstr)
   return converter.to_bytes(wstr);
 }
 
-// std::wstring cp1251ucs2(const std::string& str)
-// {
-//   std::wstring_convert<codecvt_cp1251<char, wchar_t, mbstate_t>> converter;
-//   return converter.from_bytes(str);
-// }
+uint32_t checksum(const std::string filename)
+{
+  std::ifstream file(filename);
+  uint32_t checksum = 0;
+  unsigned shift = 0;
+  for (uint32_t ch = file.get(); file; ch = file.get()) {
+    checksum += (ch << shift);
+    shift += 8;
+    if (shift == 32) {
+      shift = 0;
+    }
+  }
+  return checksum;
+}
+
+#endif

@@ -1,6 +1,7 @@
 #include "dictionary.h"
 #include "hooks.h"
 #include "logger.hpp"
+#include "utils.hpp"
 
 extern "C" __declspec(dllexport) VOID NullExport(VOID)
 {
@@ -15,6 +16,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       if (Config::Metadata::name != "dfint localization hook") {
         spdlog::critical("unable to find config file");
         exit(2);
+      }
+      if (Config::Metadata::checksum != checksum("Dwarf Fortress.exe")) {
+        spdlog::critical("checksum mismatch, seems like config for another version of DF");
+      } else {
+        spdlog::info("checksum ok!");
       }
       spdlog::info("config version: {}", Config::Metadata::version);
 

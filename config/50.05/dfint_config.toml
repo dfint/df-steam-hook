@@ -1,6 +1,7 @@
 [metadata]
 name = "dfint localization hook"
 version = "50.05 steam"
+checksum = 3559291401
 
 [settings]
 # trace - 0, debug - 1, info - 2, error - 4
