@@ -44,7 +44,7 @@
 #define NOOPENFILE       // OpenFile(), OemToAnsi, AnsiToOem, and OF_*
 #define NOSCROLL         // SB_* and scrolling routines
 #define NOSERVICE        // All Service Controller routines, SERVICE_ equates, etc.
-#include <windows.h>
+#include <Windows.h>
 
 #include "SDL/SDL_ttf.h"
 #pragma comment(lib, "SDL_ttf.lib")

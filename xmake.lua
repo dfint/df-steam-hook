@@ -2,7 +2,6 @@
 set_project("dfint-hook")
 set_languages("c++20")
 
-
 -- allowed
 set_allowedarchs("windows|x64")
 set_allowedmodes("release")
@@ -23,11 +22,19 @@ add_requires("spdlog")
 add_requires("vcpkg::detours")
 add_requires("toml++")
 
-target("df-hook")
+target("dfint_hook")
+    set_default(true)
     set_kind("shared")
-    set_basename("df-steam-translate-hook")
+    set_basename("dfint_hook")
     -- set_targetdir("E:\\Games\\Dwarf Fortress Steam 50.05\\") -- build to DF dir, handy for testing
-    set_pcxxheader("src/pch.h")
-    add_files("src/*.cpp")
+    set_pcxxheader("src/hook/pch.h")
+    add_files("src/hook/*.cpp")
     add_packages("spdlog", "vcpkg::detours", "toml++")
 
+target("dfint_launcher")
+    set_default(false)
+    set_kind("binary")
+    set_basename("dfint_launcher")
+    -- set_targetdir("E:\\Games\\Dwarf Fortress Steam 50.05\\") -- build to DF dir, handy for testing
+    add_files("src/launcher/*.cpp")
+    add_packages("vcpkg::detours")

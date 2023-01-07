@@ -702,7 +702,7 @@ void InstallTranslation()
   ATTACH(addst_top);
   ATTACH(addst_flag);
   ATTACH(addcoloredst);
-  //  ATTACH(addst_template);
+  // ATTACH(addst_template);
 
   // search handling
   if (Config::Setting::enable_search) {
