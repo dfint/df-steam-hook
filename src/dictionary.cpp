@@ -43,9 +43,10 @@ std::pair<std::string, std::string> Split(const std::string& str)
 // C code would be faster here, but we need to load just once
 void Dictionary::LoadCsv(const std::string& filename)
 {
+  spdlog::info("trying to load dictionary from csv file {}", filename);
   std::ifstream file(filename);
   if (!file.is_open()) {
-    spdlog::error("Unable to open csv file {}", filename);
+    spdlog::critical("unable to open csv file {}", filename);
     // do we need exit(2) here?
     return;
   }

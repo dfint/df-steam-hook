@@ -4,11 +4,9 @@
 #include "screen_manager.hpp"
 #include "state_manager.hpp"
 #include "ttf_manager.h"
-// #include "utils.hpp"
 
 void* g_textures_ptr = nullptr;
 graphicst_* g_graphics_ptr = nullptr;
-
 std::atomic_flag ttf_injection_lock = ATOMIC_FLAG_INIT;
 
 // cache for textures id
@@ -77,6 +75,56 @@ void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance)
   ORIGINAL(addchar_top)(gps, symbol, advance);
 }
 
+// allocate screen array
+SETUP_ORIG_FUNC(gps_allocate);
+void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z,
+                                   int dispy_z)
+{
+
+  spdlog::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy,
+                screen_width, screen_height, dispx_z, dispy_z);
+  ORIGINAL(gps_allocate)(ptr, dimx, dimy, screen_width, screen_height, dispx_z, dispy_z);
+  ScreenManager::GetSingleton()->AllocateScreen(dimx, dimy);
+}
+
+// clean screen array here
+SETUP_ORIG_FUNC(cleanup_arrays);
+void __fastcall HOOK(cleanup_arrays)(void* ptr)
+{
+  ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Main>();
+  ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Top>();
+  ORIGINAL(cleanup_arrays)(ptr);
+}
+
+// render for main matrix
+SETUP_ORIG_FUNC(screen_to_texid);
+Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y)
+{
+  Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
+  if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
+    auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Main>(x, y);
+    if (tile->tex_pos > 0) {
+      texture_by_id->left.texpos = tile->tex_pos;
+    }
+  }
+  return texture_by_id;
+}
+
+// renderer for top screen matrix
+SETUP_ORIG_FUNC(screen_to_texid_top);
+Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(renderer_* renderer, __int64 a2, int x,
+                                                                            int y)
+{
+  Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid_top)(renderer, a2, x, y);
+  if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
+    auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Top>(x, y);
+    if (tile->tex_pos > 0) {
+      texture_by_id->left.texpos = tile->tex_pos;
+    }
+  }
+  return texture_by_id;
+}
+
 // main strings handling
 // ttf swap option
 // SETUP_ORIG_FUNC(addst, 0x784C60);
@@ -100,6 +148,7 @@ void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance)
 //   ORIGINAL(addst)(gps, str, justify, space);
 // }
 
+// strcpy
 SETUP_ORIG_FUNC(string_copy);
 char* __cdecl HOOK(string_copy)(char* dst, const char* src)
 {
@@ -183,96 +232,11 @@ void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, 
   ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
 }
 
-// dynamic template string
+// // dynamic template string
 SETUP_ORIG_FUNC(addst_template);
 void __fastcall HOOK(addst_template)(renderer_2d_base_* renderer, std::string& str)
 {
-  spdlog::debug("addst_template {}", str);
   ORIGINAL(addst_template)(renderer, str);
-}
-
-// allocate screen array
-SETUP_ORIG_FUNC(gps_allocate);
-void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z,
-                                   int dispy_z)
-{
-
-  spdlog::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy,
-                screen_width, screen_height, dispx_z, dispy_z);
-  ORIGINAL(gps_allocate)(ptr, dimx, dimy, screen_width, screen_height, dispx_z, dispy_z);
-  ScreenManager::GetSingleton()->AllocateScreen(dimx, dimy);
-}
-
-// clean screen array here
-SETUP_ORIG_FUNC(cleanup_arrays);
-void __fastcall HOOK(cleanup_arrays)(void* ptr)
-{
-  ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Main>();
-  ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Top>();
-  ORIGINAL(cleanup_arrays)(ptr);
-}
-
-// render for main matrix
-SETUP_ORIG_FUNC(screen_to_texid);
-Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y)
-{
-  Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
-  if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
-    auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Main>(x, y);
-    if (tile->tex_pos > 0) {
-      texture_by_id->left.texpos = tile->tex_pos;
-    }
-  }
-  return texture_by_id;
-}
-
-// renderer for top screen matrix
-SETUP_ORIG_FUNC(screen_to_texid_top);
-Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(renderer_* renderer, __int64 a2, int x,
-                                                                            int y)
-{
-  Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid_top)(renderer, a2, x, y);
-  if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
-    auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Top>(x, y);
-    if (tile->tex_pos > 0) {
-      texture_by_id->left.texpos = tile->tex_pos;
-    }
-  }
-  return texture_by_id;
-}
-
-// resizing font
-// can be used to set current font size settings in ttfmanager
-SETUP_ORIG_FUNC(reshape);
-void __fastcall HOOK(reshape)(renderer_2d_base_* renderer, std::pair<int, int> max_grid)
-{
-  ORIGINAL(reshape)(renderer, max_grid);
-  spdlog::debug("reshape dimx {} dimy {} dispx {} dispy {} dispx_z {} dispy_z {} screen 0x{:x}", renderer->dimx,
-                renderer->dimy, renderer->dispx, renderer->dispy, renderer->dispx_z, renderer->dispy_z,
-                (uintptr_t)renderer->screen);
-}
-
-// loading main menu (start game)
-SETUP_ORIG_FUNC(load_multi_pdim);
-void __fastcall HOOK(load_multi_pdim)(void* ptr, std::string& filename, long* tex_pos, long dimx, long dimy,
-                                      bool convert_magenta, long* disp_x, long* disp_y)
-{
-  ORIGINAL(load_multi_pdim)(ptr, filename, tex_pos, dimx, dimy, convert_magenta, disp_x, disp_y);
-}
-
-// loading mods
-SETUP_ORIG_FUNC(load_multi_pdim_2);
-void __fastcall HOOK(load_multi_pdim_2)(void* ptr, std::string& filename, long* tex_pos, long dimx, long dimy,
-                                        bool convert_magenta, long* disp_x, long* disp_y)
-{
-  ORIGINAL(load_multi_pdim_2)(ptr, filename, tex_pos, dimx, dimy, convert_magenta, disp_x, disp_y);
-}
-
-// upload textures
-SETUP_ORIG_FUNC(upload_textures);
-void __fastcall HOOK(upload_textures)(__int64 a1)
-{
-  ORIGINAL(upload_textures)(a1);
 }
 
 // loading_data_new_game_loop interface loop
@@ -376,11 +340,6 @@ SETUP_ORIG_FUNC(standardstringentry);
 int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag,
                                          std::set<InterfaceKey>& events)
 {
-  spdlog::debug("entry hook str {}, maxlen {}, flags {}, events {}", str, maxlen, flag, events.size());
-  for (auto it = events.begin(); it != events.end(); it++) {
-    spdlog::debug("events i {}", *it);
-  }
-
   char entry = char(1);
 
   if (flag & STRINGENTRY_SYMBOLS) {
@@ -459,7 +418,7 @@ int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned 
   }
 
   return 0;
-  // ORIGINAL(standardstringentry)(str, maxlen, flag, events);
+  // return ORIGINAL(standardstringentry)(str, maxlen, flag, events);
 }
 
 SETUP_ORIG_FUNC(simplify_string);
@@ -698,6 +657,15 @@ void InstallTTFInjection()
   auto ttf = TTFManager::GetSingleton();
   ttf->Init();
   ttf->LoadFont("terminus_bold.ttf", 14, 2);
+
+  // ttf inject, we swap get every char and swap it to our texture
+  ATTACH(addchar);
+  ATTACH(addchar_top);
+  ATTACH(add_texture);
+  ATTACH(screen_to_texid);
+  ATTACH(screen_to_texid_top);
+  ATTACH(gps_allocate);
+  ATTACH(cleanup_arrays);
 }
 
 // init StateManager, set callback to reset textures cache;
@@ -716,26 +684,16 @@ void InstallStateManager()
     texture_id_cache.Clear();
     spdlog::debug("game state changed to StateManager::Game, clearing texture cache");
   });
+
+  // game state tracking
+  ATTACH(loading_world_new_game_loop);
+  ATTACH(loading_world_continuing_game_loop);
+  ATTACH(loading_world_start_new_game_loop);
+  ATTACH(menu_interface_loop);
 }
 
-void InstallHooks()
+void InstallTranslation()
 {
-
-  // ttf inject, we swap get every char and swap it to our texture
-  // ATTACH(add_texture);
-  // ATTACH(addchar);
-  // ATTACH(addchar_top);
-  // ATTACH(screen_to_texid);
-  // ATTACH(screen_to_texid_top);
-  // our screen matrix
-  // ATTACH(gps_allocate);
-  // ATTACH(cleanup_arrays);
-  // maybe scaling for bigger font pt?
-  // ATTACH(reshape);
-  // ATTACH(load_multi_pdim);
-  // ATTACH(load_multi_pdim_2);
-  // ATTACH(upload_textures);
-
   // translation
   // ATTACH(string_copy); // dont work with other hook, crash on loading save, why?
   ATTACH(string_copy_n);
@@ -747,18 +705,14 @@ void InstallHooks()
   //  ATTACH(addst_template);
 
   // search handling
-  ATTACH(standardstringentry);
-  ATTACH(simplify_string);
-  ATTACH(upper_case_string);
-  ATTACH(lower_case_string);
-  ATTACH(capitalize_string_words);
-  ATTACH(capitalize_string_first_word);
-
-  // game state tracking
-  ATTACH(loading_world_new_game_loop);
-  ATTACH(loading_world_continuing_game_loop);
-  ATTACH(loading_world_start_new_game_loop);
-  ATTACH(menu_interface_loop);
+  if (Config::Setting::enable_search) {
+    ATTACH(standardstringentry);
+    ATTACH(simplify_string);
+    ATTACH(upper_case_string);
+    ATTACH(lower_case_string);
+    ATTACH(capitalize_string_words);
+    ATTACH(capitalize_string_first_word);
+  }
 
   spdlog::info("hooks installed");
 }

@@ -18,3 +18,4 @@ ColumnLimit: 120
 IndentPPDirectives: AfterHash
 SortUsingDeclarations: true
 SpaceAfterTemplateKeyword: true
+NamespaceIndentation: All

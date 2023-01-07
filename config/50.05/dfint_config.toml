@@ -1,0 +1,39 @@
+[metadata]
+name = "dfint localization hook"
+version = "50.05 steam"
+
+[settings]
+# trace - 0, debug - 1, info - 2, error - 4
+log_level = 0
+enable_search = true
+
+[offsets]
+# translation
+string_copy = 0xB5B0
+string_copy_n = 0xB5D0
+string_append_n = 0xB710
+addst = 0x784C50
+addst_top = 0x784DA0
+addcoloredst = 0x784880
+addst_flag = 0x784960
+addst_template = 0x96E700
+# search
+standardstringentry = 0x87ED40
+simplify_string = 0x35C790
+upper_case_string = 0x35CAD0
+lower_case_string = 0x35C930
+capitalize_string_words = 0x35CC70
+capitalize_string_first_word = 0x35CEF0
+# ttf
+addchar = 0x55D80
+addchar_top = 0xE9D60
+add_texture = 0xE82890
+gps_allocate = 0x5C2AA0
+cleanup_arrays = 0x5C28C0
+screen_to_texid = 0x5BAB30
+screen_to_texid_top = 0x5BAD20
+# game state
+loading_world_new_game_loop = 0x9FD2D0
+loading_world_continuing_game_loop = 0x566F30
+loading_world_start_new_game_loop = 0x5652B0
+menu_interface_loop = 0x167890

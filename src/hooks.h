@@ -1,7 +1,6 @@
 #pragma once
 
 #include "keybindings.h"
-#include "offsets.h"
 
 enum curses_color_ : uint8_t
 {
@@ -143,7 +142,8 @@ struct Either
 };
 
 // #define SETUP_ORIG_FUNC(fn_name, shift) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + shift);
-#define SETUP_ORIG_FUNC(fn_name) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + Offset::fn_name);
+#define SETUP_ORIG_FUNC(fn_name)                                                                                       \
+  fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + Config::Offset::fn_name);
 #define SETUP_ORIG_FUNC_FNAME(fn_name, module_name)                                                                    \
   fn_name fn_name##_orig = (fn_name)(GetProcAddress(GetModuleHandle(#module_name), #fn_name));
 #define GET_ADDR(shift) (PVOID)((UINT64)GetModuleHandle(0) + shift)
@@ -180,20 +180,12 @@ typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(rend
 typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid_top)(renderer_* a1, __int64 a2, int a3,
                                                                                 int a4);
 
-// scaling
-typedef void(__fastcall* reshape)(renderer_2d_base_* ptr, std::pair<int, int> max_grid);
-typedef void(__fastcall* upload_textures)(__int64 a1);
-typedef void(__fastcall* load_multi_pdim)(void* ptr, std::string& filename, long* tex_pos, long dimx, long dimy,
-                                          bool convert_magenta, long* disp_x, long* disp_y);
-typedef void(__fastcall* load_multi_pdim_2)(void* ptr, std::string& filename, long* tex_pos, long dimx, long dimy,
-                                            bool convert_magenta, long* disp_x, long* disp_y);
-
 // game state
 typedef void(__fastcall* loading_world_new_game_loop)(void* a1);
 typedef void(__fastcall* loading_world_continuing_game_loop)(__int64 a1);
 typedef void(__fastcall* loading_world_start_new_game_loop)(__int64 a1);
 typedef void(__fastcall* menu_interface_loop)(__int64 a1);
 
-void InstallHooks();
+void InstallTranslation();
 void InstallTTFInjection();
 void InstallStateManager();
