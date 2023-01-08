@@ -9,7 +9,7 @@ namespace Config {
 
     inline auto name = Config::config["metadata"]["name"].value_or<std::string>("");
     inline auto version = Config::config["metadata"]["version"].value_or<std::string>("");
-    inline auto checksum = Config::config["metadata"]["checksum"].value_or<uint32_t>(0);
+    inline auto checksum = Config::config["metadata"]["checksum"].value_or<uint64_t>(0);
 
   }
 

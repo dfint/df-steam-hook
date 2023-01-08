@@ -30,18 +30,16 @@ std::string ws2s(const std::wstring& wstr)
   return converter.to_bytes(wstr);
 }
 
-uint32_t checksum(const std::string filename)
+uint64_t checksum(const std::string filename)
 {
   std::ifstream file(filename);
-  uint32_t checksum = 0;
-  unsigned shift = 0;
-  for (uint32_t ch = file.get(); file; ch = file.get()) {
-    checksum += (ch << shift);
-    shift += 8;
-    if (shift == 32) {
-      shift = 0;
-    }
+  uint64_t checksum = 0;
+  char buf[32];
+
+  while (file.get(buf, 32)) {
+    checksum += crc32c::Crc32c(buf, 32);
   }
+
   return checksum;
 }
 
