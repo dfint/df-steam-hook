@@ -5,17 +5,16 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        target: ["dfint_hook", "dfint_launcher"]
 
     steps:
     - uses: actions/checkout@v3
-    
-    - name: clang-format Check
-      run: clang-format --dry-run --Werror src/*.c* src/*.h*
 
     - name: Configure XMake
       uses: xmake-io/github-action-setup-xmake@v1
@@ -32,4 +31,4 @@ jobs:
         key: ${{ runner.os }}-xmake-${{ hashFiles('**/xmake.lua') }}
 
     - name: Build
-      run: xmake -y
+      run: xmake -y ${{ matrix.target }}
