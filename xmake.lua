@@ -1,6 +1,6 @@
 -- project
 set_project("dfint-hook")
-set_languages("c++20")
+set_languages("cxxlatest")
 
 -- allowed
 set_allowedarchs("windows|x64")

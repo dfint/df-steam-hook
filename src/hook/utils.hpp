@@ -9,7 +9,7 @@ namespace Utils {
       std::u16string ucs2 = ucs2conv.from_bytes(str);
       return ucs2;
     } catch (const std::range_error& e) {
-      spdlog::error("some error while encoding from utf8 to ucs2");
+      logger::error("some error while encoding from utf8 to ucs2");
     }
   }
 

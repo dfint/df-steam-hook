@@ -71,8 +71,8 @@ SDL_Surface* TTFManager::ScaleSurface(SDL_Surface* Surface, Uint16 Width, Uint16
     return 0;
 
   SDL_Surface* _ret =
-    SDL_CreateRGBSurface_ptr(Surface->flags, Width, Height, Surface->format->BitsPerPixel, Surface->format->Rmask,
-                             Surface->format->Gmask, Surface->format->Bmask, Surface->format->Amask);
+    SDL::CreateRGBSurface(Surface->flags, Width, Height, Surface->format->BitsPerPixel, Surface->format->Rmask,
+                          Surface->format->Gmask, Surface->format->Bmask, Surface->format->Amask);
 
   double _stretch_factor_x = (static_cast<double>(Width) / static_cast<double>(Surface->w)),
          _stretch_factor_y = (static_cast<double>(Height) / static_cast<double>(Surface->h));
@@ -95,8 +95,8 @@ SDL_Surface* TTFManager::ResizeSurface(SDL_Surface* surface, int width, int heig
   }
 
   SDL_Surface* sized_texture =
-    SDL_CreateRGBSurface_ptr(surface->flags, width, height, surface->format->BitsPerPixel, surface->format->Rmask,
-                             surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
+    SDL::CreateRGBSurface(surface->flags, width, height, surface->format->BitsPerPixel, surface->format->Rmask,
+                          surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
 
   for (int y = shift_frame_from_up; y < surface->h; y++) {
     for (int x = 0; x < surface->w; x++) {
@@ -107,7 +107,7 @@ SDL_Surface* TTFManager::ResizeSurface(SDL_Surface* surface, int width, int heig
   }
 
   // clear source surface
-  SDL_FreeSurface_ptr(surface);
+  SDL::FreeSurface(surface);
 
   return sized_texture;
 }
@@ -115,13 +115,13 @@ SDL_Surface* TTFManager::ResizeSurface(SDL_Surface* surface, int width, int heig
 void TTFManager::Init()
 {
   if (TTF_Init() == -1) {
-    spdlog::error("SDL_ttf init error");
+    logger::error("SDL_ttf init error");
     exit(2);
   }
-  LoadSDLAdresses();
+  SDL::LoadSDLAdresses();
   // seems like game deleting surface
   // this->cache.SetEraseCallback([](const std::string& key, SDL_Surface* value) { SDL_FreeSurface_ptr(value); });
-  spdlog::info("TTFManager loaded");
+  logger::info("TTFManager loaded");
 }
 
 void TTFManager::ClearCache()
@@ -137,14 +137,14 @@ void TTFManager::LoadFont(const std::string& file, int ptsize, int shift_frame_f
   auto font = TTF_OpenFont(file.c_str(), ptsize);
   this->font = font;
   this->shift_frame_from_up = shift_frame_from_up;
-  spdlog::debug("load font 0x{:x}", (uintptr_t)this->font);
+  logger::debug("load font 0x{:x}", (uintptr_t)this->font);
 }
 
 void TTFManager::LoadScreen()
 {
-  auto screen = SDL_GetVideoSurface_ptr();
+  auto screen = SDL::GetVideoSurface();
   this->screen = screen;
-  spdlog::debug("load screen 0x{:x}", (uintptr_t)this->screen);
+  logger::debug("load screen 0x{:x}", (uintptr_t)this->screen);
 }
 
 // TODO: should be properly scaled, add more options for scaling methods
@@ -157,14 +157,14 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_co
   }
 
   if (this->font == nullptr) {
-    spdlog::error("trying to create texture before setting font");
+    logger::error("trying to create texture before setting font");
     exit(2);
   }
 
   auto texture = TTF_RenderUTF8_Blended(this->font, str.c_str(), font_color);
   // TODO: rework missing utf8 chars  and font glyphs
   if (texture == NULL) {
-    spdlog::error("texture generation error on string {}", str);
+    logger::error("texture generation error on string {}", str);
     texture = TTF_RenderUTF8_Blended(this->font, "x", font_color);
   }
   // scale to target tile size

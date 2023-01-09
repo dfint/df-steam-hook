@@ -8,7 +8,7 @@ namespace Config {
     std::ifstream file(filename);
 
     if (!file.is_open()) {
-      spdlog::error("unable to open PE file {}", filename);
+      logger::error("unable to open PE file {}", filename);
     }
     char buf[64];
     file.get(buf, 64);

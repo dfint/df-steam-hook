@@ -19,14 +19,15 @@ std::string Dictionary::Sanitize(std::string& str)
   return str;
 }
 
-// std::optional<std::pair<std::string, std::string>> Dictionary::Split(const std::string&
-// str)
+// std::pair<std::string, std::string> Dictionary::Split(const std::string& str)
 // {
 //   const std::regex re(R"r(^"(.*?)","(.*?)")r");
 
 //   std::smatch match;
 //   if (regex_search(str, match, re)) {
-//     return std::make_pair(match[1], match[2]);
+//     auto key = std::string(match[1]);
+//     auto value = std::string(match[2]);
+//     return std::make_pair(Sanitize(key), Sanitize(value));
 //   }
 // }
 
@@ -43,10 +44,10 @@ std::pair<std::string, std::string> Dictionary::Split(const std::string& str)
 // C code would be faster here, but we need to load just once
 void Dictionary::LoadCsv(const std::string& filename)
 {
-  spdlog::info("trying to load dictionary from csv file {}", filename);
+  logger::info("trying to load dictionary from csv file {}", filename);
   std::ifstream file(filename);
   if (!file.is_open()) {
-    spdlog::critical("unable to open csv file {}", filename);
+    logger::critical("unable to open csv file {}", filename);
     MessageBoxA(nullptr, "unable to find csv dictionary file", "dfint hook error", MB_ICONERROR);
     exit(2);
     // do we need exit(2) here?
@@ -60,7 +61,7 @@ void Dictionary::LoadCsv(const std::string& filename)
     this->Add(pair);
   }
   file.close();
-  spdlog::info("csv dictionary loaded, total lines {}", this->Size());
+  logger::info("csv dictionary loaded, total lines {}", this->Size());
 }
 
 std::optional<std::string> Dictionary::Get(const std::string& key)

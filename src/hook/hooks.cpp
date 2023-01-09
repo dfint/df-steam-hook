@@ -60,7 +60,7 @@ void __fastcall HOOK(addchar)(graphicst_* gps, wchar_t symbol, char advance)
 {
   g_graphics_ptr = gps;
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
-    // InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
+    InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
   }
   ORIGINAL(addchar)(gps, symbol, advance);
 }
@@ -70,7 +70,7 @@ SETUP_ORIG_FUNC(addchar_top);
 void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance)
 {
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
-    // InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
+    InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
   }
   ORIGINAL(addchar_top)(gps, symbol, advance);
 }
@@ -81,7 +81,7 @@ void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_wid
                                    int dispy_z)
 {
 
-  spdlog::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy,
+  logger::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy,
                 screen_width, screen_height, dispx_z, dispy_z);
   ORIGINAL(gps_allocate)(ptr, dimx, dimy, screen_width, screen_height, dispx_z, dispy_z);
   ScreenManager::GetSingleton()->AllocateScreen(dimx, dimy);
@@ -131,7 +131,7 @@ Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(rend
 // void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
 // {
 //   // translation test segment
-//   // spdlog::debug("addst text {} len {} capa {}", text, str->len, str->capa);
+//   // logger::debug("addst text {} len {} capa {}", text, str->len, str->capa);
 
 //   auto translation = Dictionary::GetSingleton()->Get(str);
 //   if (translation) {
@@ -599,7 +599,7 @@ void __fastcall HOOK(capitalize_string_words)(std::string& str)
 SETUP_ORIG_FUNC(capitalize_string_first_word);
 void __fastcall HOOK(capitalize_string_first_word)(std::string& str)
 {
-  // spdlog::debug("capitalize_string_first_word str {}", str);
+  // logger::debug("capitalize_string_first_word str {}", str);
   for (int s = 0; s < str.size(); s++) {
     char conf = 0;
     if (s > 0) {
@@ -672,16 +672,16 @@ void InstallTTFInjection()
 void InstallStateManager()
 {
   auto state = StateManager::GetSingleton();
-  state->SetCallback(StateManager::Menu, [&](void) { spdlog::debug("game state changed to StateManager::Menu"); });
+  state->SetCallback(StateManager::Menu, [&](void) { logger::debug("game state changed to StateManager::Menu"); });
   state->SetCallback(StateManager::Loading, [&](void) {
     TTFManager::GetSingleton()->ClearCache();
     texture_id_cache.Clear();
-    spdlog::debug("game state changed to StateManager::Loading, clearing texture cache");
+    logger::debug("game state changed to StateManager::Loading, clearing texture cache");
   });
   state->SetCallback(StateManager::Game, [&](void) {
     TTFManager::GetSingleton()->ClearCache();
     texture_id_cache.Clear();
-    spdlog::debug("game state changed to StateManager::Game, clearing texture cache");
+    logger::debug("game state changed to StateManager::Game, clearing texture cache");
   });
 
   // game state tracking
@@ -713,5 +713,5 @@ void InstallTranslation()
     ATTACH(capitalize_string_first_word);
   }
 
-  spdlog::info("hooks installed");
+  logger::info("hooks installed");
 }

@@ -13,12 +13,12 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       InitLogger();
 
       if (Config::Metadata::name != "dfint localization hook") {
-        spdlog::critical("unable to find config file");
+        logger::critical("unable to find config file");
         MessageBoxA(nullptr, "unable to find config file", "dfint hook error", MB_ICONERROR);
         exit(2);
       }
-      spdlog::info("pe checksum: 0x{:x}", Config::Metadata::checksum);
-      spdlog::info("offsets version: {}", Config::Metadata::version);
+      logger::info("pe checksum: 0x{:x}", Config::Metadata::checksum);
+      logger::info("offsets version: {}", Config::Metadata::version);
 
       Dictionary::GetSingleton()->LoadCsv("./dfint_data/dfint_dictionary.csv");
 
