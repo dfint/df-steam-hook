@@ -30,17 +30,21 @@ std::string ws2s(const std::wstring& wstr)
   return converter.to_bytes(wstr);
 }
 
-uint64_t checksum(const std::string filename)
+time_t petimestamp(const std::string filename)
 {
   std::ifstream file(filename);
-  uint64_t checksum = 0;
-  char buf[32];
 
-  while (file.get(buf, 32)) {
-    checksum += crc32c::Crc32c(buf, 32);
+  if (!file.is_open()) {
+    spdlog::error("unable to open PE file {}", filename);
   }
+  char buf[64];
+  file.get(buf, 64);
+  auto dos_header = reinterpret_cast<IMAGE_DOS_HEADER*>(buf);
+  file.seekg(dos_header->e_lfanew);
+  file.get(buf, 64);
+  auto nt_header = reinterpret_cast<IMAGE_NT_HEADERS*>(buf);
 
-  return checksum;
+  return nt_header->FileHeader.TimeDateStamp;
 }
 
 #endif

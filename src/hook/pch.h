@@ -50,7 +50,6 @@
 #include "SDL/SDL_ttf.h"
 #pragma comment(lib, "SDL_ttf.lib")
 
-#include <crc32c/crc32c.h>
 #include <detours/detours.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>

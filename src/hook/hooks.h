@@ -141,7 +141,7 @@ struct Either
   }
 };
 
-// #define SETUP_ORIG_FUNC(fn_name, shift) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + shift);
+#define SETUP_ORIG_FUNC_OFFSET(fn_name, shift) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + shift);
 #define SETUP_ORIG_FUNC(fn_name)                                                                                       \
   fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + Config::Offset::fn_name);
 #define SETUP_ORIG_FUNC_FNAME(fn_name, module_name)                                                                    \

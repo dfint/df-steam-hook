@@ -18,7 +18,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         MessageBoxA(nullptr, "unable to find config file", "dfint hook error", MB_ICONERROR);
         exit(2);
       }
-      if (Config::Metadata::checksum != checksum("Dwarf Fortress.exe")) {
+      if (Config::Metadata::checksum != petimestamp("Dwarf Fortress.exe")) {
         spdlog::critical("checksum mismatch, seems like config for another version of DF");
       } else {
         spdlog::info("checksum ok!");

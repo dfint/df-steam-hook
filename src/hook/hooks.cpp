@@ -152,7 +152,6 @@ Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(rend
 SETUP_ORIG_FUNC(string_copy);
 char* __cdecl HOOK(string_copy)(char* dst, const char* src)
 {
-  // spdlog::debug("strcpy {}", src);
   if (strlen(src) > 0) {
     auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
     if (tstr) {
@@ -695,7 +694,7 @@ void InstallStateManager()
 void InstallTranslation()
 {
   // translation
-  // ATTACH(string_copy); // dont work with other hook, crash on loading save, why?
+  // ATTACH(string_copy); // dont work why?
   ATTACH(string_copy_n);
   ATTACH(string_append_n);
   ATTACH(addst);
