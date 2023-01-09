@@ -13,7 +13,7 @@ int main()
   si.cb = sizeof(si);
 
   const auto exe_path = "Dwarf Fortress.exe";
-  const auto dll_path = "./dfint_hook.dll";
+  const auto dll_path = "./dfint_data/dfint_hook.dll";
 
   // spawn a DLL injected process
   const BOOL status = DetourCreateProcessWithDllEx(exe_path,                  // application name

@@ -1,12 +1,7 @@
 [metadata]
-name = "dfint localization hook"
-version = "50.05 steam"
+name = "dfint localization hook offsets"
+version = "50.05 steam win64"
 checksum = 0x63b6063b
-
-[settings]
-# trace - 0, debug - 1, info - 2, error - 4
-log_level = 0
-enable_search = true
 
 [offsets]
 # translation

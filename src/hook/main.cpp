@@ -1,7 +1,6 @@
 #include "dictionary.h"
 #include "hooks.h"
 #include "logger.hpp"
-#include "utils.hpp"
 
 extern "C" __declspec(dllexport) VOID NullExport(VOID)
 {
@@ -18,14 +17,18 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         MessageBoxA(nullptr, "unable to find config file", "dfint hook error", MB_ICONERROR);
         exit(2);
       }
-      if (Config::Metadata::checksum != petimestamp("Dwarf Fortress.exe")) {
-        spdlog::critical("checksum mismatch, seems like config for another version of DF");
-      } else {
-        spdlog::info("checksum ok!");
-      }
-      spdlog::info("config version: {}", Config::Metadata::version);
 
-      Dictionary::GetSingleton()->LoadCsv("dfint_dictionary.csv");
+      spdlog::info("pe checksum: 0x{:x}", Config::Metadata::checksum);
+      spdlog::info("offsets version: {}", Config::Metadata::version);
+
+      // if (Config::Metadata::checksum != Config::pe_timestamp) {
+      //   spdlog::critical("checksum mismatch, config checksum: 0x{:x}", Config::Metadata::checksum);
+      // } else {
+      //   spdlog::info("checksum ok!");
+      // }
+      // spdlog::info("config version: {}", Config::Metadata::version);
+
+      Dictionary::GetSingleton()->LoadCsv("./dfint_data/dfint_dictionary.csv");
 
       DetourRestoreAfterWith();
       DetourTransactionBegin();

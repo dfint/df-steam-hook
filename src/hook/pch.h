@@ -4,6 +4,7 @@
 #include <atomic>
 #include <codecvt> // for std::codecvt_utf8 - myabe not needed cause we can render utf8
 #include <cstddef>
+#include <filesystem>
 #include <format>
 #include <fstream>
 #include <list>

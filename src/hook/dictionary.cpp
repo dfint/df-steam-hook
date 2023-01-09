@@ -47,7 +47,7 @@ void Dictionary::LoadCsv(const std::string& filename)
   std::ifstream file(filename);
   if (!file.is_open()) {
     spdlog::critical("unable to open csv file {}", filename);
-    MessageBoxA(nullptr, "unable to find config file", "dfint hook error", MB_ICONERROR);
+    MessageBoxA(nullptr, "unable to find csv dictionary file", "dfint hook error", MB_ICONERROR);
     exit(2);
     // do we need exit(2) here?
     return;
