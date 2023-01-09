@@ -60,7 +60,7 @@ void __fastcall HOOK(addchar)(graphicst_* gps, wchar_t symbol, char advance)
 {
   g_graphics_ptr = gps;
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
-    InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
+    // InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
   }
   ORIGINAL(addchar)(gps, symbol, advance);
 }
@@ -70,7 +70,7 @@ SETUP_ORIG_FUNC(addchar_top);
 void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance)
 {
   if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
-    InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
+    // InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
   }
   ORIGINAL(addchar_top)(gps, symbol, advance);
 }
