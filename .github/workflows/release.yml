@@ -12,6 +12,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Configure XMake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
       - name: Build project
         run: |
           ./ci/release.ps1 dfint_release.zip

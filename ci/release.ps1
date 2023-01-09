@@ -11,7 +11,7 @@ if ($zip_path) {
 
 echo $zip_path
 
-xmake build
+xmake -y build
 mkdir ".\dfint_release\"
 mkdir ".\dfint_release\dfint_data\"
 mkdir ".\dfint_release\dfint_data\offsets\"
