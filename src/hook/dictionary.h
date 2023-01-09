@@ -21,5 +21,9 @@ private:
 
   ~Dictionary() = default;
 
+  void ReplaceAll(std::string& subject, const std::string& search, const std::string& replace);
+  std::pair<std::string, std::string> Split(const std::string& str);
+  std::string Sanitize(std::string& str);
+
   std::unordered_map<std::string, std::string> dict;
 };

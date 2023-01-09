@@ -1,6 +1,6 @@
 #include "dictionary.h"
 
-void ReplaceAll(std::string& subject, const std::string& search, const std::string& replace)
+void Dictionary::ReplaceAll(std::string& subject, const std::string& search, const std::string& replace)
 {
   size_t pos = 0;
   while ((pos = subject.find(search, pos)) != std::string::npos) {
@@ -9,7 +9,7 @@ void ReplaceAll(std::string& subject, const std::string& search, const std::stri
   }
 }
 
-std::string Sanitize(std::string& str)
+std::string Dictionary::Sanitize(std::string& str)
 {
   ReplaceAll(str, R"(\\)", "\\");
   ReplaceAll(str, R"(\t)", "\t");
@@ -19,7 +19,7 @@ std::string Sanitize(std::string& str)
   return str;
 }
 
-// std::optional<std::pair<std::string, std::string>> split(const std::string&
+// std::optional<std::pair<std::string, std::string>> Dictionary::Split(const std::string&
 // str)
 // {
 //   const std::regex re(R"r(^"(.*?)","(.*?)")r");
@@ -30,7 +30,7 @@ std::string Sanitize(std::string& str)
 //   }
 // }
 
-std::pair<std::string, std::string> Split(const std::string& str)
+std::pair<std::string, std::string> Dictionary::Split(const std::string& str)
 {
   std::string delimiter = "\",\"";
   auto delimiter_pos = str.find(delimiter);
