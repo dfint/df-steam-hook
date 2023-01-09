@@ -9,9 +9,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        target: ["dfint_hook", "dfint_launcher"]
 
     steps:
     - uses: actions/checkout@v3
@@ -30,5 +27,5 @@ jobs:
           .xmake-cache
         key: ${{ runner.os }}-xmake-${{ hashFiles('**/xmake.lua') }}
 
-    - name: Build
-      run: xmake -y ${{ matrix.target }}
+    - name: Build all targets
+      run: xmake -y --all
