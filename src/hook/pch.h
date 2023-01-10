@@ -10,6 +10,7 @@
 #include <list>
 #include <locale> // for std::wstring_convert - myabe not needed cause we can render utf8
 #include <set>
+#include <stacktrace>
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
@@ -51,7 +52,7 @@
 #include "SDL/SDL_ttf.h"
 #pragma comment(lib, "SDL_ttf.lib")
 
-#include <StackWalker.h>
+// #include <StackWalker.h>
 #include <detours/detours.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>

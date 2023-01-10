@@ -21,7 +21,6 @@ add_includedirs("deps/include")
 add_requires("spdlog")
 add_requires("vcpkg::detours")
 add_requires("toml++")
-add_requires("stackwalker")
 
 target("dfint_hook")
     set_default(true)
@@ -30,7 +29,7 @@ target("dfint_hook")
     -- set_targetdir("E:\\Games\\Dwarf Fortress Steam 50.05\\dfint_data") -- build to DF dir, handy for testing
     set_pcxxheader("src/hook/pch.h")
     add_files("src/hook/*.cpp")
-    add_packages("spdlog", "vcpkg::detours", "toml++", "stackwalker")
+    add_packages("spdlog", "vcpkg::detours", "toml++")
 
 target("dfint_launcher")
     set_default(true)

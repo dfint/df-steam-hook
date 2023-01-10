@@ -1,5 +1,3 @@
-#include <Psapi.h>
-
 namespace CrashReport {
 
   std::ofstream GetCrashReportLogHandle(std::string filename)
@@ -13,59 +11,11 @@ namespace CrashReport {
     return file;
   }
 
-  class LoggedStackWalker : public StackWalker
-  {
-  public:
-    LoggedStackWalker()
-      : StackWalker()
-    {
-      this->output_filename = "./dfint_data/crash_reports/cr_" + std::to_string(std::time(NULL)) + ".txt";
-      this->output_file = GetCrashReportLogHandle(this->output_filename);
-    }
-
-    std::string output_filename;
-    std::ofstream output_file;
-
-  protected:
-    virtual void OnOutput(LPCSTR szText)
-    {
-      this->output_file << szText;
-      StackWalker::OnOutput(szText);
-    }
-  };
-
-  uintptr_t GetBaseAddress()
-  {
-
-    HWND WindowHandle = FindWindow(nullptr, "Dwarf Fortress");
-    DWORD PID;
-    GetWindowThreadProcessId(WindowHandle, &PID);
-    logger::error("pid {}", PID);
-    PVOID hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, 0, PID);
-
-    if (hProcess == NULL)
-      return NULL;
-
-    HMODULE lphModule[1024];
-    DWORD lpcbNeeded(NULL);
-
-    if (!EnumProcessModules(hProcess, lphModule, sizeof(lphModule), &lpcbNeeded))
-      return NULL;
-
-    TCHAR szModName[MAX_PATH];
-    if (!GetModuleFileNameEx(hProcess, lphModule[0], szModName, sizeof(szModName) / sizeof(TCHAR)))
-      return NULL;
-
-    logger::error("name {}", szModName);
-
-    return (uintptr_t)lphModule[0];
-  }
-
-  LONG WINAPI Handler(EXCEPTION_POINTERS* ExceptionInfo)
+  std::string ErrCodeToString(DWORD code)
   {
     std::string errcode;
 
-    switch (ExceptionInfo->ExceptionRecord->ExceptionCode) {
+    switch (code) {
       case EXCEPTION_ACCESS_VIOLATION:
         errcode = "Error: EXCEPTION_ACCESS_VIOLATION";
         break;
@@ -131,21 +81,31 @@ namespace CrashReport {
         break;
     }
 
-    if (EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode) {
+    return errcode;
+  }
 
-      auto handle = GetCurrentThread();
-      LoggedStackWalker sw;
-      sw.ShowCallstack(handle, ExceptionInfo->ContextRecord);
-      auto base = std::string(std::format("Base address: 0x{:x}\n", GetBaseAddress()));
-      sw.output_file << base;
-      sw.output_file << Config::Metadata::version;
-      sw.output_file << Config::Metadata::checksum;
-      sw.output_file.close();
+  LONG WINAPI Handler(EXCEPTION_POINTERS* ExceptionInfo)
+  {
+    std::string errcode = ErrCodeToString(ExceptionInfo->ExceptionRecord->ExceptionCode);
+
+    if (EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode) {
+      auto cr_filename = "./dfint_data/crash_reports/cr_" + std::to_string(std::time(NULL)) + ".txt";
+      auto cr_file = GetCrashReportLogHandle(cr_filename);
+
+      cr_file << "Version: " << Config::Metadata::version << "\n";
+      cr_file << "Checksum: " << std::format("0x{:x}", Config::Metadata::checksum) << "\n";
+      cr_file << errcode << "\n";
+      cr_file << "--------------Stack-------------\n";
+
+      for (const auto& entry : std::stacktrace::current()) {
+        cr_file << "> " << entry.description() << "\n";
+      }
+
+      cr_file << "--------------------------------\n";
 
       std::string message("Oops, it's a crash!\n");
       message += errcode + "\n";
-      message += "Crash log: " + sw.output_filename + "\n";
-      message += base;
+      message += "Crash log: " + cr_filename + "\n";
 
       MessageBoxA(nullptr, message.c_str(), "dfint hook error", MB_ICONERROR);
     } else {
