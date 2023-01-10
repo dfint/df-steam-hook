@@ -13,19 +13,32 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Configure XMake
+    # Force xmake to a specific folder (for cache)
+    - name: Set xmake env
+      run: echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/xmake-global" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    # Install xmake
+    - name: Setup xmake
       uses: xmake-io/github-action-setup-xmake@v1
       with:
-        xmake-version: latest
-        actions-cache-folder: '.xmake-cache'
+        xmake-version: branch@dev
+        actions-cache-folder: .xmake-cache-W${{ steps.cache_key.outputs.key }}
 
-    - name: cache xmake
-      uses: actions/cache@v2
+    # Update xmake repository (in order to have the file that will be cached)
+    - name: Update xmake repository
+      run: xmake repo --update
+
+    # Fetch xmake dephash
+    - name: Retrieve dependencies hash
+      id: dep_hash
+      run: echo "hash=$(xmake l utils.ci.packageskey)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+    # Cache xmake dependencies
+    - name: Retrieve cached xmake dependencies
+      uses: actions/cache@v3
       with:
-        path: |
-          ${{github.workspace}}/build/.build_cache
-          .xmake-cache
-        key: ${{ runner.os }}-xmake-${{ hashFiles('**/xmake.lua') }}
+        path: ${{ env.XMAKE_GLOBALDIR }}\.xmake\packages
+        key: xmake-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
     - name: Build all targets
       run: xmake -y --all
