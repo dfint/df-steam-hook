@@ -4,4 +4,5 @@ name = "dfint localization hook"
 [settings]
 # trace - 0, debug - 1, info - 2, error - 4
 log_level = 0
+crash_report = true
 enable_search = true

@@ -1,5 +1,6 @@
 #pragma once
 
+// #include <regex>  // remove if regex dont needed
 #include <atomic>
 #include <codecvt> // for std::codecvt_utf8 - myabe not needed cause we can render utf8
 #include <cstddef>
@@ -8,7 +9,6 @@
 #include <fstream>
 #include <list>
 #include <locale> // for std::wstring_convert - myabe not needed cause we can render utf8
-// #include <regex>  // remove if regex dont needed
 #include <set>
 #include <stdexcept>
 #include <thread>
@@ -51,6 +51,7 @@
 #include "SDL/SDL_ttf.h"
 #pragma comment(lib, "SDL_ttf.lib")
 
+#include <StackWalker.h>
 #include <detours/detours.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>

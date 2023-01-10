@@ -152,6 +152,9 @@ Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(rend
 SETUP_ORIG_FUNC(string_copy);
 char* __cdecl HOOK(string_copy)(char* dst, const char* src)
 {
+  if (src == nullptr) {
+    return ORIGINAL(string_copy)(dst, src);
+  }
   if (strlen(src) > 0) {
     auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
     if (tstr) {
@@ -165,6 +168,9 @@ char* __cdecl HOOK(string_copy)(char* dst, const char* src)
 SETUP_ORIG_FUNC(string_copy_n);
 char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
 {
+  if (src == nullptr) {
+    return ORIGINAL(string_copy_n)(dst, src, size);
+  }
   auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
   if (tstr) {
     return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
@@ -176,6 +182,9 @@ char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
 SETUP_ORIG_FUNC(string_append_n);
 char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
 {
+  if (src == nullptr) {
+    return ORIGINAL(string_append_n)(dst, src, size);
+  }
   auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
   if (tstr) {
     return ORIGINAL(string_append_n)(dst, tstr.value().c_str(), tstr.value().size());
@@ -186,6 +195,9 @@ char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
 SETUP_ORIG_FUNC(addst);
 void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
 {
+  if (str.size() == 0) {
+    ORIGINAL(addst)(gps, str, justify, space);
+  }
   auto translation = Dictionary::GetSingleton()->Get(str);
   if (translation) {
     ORIGINAL(addst)(gps, translation.value(), justify, space);
@@ -198,6 +210,9 @@ void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ ju
 SETUP_ORIG_FUNC(addst_top);
 void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
 {
+  if (str.size() == 0) {
+    ORIGINAL(addst_top)(gps, str, a3);
+  }
   auto translation = Dictionary::GetSingleton()->Get(str);
   if (translation) {
     ORIGINAL(addst_top)(gps, translation.value(), a3);
@@ -211,6 +226,9 @@ void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
 SETUP_ORIG_FUNC(addcoloredst);
 void __fastcall HOOK(addcoloredst)(graphicst_* gps, char* str, __int64 a3)
 {
+  if (str == nullptr) {
+    ORIGINAL(addcoloredst)(gps, str, a3);
+  }
   auto translation = Dictionary::GetSingleton()->Get(std::string(str));
   if (translation) {
     ORIGINAL(addcoloredst)(gps, translation.value().c_str(), a3);
@@ -223,6 +241,9 @@ void __fastcall HOOK(addcoloredst)(graphicst_* gps, char* str, __int64 a3)
 SETUP_ORIG_FUNC(addst_flag);
 void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, __int64 a4, int some_flag)
 {
+  if (str.size() == 0) {
+    ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
+  }
   auto translation = Dictionary::GetSingleton()->Get(str);
   if (translation) {
     ORIGINAL(addst_flag)(gps, translation.value(), a3, a4, some_flag);
@@ -713,7 +734,7 @@ void UninstallStateManager()
 void InstallTranslation()
 {
   // translation
-  // ATTACH(string_copy); // dont work why?
+  ATTACH(string_copy);
   ATTACH(string_copy_n);
   ATTACH(string_append_n);
   ATTACH(addst);
@@ -736,7 +757,7 @@ void InstallTranslation()
 void UninstallTranslation()
 {
   // translation
-  // DETACH(string_copy); // dont work why?
+  DETACH(string_copy);
   DETACH(string_copy_n);
   DETACH(string_append_n);
   DETACH(addst);

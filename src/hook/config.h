@@ -53,6 +53,7 @@ namespace Config {
   namespace Setting {
 
     inline auto log_level = Config::config["settings"]["log_level"].value_or<int>(0);
+    inline auto crash_report = Config::config["settings"]["crash_report"].value_or<bool>(true);
     inline auto enable_search = Config::config["settings"]["enable_search"].value_or<bool>(true);
 
   }
