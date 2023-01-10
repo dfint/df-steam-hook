@@ -148,6 +148,7 @@ struct Either
   fn_name fn_name##_orig = (fn_name)(GetProcAddress(GetModuleHandle(#module_name), #fn_name));
 #define GET_ADDR(shift) (PVOID)((UINT64)GetModuleHandle(0) + shift)
 #define ATTACH(fn_name) DetourAttach(&(PVOID&)(fn_name##_orig), (PVOID)fn_name##_hook)
+#define DETACH(fn_name) DetourDetach(&(PVOID&)(fn_name##_orig), (PVOID)fn_name##_hook)
 #define HOOK(fn_name) fn_name##_hook
 #define ORIGINAL(fn_name) fn_name##_orig
 
@@ -187,5 +188,8 @@ typedef void(__fastcall* loading_world_start_new_game_loop)(__int64 a1);
 typedef void(__fastcall* menu_interface_loop)(__int64 a1);
 
 void InstallTranslation();
+void UninstallTranslation();
 void InstallTTFInjection();
+void UninstallTTFInjection();
 void InstallStateManager();
+void UninstallStateManager();

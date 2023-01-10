@@ -667,6 +667,17 @@ void InstallTTFInjection()
   ATTACH(cleanup_arrays);
 }
 
+void UninstallTTFInjection()
+{
+  DETACH(addchar);
+  DETACH(addchar_top);
+  DETACH(add_texture);
+  DETACH(screen_to_texid);
+  DETACH(screen_to_texid_top);
+  DETACH(gps_allocate);
+  DETACH(cleanup_arrays);
+}
+
 // init StateManager, set callback to reset textures cache;
 // StateManager used for tracking game state in case of ttf usage (resetting cache)
 void InstallStateManager()
@@ -691,6 +702,14 @@ void InstallStateManager()
   ATTACH(menu_interface_loop);
 }
 
+void UninstallStateManager()
+{
+  DETACH(loading_world_new_game_loop);
+  DETACH(loading_world_continuing_game_loop);
+  DETACH(loading_world_start_new_game_loop);
+  DETACH(menu_interface_loop);
+}
+
 void InstallTranslation()
 {
   // translation
@@ -712,6 +731,27 @@ void InstallTranslation()
     ATTACH(capitalize_string_words);
     ATTACH(capitalize_string_first_word);
   }
+}
 
-  logger::info("hooks installed");
+void UninstallTranslation()
+{
+  // translation
+  // DETACH(string_copy); // dont work why?
+  DETACH(string_copy_n);
+  DETACH(string_append_n);
+  DETACH(addst);
+  DETACH(addst_top);
+  DETACH(addst_flag);
+  DETACH(addcoloredst);
+  // DETACH(addst_template);
+
+  // search handling
+  if (Config::Setting::enable_search) {
+    DETACH(standardstringentry);
+    DETACH(simplify_string);
+    DETACH(upper_case_string);
+    DETACH(lower_case_string);
+    DETACH(capitalize_string_words);
+    DETACH(capitalize_string_first_word);
+  }
 }
