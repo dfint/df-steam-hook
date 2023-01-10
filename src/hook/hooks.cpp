@@ -3,7 +3,7 @@
 #include "dictionary.h"
 #include "screen_manager.hpp"
 #include "state_manager.hpp"
-#include "ttf_manager.h"
+// #include "ttf_manager.h"
 
 void* g_textures_ptr = nullptr;
 graphicst_* g_graphics_ptr = nullptr;
@@ -13,12 +13,12 @@ std::atomic_flag ttf_injection_lock = ATOMIC_FLAG_INIT;
 LRUCache<std::string, long> texture_id_cache(500);
 
 // setup texture to texture vector and recieve tex_pos
-SETUP_ORIG_FUNC(add_texture);
-long __fastcall HOOK(add_texture)(void* ptr, SDL_Surface* texture)
-{
-  g_textures_ptr = ptr;
-  return ORIGINAL(add_texture)(ptr, texture);
-}
+// SETUP_ORIG_FUNC(add_texture);
+// long __fastcall HOOK(add_texture)(void* ptr, SDL_Surface* texture)
+// {
+//   g_textures_ptr = ptr;
+//   return ORIGINAL(add_texture)(ptr, texture);
+// }
 
 template <typename T, typename... Args>
 void LockedInject(T& func, Args&&... args)
@@ -39,13 +39,13 @@ void InjectTTFChar(unsigned char symbol, int x, int y)
 
   if (symbol > 0) {
     std::string str(1, symbol);
-    auto texture = TTFManager::GetSingleton()->CreateTexture(str);
+    // auto texture = TTFManager::GetSingleton()->CreateTexture(str);
     auto cached_texture_id = texture_id_cache.Get(str);
     long tex_pos = 0;
     if (cached_texture_id) {
       tex_pos = cached_texture_id.value().get();
     } else {
-      tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
+      // tex_pos = ORIGINAL(add_texture)(g_textures_ptr, texture);
       texture_id_cache.Put(str, tex_pos);
     }
     tile->tex_pos = tex_pos;
@@ -674,14 +674,14 @@ void __fastcall HOOK(capitalize_string_first_word)(std::string& str)
 // then should load font for drawing text
 void InstallTTFInjection()
 {
-  auto ttf = TTFManager::GetSingleton();
-  ttf->Init();
-  ttf->LoadFont("terminus_bold.ttf", 14, 2);
+  // auto ttf = TTFManager::GetSingleton();
+  // ttf->Init();
+  // ttf->LoadFont("terminus_bold.ttf", 14, 2);
 
   // ttf inject, we swap get every char and swap it to our texture
   ATTACH(addchar);
   ATTACH(addchar_top);
-  ATTACH(add_texture);
+  // ATTACH(add_texture);
   ATTACH(screen_to_texid);
   ATTACH(screen_to_texid_top);
   ATTACH(gps_allocate);
@@ -692,7 +692,7 @@ void UninstallTTFInjection()
 {
   DETACH(addchar);
   DETACH(addchar_top);
-  DETACH(add_texture);
+  // DETACH(add_texture);
   DETACH(screen_to_texid);
   DETACH(screen_to_texid_top);
   DETACH(gps_allocate);
@@ -706,12 +706,12 @@ void InstallStateManager()
   auto state = StateManager::GetSingleton();
   state->SetCallback(StateManager::Menu, [&](void) { logger::debug("game state changed to StateManager::Menu"); });
   state->SetCallback(StateManager::Loading, [&](void) {
-    TTFManager::GetSingleton()->ClearCache();
+    // TTFManager::GetSingleton()->ClearCache();
     texture_id_cache.Clear();
     logger::debug("game state changed to StateManager::Loading, clearing texture cache");
   });
   state->SetCallback(StateManager::Game, [&](void) {
-    TTFManager::GetSingleton()->ClearCache();
+    // TTFManager::GetSingleton()->ClearCache();
     texture_id_cache.Clear();
     logger::debug("game state changed to StateManager::Game, clearing texture cache");
   });

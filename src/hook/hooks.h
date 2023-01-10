@@ -57,7 +57,8 @@ struct graphicst_
 struct renderer_2d_base_
 {
   char dump[240];
-  SDL_Surface* screen;          // 8
+  // SDL_Surface* screen;          // 8
+  void* screen;                 // 8
   char pad16[16];               // 16
   int32_t dispx;                // 4
   int32_t dispy;                // 4

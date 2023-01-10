@@ -110,6 +110,7 @@ namespace CrashReport {
       MessageBoxA(nullptr, message.c_str(), "dfint hook error", MB_ICONERROR);
     } else {
       MessageBoxA(nullptr, "Stack Overflow!", "dfint hook error", MB_ICONERROR);
+      return EXCEPTION_CONTINUE_EXECUTION;
     }
 
     return EXCEPTION_EXECUTE_HANDLER;
