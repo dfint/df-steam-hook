@@ -138,6 +138,8 @@ namespace CrashReport {
       sw.ShowCallstack(handle, ExceptionInfo->ContextRecord);
       auto base = std::string(std::format("Base address: 0x{:x}\n", GetBaseAddress()));
       sw.output_file << base;
+      sw.output_file << Config::Metadata::version;
+      sw.output_file << Config::Metadata::checksum;
       sw.output_file.close();
 
       std::string message("Oops, it's a crash!\n");
