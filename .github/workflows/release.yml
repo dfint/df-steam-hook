@@ -51,7 +51,7 @@ jobs:
           
       - name: Build project
         run: |
-          ./ci/release.ps1 $package_name
+          ./ci/release.ps1 ${{ env.PACKAGE_NAME }}
           
       - name: Release
         uses: softprops/action-gh-release@v1
