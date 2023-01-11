@@ -63,4 +63,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ env.PACKAGE_NAME }}
+          tag_name: ${{ github.event.inputs.version }}
           draft: true
