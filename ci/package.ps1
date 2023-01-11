@@ -9,7 +9,6 @@ if ($zip_path) {
   $zip_path = ".\dfint_release\dfint_release.zip"
 }
 
-xmake -y --all
 mkdir ".\dfint_release\"
 mkdir ".\dfint_release\dfint_data\"
 cpi ".\build\windows\x64\release\dfint_launcher.exe" ".\dfint_release\dfint_launcher.exe"
