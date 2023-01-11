@@ -620,7 +620,6 @@ void __fastcall HOOK(capitalize_string_words)(std::string& str)
 SETUP_ORIG_FUNC(capitalize_string_first_word);
 void __fastcall HOOK(capitalize_string_first_word)(std::string& str)
 {
-  // logger::debug("capitalize_string_first_word str {}", str);
   for (int s = 0; s < str.size(); s++) {
     char conf = 0;
     if (s > 0) {

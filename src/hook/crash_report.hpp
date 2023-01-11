@@ -96,11 +96,7 @@ namespace CrashReport {
       cr_file << "Checksum: " << std::format("0x{:x}", Config::Metadata::checksum) << "\n";
       cr_file << errcode << "\n";
       cr_file << "--------------Stack-------------\n";
-
-      for (const auto& entry : std::stacktrace::current()) {
-        cr_file << "> " << entry.description() << "\n";
-      }
-
+      cr_file << std::stacktrace::current() << "\n";
       cr_file << "--------------------------------\n";
 
       std::string message("Oops, it's a crash!\n");
