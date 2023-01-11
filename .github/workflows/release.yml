@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Check variables
         run: |
-          echo '${{ github.event.inputs.version }}'
+          echo '${{ github.ref }}'
           echo '${{ env.PACKAGE_NAME }}'
     
       - name: Checkout code
@@ -52,12 +52,15 @@ jobs:
       - name: Build project
         run: |
           ./ci/release.ps1 ${{ env.PACKAGE_NAME }}
-          
+
+      - name: Bump version and push tag
+        uses: laputansoft/github-tag-action@v4.6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.inputs.version }}
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: '${{ github.event.inputs.version }}'
           files: ${{ env.PACKAGE_NAME }}
           draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
