@@ -15,7 +15,7 @@ jobs:
       package_name: dfint-steam-hook-${{ github.event.inputs.version }}.zip
     steps:
       - name: Check variables
-        run:
+        run: |
           echo '${{ github.event.inputs.version }}'
           echo '$package_name'
     
