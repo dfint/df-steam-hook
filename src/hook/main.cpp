@@ -2,6 +2,7 @@
 #include "dictionary.h"
 #include "hooks.h"
 #include "logger.hpp"
+#include "watchdog.hpp"
 
 extern "C" __declspec(dllexport) VOID NullExport(VOID)
 {
@@ -16,6 +17,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
   switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH: {
       InitLogger();
+      Watchdog::WatchKeyboard();
 
       if (Config::Metadata::name != "dfint localization hook") {
         logger::critical("unable to find config file");

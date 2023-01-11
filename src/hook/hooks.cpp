@@ -154,7 +154,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_copy);
   char* __cdecl HOOK(string_copy)(char* dst, const char* src)
   {
-    if (src == nullptr) {
+    if (src == nullptr || Config::Setting::enable_translation == false) {
       return ORIGINAL(string_copy)(dst, src);
     }
     if (strlen(src) > 0) {
@@ -170,7 +170,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_copy_n);
   char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
   {
-    if (src == nullptr) {
+    if (src == nullptr || Config::Setting::enable_translation == false) {
       return ORIGINAL(string_copy_n)(dst, src, size);
     }
     auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
@@ -184,7 +184,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_append_n);
   char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
   {
-    if (src == nullptr) {
+    if (src == nullptr || Config::Setting::enable_translation == false) {
       return ORIGINAL(string_append_n)(dst, src, size);
     }
     auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
@@ -197,8 +197,9 @@ namespace Hook {
   SETUP_ORIG_FUNC(addst);
   void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
   {
-    if (str.size() == 0) {
+    if (str.size() == 0 || Config::Setting::enable_translation == false) {
       ORIGINAL(addst)(gps, str, justify, space);
+      return;
     }
     auto translation = Dictionary::GetSingleton()->Get(str);
     if (translation) {
@@ -212,8 +213,9 @@ namespace Hook {
   SETUP_ORIG_FUNC(addst_top);
   void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
   {
-    if (str.size() == 0) {
+    if (str.size() == 0 || Config::Setting::enable_translation == false) {
       ORIGINAL(addst_top)(gps, str, a3);
+      return;
     }
     auto translation = Dictionary::GetSingleton()->Get(str);
     if (translation) {
@@ -228,8 +230,9 @@ namespace Hook {
   SETUP_ORIG_FUNC(addcoloredst);
   void __fastcall HOOK(addcoloredst)(graphicst_* gps, char* str, __int64 a3)
   {
-    if (str == nullptr) {
+    if (str == nullptr || Config::Setting::enable_translation == false) {
       ORIGINAL(addcoloredst)(gps, str, a3);
+      return;
     }
     auto translation = Dictionary::GetSingleton()->Get(std::string(str));
     if (translation) {
@@ -243,8 +246,9 @@ namespace Hook {
   SETUP_ORIG_FUNC(addst_flag);
   void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, __int64 a4, int some_flag)
   {
-    if (str.size() == 0) {
+    if (str.size() == 0 || Config::Setting::enable_translation == false) {
       ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
+      return;
     }
     auto translation = Dictionary::GetSingleton()->Get(str);
     if (translation) {
