@@ -1,3 +1,5 @@
+#include "dictionary.h"
+
 namespace Watchdog {
 
   namespace Handler {
@@ -15,6 +17,12 @@ namespace Watchdog {
           Config::Setting::enable_translation = true;
           logger::info("translation switched on");
           MessageBoxA(nullptr, "translation switched on", "dfint hook info", MB_ICONWARNING);
+        }
+        if ((GetAsyncKeyState(VK_CONTROL) & GetAsyncKeyState(VK_F2))) {
+          logger::info("reload dictionary");
+          Dictionary::GetSingleton()->Clear();
+          Dictionary::GetSingleton()->LoadCsv("./dfint_data/dfint_dictionary.csv");
+          MessageBoxA(nullptr, "dictionary reloaded", "dfint hook info", MB_ICONWARNING);
         }
       }
     }

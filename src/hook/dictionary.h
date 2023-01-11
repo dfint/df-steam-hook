@@ -1,3 +1,5 @@
+#pragma once
+
 class Dictionary
 {
 public:
@@ -13,6 +15,7 @@ public:
   void Add(std::string& key, std::string& value);
   void Add(std::pair<std::string, std::string>& pair);
   size_t Size();
+  void Clear();
 
 private:
   Dictionary() {}

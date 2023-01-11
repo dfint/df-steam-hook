@@ -92,3 +92,8 @@ size_t Dictionary::Size()
 {
   return this->dict.size();
 }
+
+void Dictionary::Clear()
+{
+  this->dict.clear();
+}
