@@ -12,12 +12,12 @@ jobs:
     name: Draft Release
     runs-on: windows-latest
     env:
-      package_name: dfint-steam-hook-${{ github.event.inputs.version }}.zip
+      PACKAGE_NAME: dfint-steam-hook-${{ github.event.inputs.version }}.zip
     steps:
       - name: Check variables
         run: |
           echo '${{ github.event.inputs.version }}'
-          echo '${{ package_name }}'
+          echo '${{ env.PACKAGE_NAME }}'
     
       - name: Checkout code
         uses: actions/checkout@v2
@@ -57,7 +57,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: '${{ github.event.inputs.version }}'
-          files: $package_name
+          files: ${{ env.PACKAGE_NAME }}
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
