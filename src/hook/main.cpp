@@ -31,9 +31,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       DetourTransactionBegin();
       DetourUpdateThread(GetCurrentThread());
 
-      InstallTranslation();
-      // InstallTTFInjection();
-      // InstallStateManager();
+      Hook::InstallTranslation();
+      // Hook::InstallTTFInjection();
+      // Hook::InstallStateManager();
 
       DetourTransactionCommit();
       logger::info("hooks installed");
@@ -43,9 +43,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       DetourTransactionBegin();
       DetourUpdateThread(GetCurrentThread());
 
-      UninstallTranslation();
-      // UninstallTTFInjection();
-      // UninstallStateManager();
+      Hook::UninstallTranslation();
+      // Hook::UninstallTTFInjection();
+      // Hook::UninstallStateManager();
       logger::info("hooks uninstalled");
 
       DetourTransactionCommit();
