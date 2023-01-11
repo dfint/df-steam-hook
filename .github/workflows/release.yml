@@ -14,6 +14,11 @@ jobs:
     env:
       package_name: dfint-steam-hook-${{ github.event.inputs.version }}.zip
     steps:
+      - name: Check variables
+        run:
+          echo '${{ github.event.inputs.version }}'
+          echo '$package_name'
+    
       - name: Checkout code
         uses: actions/checkout@v2
         
@@ -51,7 +56,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: ${{ github.event.inputs.version }}
+          name: '${{ github.event.inputs.version }}'
           files: $package_name
           draft: true
         env:
