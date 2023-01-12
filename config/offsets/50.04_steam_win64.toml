@@ -7,7 +7,10 @@ checksum = 0x63a2a9ad
 # translation
 string_copy = 0xB5B0
 string_copy_n = 0xB5D0
+string_append = 0xB380
+string_append_0 = 0xB3A0
 string_append_n = 0xB710
+convert_ulong_to_string = 0x35BC60
 addst = 0x784C60
 addst_top = 0x784DB0
 addcoloredst = 0x784890
