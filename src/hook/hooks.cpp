@@ -10,6 +10,7 @@ namespace Hook {
   void* g_textures_ptr = nullptr;
   graphicst_* g_graphics_ptr = nullptr;
   std::atomic_flag ttf_injection_lock = ATOMIC_FLAG_INIT;
+  std::atomic_flag converter_lock = ATOMIC_FLAG_INIT;
 
   // cache for textures id
   LRUCache<std::string, long> texture_id_cache(500);
@@ -170,7 +171,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_copy_n);
   char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
   {
-    if (src == nullptr || Config::Setting::enable_translation == false) {
+    if (src == nullptr || dst == nullptr || Config::Setting::enable_translation == false) {
       return ORIGINAL(string_copy_n)(dst, src, size);
     }
     auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
@@ -178,6 +179,34 @@ namespace Hook {
       return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
     }
     return ORIGINAL(string_copy_n)(dst, src, size);
+  }
+
+  // strcat
+  SETUP_ORIG_FUNC(string_append);
+  char* __cdecl HOOK(string_append)(char* dst, const char* src)
+  {
+    if (src == nullptr || Config::Setting::enable_translation == false) {
+      return ORIGINAL(string_append)(dst, src);
+    }
+    auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+    if (tstr) {
+      return ORIGINAL(string_append)(dst, tstr.value().c_str());
+    }
+    return ORIGINAL(string_append)(dst, src);
+  }
+
+  // strcat_0
+  SETUP_ORIG_FUNC(string_append_0);
+  char* __cdecl HOOK(string_append_0)(char* dst, const char* src)
+  {
+    if (src == nullptr || Config::Setting::enable_translation == false) {
+      return ORIGINAL(string_append_0)(dst, src);
+    }
+    auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+    if (tstr) {
+      return ORIGINAL(string_append_0)(dst, tstr.value().c_str());
+    }
+    return ORIGINAL(string_append_0)(dst, src);
   }
 
   // strncat
@@ -192,6 +221,15 @@ namespace Hook {
       return ORIGINAL(string_append_n)(dst, tstr.value().c_str(), tstr.value().size());
     }
     return ORIGINAL(string_append_n)(dst, src, size);
+  }
+
+  // convert_ulong_to_string
+  SETUP_ORIG_FUNC(convert_ulong_to_string);
+  void __fastcall HOOK(convert_ulong_to_string)(uint32_t n, std::string& str)
+  {
+    std::ostringstream o;
+    o << n;
+    str = o.str();
   }
 
   SETUP_ORIG_FUNC(addst);
@@ -209,7 +247,7 @@ namespace Hook {
     ORIGINAL(addst)(gps, str, justify, space);
   }
 
-  // strings handling for dialog windows
+  // strings handling for dialog windows (top screen matrix)
   SETUP_ORIG_FUNC(addst_top);
   void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
   {
@@ -741,7 +779,10 @@ namespace Hook {
     // translation
     ATTACH(string_copy);
     ATTACH(string_copy_n);
+    ATTACH(string_append);
+    ATTACH(string_append_0);
     ATTACH(string_append_n);
+    ATTACH(convert_ulong_to_string);
     ATTACH(addst);
     ATTACH(addst_top);
     ATTACH(addst_flag);
@@ -764,7 +805,10 @@ namespace Hook {
     // translation
     DETACH(string_copy);
     DETACH(string_copy_n);
+    DETACH(string_append);
+    DETACH(string_append_0);
     DETACH(string_append_n);
+    DETACH(convert_ulong_to_string);
     DETACH(addst);
     DETACH(addst_top);
     DETACH(addst_flag);

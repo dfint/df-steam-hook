@@ -63,7 +63,10 @@ namespace Config {
 
     inline int string_copy = Config::offsets["offsets"]["string_copy"].value_or<uintptr_t>(0);
     inline int string_copy_n = Config::offsets["offsets"]["string_copy_n"].value_or<uintptr_t>(0);
+    inline int string_append = Config::offsets["offsets"]["string_append"].value_or<uintptr_t>(0);
+    inline int string_append_0 = Config::offsets["offsets"]["string_append_0"].value_or<uintptr_t>(0);
     inline int string_append_n = Config::offsets["offsets"]["string_append_n"].value_or<uintptr_t>(0);
+    inline int convert_ulong_to_string = Config::offsets["offsets"]["convert_ulong_to_string"].value_or<uintptr_t>(0);
     inline int addst = Config::offsets["offsets"]["addst"].value_or<uintptr_t>(0);
     inline int addst_top = Config::offsets["offsets"]["addst_top"].value_or<uintptr_t>(0);
     inline int addcoloredst = Config::offsets["offsets"]["addcoloredst"].value_or<uintptr_t>(0);

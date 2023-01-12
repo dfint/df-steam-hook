@@ -157,7 +157,10 @@ namespace Hook {
   // translation
   typedef char*(__cdecl* string_copy)(char* dst, const char* src);
   typedef char*(__cdecl* string_copy_n)(char* dst, const char* src, size_t size);
+  typedef char*(__cdecl* string_append)(char* dst, const char* src);
+  typedef char*(__cdecl* string_append_0)(char* dst, const char* src);
   typedef char*(__cdecl* string_append_n)(char* dts, const char* src, size_t size);
+  typedef void(__fastcall* convert_ulong_to_string)(uint32_t n, std::string& str);
   typedef void(__fastcall* addst)(graphicst_* gps, std::string& str, unsigned __int8 just, int space);
   typedef void(__fastcall* addst_top)(graphicst_* gps, std::string& str, __int64 a3);
   typedef void(__fastcall* addcoloredst)(graphicst_* gps, const char* str, __int64 a3);

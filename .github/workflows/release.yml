@@ -57,12 +57,6 @@ jobs:
         run: |
           ./ci/package.ps1 ${{ env.PACKAGE_NAME }}
 
-      - name: Bump version and push tag
-        uses: laputansoft/github-tag-action@v4.6
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.event.inputs.version }}
-
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
