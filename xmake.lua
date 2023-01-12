@@ -26,7 +26,7 @@ target("dfint_hook")
     set_default(true)
     set_kind("shared")
     set_basename("dfint_hook")
-    -- set_targetdir("E:\\Games\\Dwarf Fortress Steam 50.05\\dfint_data") -- build to DF dir, handy for testing
+    --set_targetdir("E:\\Games\\Dwarf Fortress Steam 50.05\\dfint_data") -- build to DF dir, handy for testing
     set_pcxxheader("src/hook/pch.h")
     add_files("src/hook/*.cpp")
     add_packages("spdlog", "vcpkg::detours", "toml++")
@@ -39,4 +39,3 @@ target("dfint_launcher")
     -- set_targetdir("E:\\Games\\Dwarf Fortress Steam 50.05\\") -- build to DF dir, handy for testing
     add_files("src/launcher/*.cpp")
     add_packages("vcpkg::detours")
-
