@@ -30,6 +30,7 @@ target("dfint_hook")
     set_pcxxheader("src/hook/pch.h")
     add_files("src/hook/*.cpp")
     add_packages("spdlog", "vcpkg::detours", "toml++")
+    add_defines("HOOK_VERSION=1")
 
 target("dfint_launcher")
     set_default(true)

@@ -24,6 +24,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
         MessageBoxA(nullptr, "unable to find config file", "dfint hook error", MB_ICONERROR);
         exit(2);
       }
+      logger::info("hook version: {}", Config::Metadata::hook_version);
       logger::info("pe checksum: 0x{:x}", Config::Metadata::checksum);
       logger::info("offsets version: {}", Config::Metadata::version);
 

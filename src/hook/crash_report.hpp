@@ -94,6 +94,7 @@ namespace CrashReport {
 
       cr_file << "Version: " << Config::Metadata::version << "\n";
       cr_file << "Checksum: " << std::format("0x{:x}", Config::Metadata::checksum) << "\n";
+      cr_file << "Hook version: " << Config::Metadata::hook_version << "\n";
       cr_file << errcode << "\n";
       cr_file << "--------------Stack-------------\n";
       cr_file << std::stacktrace::current() << "\n";
