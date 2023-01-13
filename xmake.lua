@@ -23,7 +23,7 @@ add_requires("vcpkg::detours")
 add_requires("toml++")
 
 option("hook_version")
-    set_default("not defined")
+    set_default("not-defined")
 
 target("dfint_hook")
     set_default(true)

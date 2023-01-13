@@ -44,11 +44,12 @@ jobs:
           path: ${{ env.XMAKE_GLOBALDIR }}\.xmake\packages
           key: xmake-${{ steps.dep_hash.outputs.hash }}-W${{ steps.cache_key.outputs.key }}
 
+      - name: Configure
+        run: |
+          xmake f --hook_version="${{ github.event.inputs.version }}/${{ github.sha }}" -y
+
       - name: Build project
         run: |
-          echo Configure
-          xmake f --hook_version="${{ github.event.inputs.version }}/${{ github.sha }}" -y
-          echo Build
           xmake -y --all
 
       - name: Create package
