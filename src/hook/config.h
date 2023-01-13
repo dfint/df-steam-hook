@@ -48,9 +48,9 @@ namespace Config {
     inline auto version = Config::offsets["metadata"]["version"].value_or<std::string>("");
     inline auto checksum = Config::offsets["metadata"]["checksum"].value_or<time_t>(0);
 #ifdef HOOK_VERSION
-    inline auto hook_version = HOOK_VERSION;
+    inline std::string hook_version(HOOK_VERSION);
 #else
-    inline auto hook_version = "not-defined";
+    inline std::string hook_version("not-defined");
 #endif
 
   }
