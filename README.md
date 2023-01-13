@@ -12,9 +12,9 @@
 - Creates crash reports (cr_*.txt files) when the game crashes
 - Can support several features of DF at the same time, support of new versions is possible to add with adding a config file to dfint_data/offset directory;
 - Useful hotkeys:
-  - CTRL+F2 - reload csv dictionary;
-  - CTRL+F3 - switch the translation off;
-  - CTRL+F4 - switch the translation on.
+  - <kbd>Ctrl</kbd>+<kbd>F2</kbd> - reload csv dictionary;
+  - <kbd>Ctrl</kbd>+<kbd>F3</kbd> - switch the translation off;
+  - <kbd>Ctrl</kbd>+<kbd>F4</kbd> - switch the translation on.
 
 ## How to install:
 
