@@ -22,6 +22,9 @@ add_requires("spdlog")
 add_requires("vcpkg::detours")
 add_requires("toml++")
 
+option("hook_version")
+    set_default("not defined")
+
 target("dfint_hook")
     set_default(true)
     set_kind("shared")
@@ -30,7 +33,6 @@ target("dfint_hook")
     set_pcxxheader("src/hook/pch.h")
     add_files("src/hook/*.cpp")
     add_packages("spdlog", "vcpkg::detours", "toml++")
-    hook_version = hook_version or "not defined"
     add_defines("HOOK_VERSION=$(hook_version)")
 
 target("dfint_launcher")
