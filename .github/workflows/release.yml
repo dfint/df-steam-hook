@@ -46,7 +46,9 @@ jobs:
 
       - name: Build project
         run: |
+          echo Configure
           xmake f --hook_version="${{ github.event.inputs.version }}/${{ github.sha }}" -y
+          echo Build
           xmake -y --all
 
       - name: Create package
