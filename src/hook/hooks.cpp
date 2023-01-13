@@ -361,41 +361,37 @@ namespace Hook {
   // search section below
   void Capitalize(char& s)
   {
+    // latin capitalize
     if (s >= 'a' && s <= 'z') {
       s -= 'a';
       s += 'A';
     }
-    if ((BYTE)s >= 0xE0 && (BYTE)s <= 0xFF) {
-      s -= 0xE0;
-      s += 0xC0;
+    // cyrillic capitalize
+    if (s >= char(0xE0) && s <= char(0xFF)) {
+      s -= char(0xE0);
+      s += char(0xC0);
     }
-    if ((BYTE)s >= (BYTE)'à' && (BYTE)s <= (BYTE)'ÿ') {
-      s -= (BYTE)'à';
-      s += (BYTE)'À';
-    }
-    if ((BYTE)s == (BYTE)'¸') {
-      s -= (BYTE)'¸';
-      s += (BYTE)'¨';
+    // cyrillic ё
+    if (s == char(0xB8)) {
+      s = char(0xA8);
     }
   }
 
   void LowerCast(char& s)
   {
+    // latin lowercast
     if (s >= 'A' && s <= 'Z') {
       s -= 'A';
       s += 'a';
     }
-    if ((BYTE)s >= 0xC0 && (BYTE)s <= 0xDF) {
-      s -= 0xC0;
-      s += 0xE0;
+    // cyrillic lowercast
+    if (s >= char(0xC0) && s <= char(0xDF)) {
+      s -= char(0xC0);
+      s += char(0xE0);
     }
-    if ((BYTE)s >= (BYTE)'À' && (BYTE)s <= (BYTE)'ß') {
-      s -= (BYTE)'À';
-      s += (BYTE)'à';
-    }
-    if ((BYTE)s == (BYTE)'¨') {
-      s -= (BYTE)'¨';
-      s += (BYTE)'¸';
+    // cyrillic ё
+    if (s == char(0xA8)) {
+      s = char(0xB8);
     }
   }
 
