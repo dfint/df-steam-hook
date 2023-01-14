@@ -1,5 +1,4 @@
-#ifndef _UTILS_INCLUDED_
-#define _UTILS_INCLUDED_
+#pragma once
 
 namespace Utils {
   inline std::u16string cp437_to_unicode(const std::string& str)
@@ -31,5 +30,9 @@ namespace Utils {
     return converter.to_bytes(wstr);
   }
 
+  inline std::string now()
+  {
+    auto const time = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
+    return std::format("{:%Y%m%d-%H-%M}-{}", time, std::time(NULL));
+  }
 }
-#endif

@@ -155,14 +155,12 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_copy);
   char* __cdecl HOOK(string_copy)(char* dst, const char* src)
   {
-    if (src == nullptr || Config::Setting::enable_translation == false) {
+    if (!src || !dst || !Config::Setting::enable_translation) {
       return ORIGINAL(string_copy)(dst, src);
     }
-    if (strlen(src) > 0) {
-      auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
-      if (tstr) {
-        return ORIGINAL(string_copy)(dst, tstr.value().c_str());
-      }
+    auto tstr = Dictionary::GetSingleton()->Get(src);
+    if (tstr) {
+      return ORIGINAL(string_copy)(dst, tstr.value().c_str());
     }
     return ORIGINAL(string_copy)(dst, src);
   }
@@ -171,10 +169,10 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_copy_n);
   char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
   {
-    if (src == nullptr || dst == nullptr || Config::Setting::enable_translation == false) {
+    if (!src || !dst || !size || !Config::Setting::enable_translation) {
       return ORIGINAL(string_copy_n)(dst, src, size);
     }
-    auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+    auto tstr = Dictionary::GetSingleton()->Get(src);
     if (tstr) {
       return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
     }
@@ -185,10 +183,10 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_append);
   char* __cdecl HOOK(string_append)(char* dst, const char* src)
   {
-    if (src == nullptr || Config::Setting::enable_translation == false) {
+    if (!src || !dst || !Config::Setting::enable_translation) {
       return ORIGINAL(string_append)(dst, src);
     }
-    auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+    auto tstr = Dictionary::GetSingleton()->Get(src);
     if (tstr) {
       return ORIGINAL(string_append)(dst, tstr.value().c_str());
     }
@@ -199,10 +197,10 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_append_0);
   char* __cdecl HOOK(string_append_0)(char* dst, const char* src)
   {
-    if (src == nullptr || Config::Setting::enable_translation == false) {
+    if (!src || !dst || !Config::Setting::enable_translation) {
       return ORIGINAL(string_append_0)(dst, src);
     }
-    auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+    auto tstr = Dictionary::GetSingleton()->Get(src);
     if (tstr) {
       return ORIGINAL(string_append_0)(dst, tstr.value().c_str());
     }
@@ -213,10 +211,10 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_append_n);
   char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
   {
-    if (src == nullptr || Config::Setting::enable_translation == false) {
+    if (!src || !dst || !size || !Config::Setting::enable_translation) {
       return ORIGINAL(string_append_n)(dst, src, size);
     }
-    auto tstr = Dictionary::GetSingleton()->Get(std::string(src));
+    auto tstr = Dictionary::GetSingleton()->Get(src);
     if (tstr) {
       return ORIGINAL(string_append_n)(dst, tstr.value().c_str(), tstr.value().size());
     }
@@ -227,6 +225,9 @@ namespace Hook {
   SETUP_ORIG_FUNC(convert_ulong_to_string);
   void __fastcall HOOK(convert_ulong_to_string)(uint32_t n, std::string& str)
   {
+    if (str.empty()) {
+      return ORIGINAL(convert_ulong_to_string)(n, str);
+    }
     std::ostringstream o;
     o << n;
     str = o.str();
@@ -235,14 +236,12 @@ namespace Hook {
   SETUP_ORIG_FUNC(addst);
   void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
   {
-    if (str.size() == 0 || Config::Setting::enable_translation == false) {
-      ORIGINAL(addst)(gps, str, justify, space);
-      return;
+    if (!gps || str.empty() || !Config::Setting::enable_translation) {
+      return ORIGINAL(addst)(gps, str, justify, space);
     }
     auto translation = Dictionary::GetSingleton()->Get(str);
     if (translation) {
-      ORIGINAL(addst)(gps, translation.value(), justify, space);
-      return;
+      return ORIGINAL(addst)(gps, translation.value(), justify, space);
     }
     ORIGINAL(addst)(gps, str, justify, space);
   }
@@ -251,14 +250,12 @@ namespace Hook {
   SETUP_ORIG_FUNC(addst_top);
   void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
   {
-    if (str.size() == 0 || Config::Setting::enable_translation == false) {
-      ORIGINAL(addst_top)(gps, str, a3);
-      return;
+    if (!gps || str.empty() || !Config::Setting::enable_translation) {
+      return ORIGINAL(addst_top)(gps, str, a3);
     }
     auto translation = Dictionary::GetSingleton()->Get(str);
     if (translation) {
-      ORIGINAL(addst_top)(gps, translation.value(), a3);
-      return;
+      return ORIGINAL(addst_top)(gps, translation.value(), a3);
     }
     ORIGINAL(addst_top)(gps, str, a3);
   }
@@ -266,16 +263,14 @@ namespace Hook {
   // some colored string with color not from enum
   // not see it
   SETUP_ORIG_FUNC(addcoloredst);
-  void __fastcall HOOK(addcoloredst)(graphicst_* gps, char* str, __int64 a3)
+  void __fastcall HOOK(addcoloredst)(graphicst_* gps, const char* str, __int64 a3)
   {
-    if (str == nullptr || Config::Setting::enable_translation == false) {
-      ORIGINAL(addcoloredst)(gps, str, a3);
-      return;
+    if (!gps || !str || !Config::Setting::enable_translation) {
+      return ORIGINAL(addcoloredst)(gps, str, a3);
     }
-    auto translation = Dictionary::GetSingleton()->Get(std::string(str));
+    auto translation = Dictionary::GetSingleton()->Get(str);
     if (translation) {
-      ORIGINAL(addcoloredst)(gps, translation.value().c_str(), a3);
-      return;
+      return ORIGINAL(addcoloredst)(gps, translation.value().c_str(), a3);
     }
     ORIGINAL(addcoloredst)(gps, str, a3);
   }
@@ -284,14 +279,12 @@ namespace Hook {
   SETUP_ORIG_FUNC(addst_flag);
   void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, __int64 a4, int some_flag)
   {
-    if (str.size() == 0 || Config::Setting::enable_translation == false) {
-      ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
-      return;
+    if (!gps || str.empty() || !Config::Setting::enable_translation) {
+      return ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
     }
     auto translation = Dictionary::GetSingleton()->Get(str);
     if (translation) {
-      ORIGINAL(addst_flag)(gps, translation.value(), a3, a4, some_flag);
-      return;
+      return ORIGINAL(addst_flag)(gps, translation.value(), a3, a4, some_flag);
     }
     ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
   }

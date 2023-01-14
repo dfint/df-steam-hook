@@ -66,10 +66,31 @@ void Dictionary::LoadCsv(const std::string& filename)
 
 std::optional<std::string> Dictionary::Get(const std::string& key)
 {
+  if (key.empty()) {
+    return std::nullopt;
+  }
   if (this->dict.find(key) == this->dict.end()) {
     return std::nullopt;
   }
   auto value = this->dict.at(key);
+  if (value.empty()) {
+    return std::nullopt;
+  }
+  return value;
+}
+
+std::optional<std::string> Dictionary::Get(const char* key)
+{
+  if (!key) {
+    return std::nullopt;
+  }
+  if (this->dict.find(key) == this->dict.end()) {
+    return std::nullopt;
+  }
+  auto value = this->dict.at(key);
+  if (value.empty()) {
+    return std::nullopt;
+  }
   return value;
 }
 

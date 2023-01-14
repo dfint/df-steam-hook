@@ -2,6 +2,7 @@
 
 // #include <regex>  // remove if regex dont needed
 #include <atomic>
+#include <chrono>
 #include <codecvt> // for std::codecvt_utf8 - myabe not needed cause we can render utf8
 #include <cstddef>
 #include <filesystem>
