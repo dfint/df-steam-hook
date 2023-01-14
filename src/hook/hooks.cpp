@@ -256,7 +256,8 @@ namespace Hook {
   SETUP_ORIG_FUNC(addcoloredst);
   void __fastcall HOOK(addcoloredst)(graphicst_* gps, const char* str, __int64 a3)
   {
-    if (gps && str && Config::Setting::enable_translation) {
+    auto len = strnlen_s(str, 1000);
+    if (gps && str && len > 0 && len < 1000 && Config::Setting::enable_translation) {
       auto translation = Dictionary::GetSingleton()->Get(str);
       if (translation) {
         return ORIGINAL(addcoloredst)(gps, translation.value().c_str(), a3);

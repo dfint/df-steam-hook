@@ -81,7 +81,8 @@ std::optional<std::string> Dictionary::Get(const std::string& key)
 
 std::optional<std::string> Dictionary::Get(const char* key)
 {
-  if (!key) {
+  auto len = strnlen_s(key, 1000);
+  if (!key || len <= 0 || len >= 1000) {
     return std::nullopt;
   }
   if (this->dict.find(key) == this->dict.end()) {
