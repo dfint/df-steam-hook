@@ -222,6 +222,12 @@ namespace Hook {
   void __fastcall HOOK(convert_ulong_to_string)(uint32_t n, std::string& str)
   {
     std::ostringstream o;
+    if (n > 4000000000) {
+      auto n1 = n - 4294967296;
+      o << n1;
+      str = o.str();
+      return;
+    }
     o << n;
     str = o.str();
   }
@@ -756,7 +762,7 @@ namespace Hook {
   void InstallTranslation()
   {
     // translation
-    ATTACH(string_copy);
+    // ATTACH(string_copy);
     ATTACH(string_copy_n);
     ATTACH(string_append);
     ATTACH(string_append_0);
@@ -782,7 +788,7 @@ namespace Hook {
   void UninstallTranslation()
   {
     // translation
-    DETACH(string_copy);
+    // DETACH(string_copy);
     DETACH(string_copy_n);
     DETACH(string_append);
     DETACH(string_append_0);

@@ -33,6 +33,6 @@ namespace Utils {
   inline std::string now()
   {
     auto const time = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
-    return std::format("{:%Y%m%d-%H-%M}-{}", time, std::time(NULL));
+    return std::format("{:%Y%m%d-%H-%M-%S}-{}", time, std::time(NULL));
   }
 }
