@@ -7,10 +7,13 @@
 
 namespace Hook {
 
+  // globals
   void* g_textures_ptr = nullptr;
   graphicst_* g_graphics_ptr = nullptr;
+
+  // locks
   std::atomic<bool> ttf_injection_lock = false;
-  std::atomic<bool> converter_lock = false;
+  std::atomic<bool> convert_ulong_lock = false;
 
   // cache for textures id
   LRUCache<std::string, long> texture_id_cache(500);
@@ -168,7 +171,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_copy_n);
   char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
   {
-    if (src && dst && size && !converter_lock && Config::Setting::enable_translation) {
+    if (src && dst && size && !convert_ulong_lock && Config::Setting::enable_translation) {
       auto tstr = Dictionary::GetSingleton()->Get(src);
       if (tstr) {
         return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
@@ -221,7 +224,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(convert_ulong_to_string);
   void __fastcall HOOK(convert_ulong_to_string)(uint32_t n, std::string& str)
   {
-    LockedCall(converter_lock, ORIGINAL(convert_ulong_to_string), n, str);
+    LockedCall(convert_ulong_lock, ORIGINAL(convert_ulong_to_string), n, str);
   }
 
   SETUP_ORIG_FUNC(addst);
