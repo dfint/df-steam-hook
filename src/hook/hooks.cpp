@@ -24,11 +24,11 @@ namespace Hook {
   // }
 
   template <typename T, typename... Args>
-  void LockedInject(T& func, Args&&... args)
+  void LockedInject(std::atomic_flag& flag, T& func, Args&&... args)
   {
-    ttf_injection_lock.test_and_set(std::memory_order_acquire);
+    flag.test_and_set(std::memory_order_acquire);
     func(args...);
-    ttf_injection_lock.clear(std::memory_order_release);
+    flag.clear(std::memory_order_release);
   }
 
   // swap texture of specific char in chosen screen matrix (main/top)
@@ -168,7 +168,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_copy_n);
   char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
   {
-    if (src && dst && size && Config::Setting::enable_translation) {
+    if (src && dst && size && !converter_lock.test() && Config::Setting::enable_translation) {
       auto tstr = Dictionary::GetSingleton()->Get(src);
       if (tstr) {
         return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
@@ -217,19 +217,11 @@ namespace Hook {
   }
 
   // convert_ulong_to_string
-  // do not call original!
+  // locked cause we don't want call hooked strncpy inside it
   SETUP_ORIG_FUNC(convert_ulong_to_string);
   void __fastcall HOOK(convert_ulong_to_string)(uint32_t n, std::string& str)
   {
-    std::ostringstream o;
-    if (n > 4000000000) {
-      auto n1 = n - 4294967296;
-      o << n1;
-      str = o.str();
-      return;
-    }
-    o << n;
-    str = o.str();
+    LockedInject(converter_lock, ORIGINAL(convert_ulong_to_string), n, str);
   }
 
   SETUP_ORIG_FUNC(addst);
@@ -765,7 +757,7 @@ namespace Hook {
     // ATTACH(string_copy);
     ATTACH(string_copy_n);
     ATTACH(string_append);
-    ATTACH(string_append_0);
+    // ATTACH(string_append_0);
     ATTACH(string_append_n);
     ATTACH(convert_ulong_to_string);
     ATTACH(addst);
@@ -791,7 +783,7 @@ namespace Hook {
     // DETACH(string_copy);
     DETACH(string_copy_n);
     DETACH(string_append);
-    DETACH(string_append_0);
+    // DETACH(string_append_0);
     DETACH(string_append_n);
     DETACH(convert_ulong_to_string);
     DETACH(addst);
