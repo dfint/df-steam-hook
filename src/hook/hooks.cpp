@@ -9,8 +9,8 @@ namespace Hook {
 
   void* g_textures_ptr = nullptr;
   graphicst_* g_graphics_ptr = nullptr;
-  std::atomic_flag ttf_injection_lock = ATOMIC_FLAG_INIT;
-  std::atomic_flag converter_lock = ATOMIC_FLAG_INIT;
+  std::atomic<bool> ttf_injection_lock = false;
+  std::atomic<bool> converter_lock = false;
 
   // cache for textures id
   LRUCache<std::string, long> texture_id_cache(500);
@@ -24,18 +24,18 @@ namespace Hook {
   // }
 
   template <typename T, typename... Args>
-  void LockedInject(std::atomic_flag& flag, T& func, Args&&... args)
+  void LockedCall(std::atomic<bool>& flag, T& func, Args&&... args)
   {
-    flag.test_and_set(std::memory_order_acquire);
+    flag = true;
     func(args...);
-    flag.clear(std::memory_order_release);
+    flag = false;
   }
 
   // swap texture of specific char in chosen screen matrix (main/top)
   template <auto T>
   void InjectTTFChar(unsigned char symbol, int x, int y)
   {
-    if (ttf_injection_lock.test())
+    if (ttf_injection_lock)
       return;
 
     auto tile = ScreenManager::GetSingleton()->GetTile<T>(x, y);
@@ -144,7 +144,7 @@ namespace Hook {
   //       InjectTTFChar<ScreenManager::ScreenType::Main>(wstr[i], gps->screenx + i, gps->screeny);
   //     }
   //     tstr.resize(wstr.size());
-  //     LockedInject(ORIGINAL(addst), gps, tstr, justify, space);
+  //     LockedCall(ttf_injection_lock, ORIGINAL(addst), gps, tstr, justify, space);
   //     return;
   //   }
 
@@ -168,7 +168,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(string_copy_n);
   char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
   {
-    if (src && dst && size && !converter_lock.test() && Config::Setting::enable_translation) {
+    if (src && dst && size && !converter_lock && Config::Setting::enable_translation) {
       auto tstr = Dictionary::GetSingleton()->Get(src);
       if (tstr) {
         return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
@@ -221,7 +221,7 @@ namespace Hook {
   SETUP_ORIG_FUNC(convert_ulong_to_string);
   void __fastcall HOOK(convert_ulong_to_string)(uint32_t n, std::string& str)
   {
-    LockedInject(converter_lock, ORIGINAL(convert_ulong_to_string), n, str);
+    LockedCall(converter_lock, ORIGINAL(convert_ulong_to_string), n, str);
   }
 
   SETUP_ORIG_FUNC(addst);
