@@ -5,6 +5,7 @@
 #include "screen_manager.hpp"
 #include "state_manager.hpp"
 #include "ttf_manager.h"
+#include "utils.hpp"
 
 namespace Hook {
 
@@ -20,7 +21,7 @@ namespace Hook {
 
    // cache for textures id
    LRUCache<std::string, long> texture_id_cache(500);
-   LRUCache<std::string, long> texture_ws_id_cache(500);
+   LRUCache<std::wstring, long> texture_ws_id_cache(2350);
 
    // setup texture to texture vector and recieve tex_pos
    SETUP_ORIG_FUNC(add_texture);
@@ -69,8 +70,9 @@ namespace Hook {
       if (ttf_injection_lock) return 0;
       if (g_textures_ptr == NULL) return 0;
 
+      std::wstring input = Utils::s2ws(str);
       // 문자열 텍스쳐 만들고 자르기
-      int count = TTFManager::GetSingleton()->CreateWSTexture(str);
+      int count = TTFManager::GetSingleton()->CreateWSTexture(input);
 
       int gap = 0;
       if(justify == justify_center)
@@ -81,8 +83,8 @@ namespace Hook {
 
       // 자른 텍스쳐 타일에 넣기
       for (int i = 0; i < count; i++) {
-         std::string find(str);
-         find += std::to_string(i);
+         std::wstring find(input);
+         find += std::to_wstring(i);
          auto slice_tex = TTFManager::GetSingleton()->GetSlicedTexture(find);
          auto tile = ScreenManager::GetSingleton()->GetTile<T>(x + i, y);
          if (slice_tex) {

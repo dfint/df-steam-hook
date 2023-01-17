@@ -12,9 +12,9 @@ class TTFManager
   void Init();
   void LoadFont(const std::string& file, int ptsize, int shift_frame_from_up = 0);
   void LoadScreen();
-  SDL_Surface* GetSlicedTexture(const std::string& str);
+  SDL_Surface* GetSlicedTexture(const std::wstring& wstr);
   SDL_Surface* CreateTexture(const std::string& str, SDL_Color font_color = {255, 255, 255});
-  int CreateWSTexture(const std::string& str, SDL_Color font_color = {255, 255, 255});
+  int CreateWSTexture(const std::wstring& wstr, SDL_Color font_color = {255, 255, 255});
 
   void ClearCache();
 
@@ -38,8 +38,9 @@ class TTFManager
   Uint32 ReadPixel(SDL_Surface* surface, int x, int y);
 
   // try to figure out the best size of cache
-  LRUCache<std::string, SDL_Surface*> cache = LRUCache<std::string, SDL_Surface*>(300);
-  LRUCache<std::string, SDL_Surface*> sliced_tex_cache = LRUCache<std::string, SDL_Surface*>(2350);
+  LRUCache<std::string, SDL_Surface*> cache = LRUCache<std::string, SDL_Surface*>(100);
+  LRUCache<std::wstring, SDL_Surface*> ws_cache = LRUCache<std::wstring, SDL_Surface*>(300);
+  LRUCache<std::wstring, SDL_Surface*> sliced_ws_cache = LRUCache<std::wstring, SDL_Surface*>(2350);
   TTF_Font* font;
   SDL_Surface* screen;
   int shift_frame_from_up = 0;

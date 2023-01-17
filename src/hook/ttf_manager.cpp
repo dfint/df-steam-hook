@@ -147,7 +147,8 @@ void TTFManager::Init()
 void TTFManager::ClearCache()
 {
    this->cache.Clear();
-   this->sliced_tex_cache.Clear();
+   this->ws_cache.Clear();
+   this->sliced_ws_cache.Clear();
 }
 
 void TTFManager::LoadFont(const std::string& file, int ptsize, int shift_frame_from_up)
@@ -168,13 +169,13 @@ void TTFManager::LoadScreen()
    logger::debug("load screen 0x{:x}", (uintptr_t)this->screen);
 }
 
-SDL_Surface* TTFManager::GetSlicedTexture(const std::string& str)
+SDL_Surface* TTFManager::GetSlicedTexture(const std::wstring& wstr)
 {
-   auto cached = this->sliced_tex_cache.Get(str);
+   auto cached = this->sliced_ws_cache.Get(wstr);
    if (cached) {
       return cached.value().get();
    }
-   spdlog::error("some sliced texture error :{}", str.c_str());
+   spdlog::error("some sliced texture error :{}", Utils::ws2s(wstr).c_str());
    return nullptr;
 }
 
@@ -206,7 +207,7 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_co
 }
 
 // 문자열을 받아서 텍스쳐 생성 후 타일 너비에 맞게 자른 후 캐시에 저장
-int TTFManager::CreateWSTexture(const std::string& str, SDL_Color font_color)
+int TTFManager::CreateWSTexture(const std::wstring& wstr, SDL_Color font_color)
 {
    if (this->font == nullptr) {
       spdlog::error("trying to create texture before setting font");
@@ -214,7 +215,7 @@ int TTFManager::CreateWSTexture(const std::string& str, SDL_Color font_color)
    }
    int count = 0;
    // 문자열 텍스쳐 캐시 확인
-   auto cached = this->cache.Get(str);
+   auto cached = this->ws_cache.Get(wstr);
    if (cached) {
       SDL_Surface* cached_tex = cached.value().get();
       // 문자열 텍스쳐 타일너비로 개수 계산
@@ -223,21 +224,21 @@ int TTFManager::CreateWSTexture(const std::string& str, SDL_Color font_color)
    }
 
    // 문자열 텍스쳐 생성
-   std::wstring wstr = Utils::s2ws(str);
+   //std::wstring wstr = Utils::s2ws(str);
    auto texture = TTF_RenderUNICODE_Blended(this->font, (Uint16*)wstr.c_str(), font_color);
    if (texture == NULL) {
       spdlog::error("texture generation error on string");
       return false;
    }
-   this->cache.Put(str, texture);
+   this->ws_cache.Put(wstr, texture);
 
    // 문자열 텍스쳐 자르기
    count = texture->w / this->frame_width + (texture->w % this->frame_width != 0);
    for (int x = 0; x < count; x++) {
       auto slice_texture = SliceSurface(texture, x * this->frame_width, this->frame_height, this->frame_height, this->shift_frame_from_up);
-      std::string temp(str);
-      temp += std::to_string(x);
-      this->sliced_tex_cache.Put(temp, slice_texture);
+      std::wstring temp(wstr);
+      temp += std::to_wstring(x);
+      this->sliced_ws_cache.Put(temp, slice_texture);
    }
 
    return count;
