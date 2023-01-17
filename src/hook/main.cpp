@@ -2,6 +2,7 @@
 #include "dictionary.h"
 #include "hooks.h"
 #include "logger.hpp"
+#include "patches.h"
 #include "watchdog.hpp"
 
 extern "C" __declspec(dllexport) VOID NullExport(VOID)
@@ -34,9 +35,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       DetourTransactionBegin();
       DetourUpdateThread(GetCurrentThread());
 
-      Hook::InstallTranslation();
-      // Hook::InstallTTFInjection();
-      // Hook::InstallStateManager();
+      Hooks::InstallTranslation();
+      // Hooks::InstallTTFInjection();
+      // Hooks::InstallStateManager();
+
+      // Patches::Install();
 
       DetourTransactionCommit();
       logger::info("hooks installed");
@@ -46,9 +49,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       DetourTransactionBegin();
       DetourUpdateThread(GetCurrentThread());
 
-      Hook::UninstallTranslation();
-      // Hook::UninstallTTFInjection();
-      // Hook::UninstallStateManager();
+      Hooks::UninstallTranslation();
+      // Hooks::UninstallTTFInjection();
+      // Hooks::UninstallStateManager();
       logger::info("hooks uninstalled");
 
       DetourTransactionCommit();

@@ -1,0 +1,5 @@
+namespace Patches {
+
+  void Install();
+
+}

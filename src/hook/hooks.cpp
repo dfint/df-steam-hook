@@ -5,7 +5,7 @@
 #include "state_manager.hpp"
 // #include "ttf_manager.h"
 
-namespace Hook {
+namespace Hooks {
 
   // globals
   void* g_textures_ptr = nullptr;

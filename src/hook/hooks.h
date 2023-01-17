@@ -1,7 +1,7 @@
 #pragma once
 
 #include "keybindings.h"
-namespace Hook {
+namespace Hooks {
 
   enum curses_color_ : uint8_t
   {

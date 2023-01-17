@@ -1,6 +1,5 @@
 #pragma once
 
-// #include <regex>  // remove if regex dont needed
 #include <atomic>
 #include <chrono>
 #include <codecvt> // for std::codecvt_utf8 - myabe not needed cause we can render utf8
@@ -10,6 +9,7 @@
 #include <fstream>
 #include <list>
 #include <locale> // for std::wstring_convert - myabe not needed cause we can render utf8
+// #include <regex>  // remove if regex dont needed
 #include <set>
 #include <stacktrace>
 #include <stdexcept>
