@@ -64,13 +64,20 @@ namespace Hook {
    }
 
    template <auto T>
-   int InjectTTFwstring(std::string& str, int x, int y)
+   int InjectTTFwstring(std::string& str, int x, int y, justification_ justify, int src_length = 0)
    {
       if (ttf_injection_lock) return 0;
       if (g_textures_ptr == NULL) return 0;
 
       // 문자열 텍스쳐 만들고 자르기
       int count = TTFManager::GetSingleton()->CreateWSTexture(str);
+
+      int gap = 0;
+      if(justify == justify_center)
+      {
+         gap = (src_length - count) * 0.5;
+         gap = gap > 0 ? gap : 0; 
+      }
 
       // 자른 텍스쳐 타일에 넣기
       for (int i = 0; i < count; i++) {
@@ -93,7 +100,7 @@ namespace Hook {
          }
       }
 
-      return count;
+      return count + gap;
    }
 
    // addchar used fot main windows chars drawing
@@ -130,7 +137,6 @@ namespace Hook {
                     dispx_z, dispy_z);
       ORIGINAL(gps_allocate)(ptr, dimx, dimy, screen_width, screen_height, dispx_z, dispy_z);
       ScreenManager::GetSingleton()->AllocateScreen(dimx, dimy);
-      logger::debug("allocate arrays {}", ptr);
    }
 
    // clean screen array here
@@ -138,11 +144,9 @@ namespace Hook {
    void __fastcall HOOK(cleanup_arrays)(void* ptr)
    {
       g_cleanup_array = ptr;
-      logger::debug("cleanup arrays {}", ptr);
       ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Main>();
       ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Top>();
       ORIGINAL(cleanup_arrays)(ptr);
-      logger::debug("cleanup arrays #2 {}", ptr);
    }
 
    // render for main matrix
@@ -275,7 +279,7 @@ namespace Hook {
       if (gps && !str.empty() && Config::Setting::enable_translation && !ttf_injection_lock) {
          auto tstr = Dictionary::GetSingleton()->Get(str);
          if (tstr) {
-            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(tstr.value(), gps->screenx, gps->screeny);
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(tstr.value(), gps->screenx, gps->screeny, justify);
             std::string bstr;
             bstr.resize(count, ' ');
             g_main_replace = true;
@@ -294,7 +298,7 @@ namespace Hook {
       if (gps && !str.empty() && Config::Setting::enable_translation && !ttf_injection_lock) {
          auto tstr = Dictionary::GetSingleton()->Get(str);
          if (tstr) {
-            int count = InjectTTFwstring<ScreenManager::ScreenType::Top>(tstr.value(), gps->screenx, gps->screeny);
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Top>(tstr.value(), gps->screenx, gps->screeny, justify_left, str.length());
             std::string bstr;
             bstr.resize(count, ' ');
             g_top_replace = true;
