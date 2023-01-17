@@ -64,6 +64,20 @@ namespace Hook {
       }
    }
 
+   // int GetStringGap(justification_ justify, int length, int src_length = 0)
+   // {
+   //    int gap = 0;
+   //    if (justify == justify_center) {
+   //       gap = (src_length - length) * 0.5 + 0.5;
+   //       gap = gap > 0 ? gap : 0;
+   //    }
+   //    if (justify == justify_right) {
+   //       gap = (src_length - length);
+   //       gap = gap > 0 ? gap : 0;
+   //    }
+   //    return gap;
+   // }
+
    template <auto T>
    int InjectTTFwstring(std::string& str, int x, int y, justification_ justify, int src_length = 0)
    {
@@ -75,11 +89,8 @@ namespace Hook {
       int count = TTFManager::GetSingleton()->CreateWSTexture(input);
 
       int gap = 0;
-      if(justify == justify_center)
-      {
-         gap = (src_length - count) * 0.5;
-         gap = gap > 0 ? gap : 0; 
-      }
+      // GetStringGap(justify, count, src_length);
+      // if (justify == justify_center || justify == justify_right)
 
       // 자른 텍스쳐 타일에 넣기
       for (int i = 0; i < count; i++) {
