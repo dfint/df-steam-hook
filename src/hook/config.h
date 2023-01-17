@@ -61,6 +61,11 @@ namespace Config {
     inline auto crash_report = Config::config["settings"]["crash_report"].value_or<bool>(true);
     inline auto enable_search = Config::config["settings"]["enable_search"].value_or<bool>(true);
     inline bool enable_translation = true;
+    inline bool enable_refresh = false;
+    inline auto font_name = Config::config["settings"]["font_name"].value_or<std::string>("font.ttf");
+    inline auto font_size = Config::config["settings"]["font_size"].value_or<int>(14);
+    inline auto font_shiftup = Config::config["settings"]["font_shiftup"].value_or<int>(4);
+
 
   }
 
@@ -101,6 +106,10 @@ namespace Config {
     inline int loading_world_start_new_game_loop =
       Config::offsets["offsets"]["loading_world_start_new_game_loop"].value_or<uintptr_t>(0);
     inline int menu_interface_loop = Config::offsets["offsets"]["menu_interface_loop"].value_or<uintptr_t>(0);
+
+    // inline int load_multi_pdim = Config::offsets["offsets"]["load_multi_pdim"].value_or<uintptr_t>(0);
+    // inline int load_multi_pdim_2 = Config::offsets["offsets"]["load_multi_pdim_2"].value_or<uintptr_t>(0);
+    // inline int reshape = Config::offsets["offsets"]["reshape"].value_or<uintptr_t>(0);
 
   }
 }

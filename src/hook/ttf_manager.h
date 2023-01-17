@@ -2,7 +2,7 @@
 
 class TTFManager
 {
-public:
+ public:
   [[nodiscard]] static TTFManager* GetSingleton()
   {
     static TTFManager singleton;
@@ -12,10 +12,13 @@ public:
   void Init();
   void LoadFont(const std::string& file, int ptsize, int shift_frame_from_up = 0);
   void LoadScreen();
-  SDL_Surface* CreateTexture(const std::string& str, SDL_Color font_color = { 255, 255, 255 });
+  SDL_Surface* GetSlicedTexture(const std::string& str);
+  SDL_Surface* CreateTexture(const std::string& str, SDL_Color font_color = {255, 255, 255});
+  int CreateWSTexture(const std::string& str, SDL_Color font_color = {255, 255, 255});
+
   void ClearCache();
 
-private:
+ private:
   TTFManager() {}
   TTFManager(const TTFManager&) = delete;
   TTFManager(TTFManager&&) = delete;
@@ -28,6 +31,7 @@ private:
     delete this;
   };
 
+  SDL_Surface* SliceSurface(SDL_Surface* surface, int slicex, Uint16 width, Uint16 height, int shift_frame_from_up);
   SDL_Surface* ResizeSurface(SDL_Surface* surface, int width, int height, int shift_frame_from_up);
   SDL_Surface* ScaleSurface(SDL_Surface* Surface, Uint16 Width, Uint16 Height);
   void DrawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel);
@@ -35,6 +39,7 @@ private:
 
   // try to figure out the best size of cache
   LRUCache<std::string, SDL_Surface*> cache = LRUCache<std::string, SDL_Surface*>(300);
+  LRUCache<std::string, SDL_Surface*> sliced_tex_cache = LRUCache<std::string, SDL_Surface*>(2350);
   TTF_Font* font;
   SDL_Surface* screen;
   int shift_frame_from_up = 0;

@@ -7,7 +7,11 @@ namespace Watchdog {
     void Keypress()
     {
       while (true) {
-        Sleep(10);
+        Sleep(50);
+        if ((GetAsyncKeyState(VK_CONTROL) & GetAsyncKeyState(VK_F5)) && Config::Setting::enable_refresh == false) {
+          Config::Setting::enable_refresh = true;
+          logger::info("refresh");
+        }
         if ((GetAsyncKeyState(VK_CONTROL) & GetAsyncKeyState(VK_F3)) && Config::Setting::enable_translation == true) {
           Config::Setting::enable_translation = false;
           logger::info("translation switched off");

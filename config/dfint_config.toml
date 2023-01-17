@@ -6,3 +6,6 @@ name = "dfint localization hook"
 log_level = 0
 crash_report = true
 enable_search = true
+font_name = "font.ttf"
+font_size = 14
+font_shiftup = 4

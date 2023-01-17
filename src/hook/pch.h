@@ -1,6 +1,6 @@
 #pragma once
 
-// #include <regex>  // remove if regex dont needed
+#include <regex>  // remove if regex dont needed
 #include <atomic>
 #include <chrono>
 #include <codecvt> // for std::codecvt_utf8 - myabe not needed cause we can render utf8
@@ -50,8 +50,8 @@
 #include <Windows.h>
 #pragma comment(lib, "User32.lib")
 
-// #include "SDL/SDL_ttf.h"
-// #pragma comment(lib, "SDL_ttf.lib")
+#include "SDL/SDL_ttf.h"
+#pragma comment(lib, "SDL_ttf.lib")
 
 #include <detours/detours.h>
 #include <spdlog/sinks/basic_file_sink.h>

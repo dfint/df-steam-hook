@@ -1,5 +1,5 @@
-BasedOnStyle: Mozilla
-IndentWidth: 2
+BasedOnStyle: Google
+IndentWidth: 3
 AlignAfterOpenBracket: true
 AlignOperands: true
 AllowShortFunctionsOnASingleLine: InlineOnly
@@ -14,7 +14,7 @@ BraceWrapping:
   AfterStruct: true
   AfterUnion: true
 BreakBeforeBraces: Custom
-ColumnLimit: 120
+ColumnLimit: 150
 IndentPPDirectives: AfterHash
 SortUsingDeclarations: true
 SpaceAfterTemplateKeyword: true
