@@ -19,3 +19,5 @@ IndentPPDirectives: AfterHash
 SortUsingDeclarations: true
 SpaceAfterTemplateKeyword: true
 NamespaceIndentation: All
+FixNamespaceComments: true
+Standard: Latest

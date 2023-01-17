@@ -1,6 +1,7 @@
 #pragma once
 
 namespace Utils {
+
   inline std::u16string cp437_to_unicode(const std::string& str)
   {
     std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> ucs2conv;
@@ -35,4 +36,5 @@ namespace Utils {
     auto const time = std::chrono::current_zone()->to_local(std::chrono::system_clock::now());
     return std::format("{:%Y%m%d-%H-%M-%S}-{}", time, std::time(NULL));
   }
-}
+
+} // namespace Utils

@@ -806,4 +806,4 @@ namespace Hook {
     }
   }
 
-}
+} // namespace Hook

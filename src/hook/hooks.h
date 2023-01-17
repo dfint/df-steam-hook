@@ -143,12 +143,13 @@ namespace Hook {
     }
   };
 
-#define SETUP_ORIG_FUNC_OFFSET(fn_name, shift) fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + shift);
-#define SETUP_ORIG_FUNC(fn_name)                                                                                       \
-  fn_name fn_name##_orig = (fn_name)((UINT64)GetModuleHandle(0) + Config::Offset::fn_name);
+  inline auto module_handle = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
+
+#define SETUP_ORIG_FUNC_OFFSET(fn_name, shift) fn_name fn_name##_orig = (fn_name)(module_handle + shift);
+#define SETUP_ORIG_FUNC(fn_name) fn_name fn_name##_orig = (fn_name)(module_handle + Config::Offset::fn_name);
 #define SETUP_ORIG_FUNC_FNAME(fn_name, module_name)                                                                    \
   fn_name fn_name##_orig = (fn_name)(GetProcAddress(GetModuleHandle(#module_name), #fn_name));
-#define GET_ADDR(shift) (PVOID)((UINT64)GetModuleHandle(0) + shift)
+#define GET_ADDR(shift) (PVOID)(module_handle + shift)
 #define ATTACH(fn_name) DetourAttach(&(PVOID&)(fn_name##_orig), (PVOID)fn_name##_hook)
 #define DETACH(fn_name) DetourDetach(&(PVOID&)(fn_name##_orig), (PVOID)fn_name##_hook)
 #define HOOK(fn_name) fn_name##_hook

@@ -120,4 +120,4 @@ namespace CrashReport {
     ::SetUnhandledExceptionFilter(Handler);
   }
 
-}
+} // namespace CrashReport

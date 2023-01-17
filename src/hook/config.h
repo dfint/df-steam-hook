@@ -53,7 +53,7 @@ namespace Config {
     inline std::string hook_version("not-defined");
 #endif
 
-  }
+  } // namespace Metadata
 
   namespace Setting {
 
@@ -62,7 +62,7 @@ namespace Config {
     inline auto enable_search = Config::config["settings"]["enable_search"].value_or<bool>(true);
     inline bool enable_translation = true;
 
-  }
+  } // namespace Setting
 
   namespace Offset {
 
@@ -102,7 +102,7 @@ namespace Config {
       Config::offsets["offsets"]["loading_world_start_new_game_loop"].value_or<uintptr_t>(0);
     inline int menu_interface_loop = Config::offsets["offsets"]["menu_interface_loop"].value_or<uintptr_t>(0);
 
-  }
-}
+  } // namespace Offset
+} // namespace Config
 
 #endif
