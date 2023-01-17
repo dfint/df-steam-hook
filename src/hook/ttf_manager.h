@@ -14,7 +14,7 @@ class TTFManager
   void LoadScreen();
   SDL_Surface* GetSlicedTexture(const std::wstring& wstr);
   SDL_Surface* CreateTexture(const std::string& str, SDL_Color font_color = {255, 255, 255});
-  int CreateWSTexture(const std::wstring& wstr, SDL_Color font_color = {255, 255, 255});
+  int CreateWSTexture(const std::wstring& wstr, int flag, SDL_Color font_color = {255, 255, 255});
 
   void ClearCache();
 
@@ -32,7 +32,7 @@ class TTFManager
   };
 
   SDL_Surface* SliceSurface(SDL_Surface* surface, int slicex, Uint16 width, Uint16 height, int shift_frame_from_up);
-  SDL_Surface* ResizeSurface(SDL_Surface* surface, int width, int height, int shift_frame_from_up);
+  SDL_Surface* ResizeSurface(SDL_Surface* surface, int width, int height, int shift_frame);
   SDL_Surface* ScaleSurface(SDL_Surface* Surface, Uint16 Width, Uint16 Height);
   void DrawPixel(SDL_Surface* surface, int x, int y, Uint32 pixel);
   Uint32 ReadPixel(SDL_Surface* surface, int x, int y);

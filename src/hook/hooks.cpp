@@ -79,14 +79,15 @@ namespace Hook {
    // }
 
    template <auto T>
-   int InjectTTFwstring(std::string& str, int x, int y, justification_ justify, int src_length = 0)
+   int InjectTTFwstring(std::string& str, int x, int y, justification_ justify, int src_length = 0, int flag = 0)
    {
       if (ttf_injection_lock) return 0;
       if (g_textures_ptr == NULL) return 0;
 
       std::wstring input = Utils::s2ws(str);
       // 문자열 텍스쳐 만들고 자르기
-      int count = TTFManager::GetSingleton()->CreateWSTexture(input);
+      int count = TTFManager::GetSingleton()->CreateWSTexture(input, flag);
+      if (flag > 0) input += std::to_wstring(flag);
 
       int gap = 0;
       // GetStringGap(justify, count, src_length);
@@ -290,13 +291,13 @@ namespace Hook {
    void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
    {
       if (gps && !str.empty() && Config::Setting::enable_translation && !ttf_injection_lock) {
-         auto tstr = Dictionary::GetSingleton()->Get(str);
-         if (tstr) {
-            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(tstr.value(), gps->screenx, gps->screeny, justify);
-            std::string bstr;
-            bstr.resize(count, ' ');
+         auto translation = Dictionary::GetSingleton()->Get(str);
+         if (translation) {
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx, gps->screeny, justify);
+            std::string blank;
+            blank.resize(count, ' ');
             g_main_replace = true;
-            LockedCall(ttf_injection_lock, ORIGINAL(addst), gps, bstr, justify, space);
+            LockedCall(ttf_injection_lock, ORIGINAL(addst), gps, blank, justify, space);
             g_main_replace = false;
             return;
          }
@@ -309,13 +310,13 @@ namespace Hook {
    void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
    {
       if (gps && !str.empty() && Config::Setting::enable_translation && !ttf_injection_lock) {
-         auto tstr = Dictionary::GetSingleton()->Get(str);
-         if (tstr) {
-            int count = InjectTTFwstring<ScreenManager::ScreenType::Top>(tstr.value(), gps->screenx, gps->screeny, justify_left, str.length());
-            std::string bstr;
-            bstr.resize(count, ' ');
+         auto translation = Dictionary::GetSingleton()->Get(str);
+         if (translation) {
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Top>(translation.value(), gps->screenx, gps->screeny, justify_left, str.length());
+            std::string blank;
+            blank.resize(count, ' ');
             g_top_replace = true;
-            LockedCall(ttf_injection_lock, ORIGINAL(addst_top), gps, bstr, a3);
+            LockedCall(ttf_injection_lock, ORIGINAL(addst_top), gps, blank, a3);
             g_top_replace = false;
             return;
          }
@@ -328,26 +329,45 @@ namespace Hook {
    SETUP_ORIG_FUNC(addcoloredst);
    void __fastcall HOOK(addcoloredst)(graphicst_* gps, const char* str, __int64 a3)
    {
-      // auto len = strnlen_s(str, 1000);
-      // if (gps && str && len > 0 && len < 1000 && Config::Setting::enable_translation) {
-      //   auto translation = Dictionary::GetSingleton()->Get(str);
-      //   if (translation) {
-      //     return ORIGINAL(addcoloredst)(gps, translation.value().c_str(), a3);
-      //   }
-      // }
+      auto len = strnlen_s(str, 1000);
+      if (gps && str && len > 0 && len < 1000 && Config::Setting::enable_translation && !ttf_injection_lock) {
+         auto translation = Dictionary::GetSingleton()->Get(str);
+         if (translation) {
+            spdlog::debug("## addcoloredst {}", translation.value());
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx, gps->screeny, justify_left, len);
+            std::string blank;
+            blank.resize(count, ' ');
+            g_main_replace = true;
+            LockedCall(ttf_injection_lock, ORIGINAL(addcoloredst), gps, blank.c_str(), a3);
+            g_main_replace = false;
+            return;
+         }
+      }
       ORIGINAL(addcoloredst)(gps, str, a3);
    }
 
    // render through different procedure, not like addst or addst_top
+   /*In order to print letters between the y-axis tiles,
+   it is like calling it twice and printing it half by half.
+   Some_flag seems to store the upper value (8) and the lower value (16) to be output.*/
    SETUP_ORIG_FUNC(addst_flag);
    void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, __int64 a4, int some_flag)
    {
-      // if (gps && !str.empty() && Config::Setting::enable_translation) {
-      //   auto translation = Dictionary::GetSingleton()->Get(str);
-      //   if (translation) {
-      //     return ORIGINAL(addst_flag)(gps, translation.value(), a3, a4, some_flag);
-      //   }
-      // }
+      if (gps && !str.empty() && Config::Setting::enable_translation) {
+         auto translation = Dictionary::GetSingleton()->Get(str);
+         if (translation) {
+            //spdlog::debug("## addst_flag {} {} x{} y{}, a3:{}, a4:{}, some_flag {}", str, translation.value(), gps->screenx, gps->screeny, a3, a4,
+              //            some_flag);
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx, gps->screeny, justify_left, str.length(),
+                                                                          some_flag);
+            std::string blank;
+            blank.resize(count, ' ');
+            g_main_replace = true;
+            LockedCall(ttf_injection_lock, ORIGINAL(addst_flag), gps, blank, a3, a4, some_flag);
+            g_main_replace = false;
+            return;
+         }
+      }
       ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
    }
 

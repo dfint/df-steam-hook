@@ -108,7 +108,7 @@ SDL_Surface* TTFManager::SliceSurface(SDL_Surface* surface, int slicex, Uint16 w
    return sliced_tex;
 }
 
-SDL_Surface* TTFManager::ResizeSurface(SDL_Surface* surface, int width, int height, int shift_frame_from_up)
+SDL_Surface* TTFManager::ResizeSurface(SDL_Surface* surface, int width, int height, int shift_frame)
 {
    // should check cause it may crashed
    if (!surface || !width || !height) {
@@ -118,10 +118,21 @@ SDL_Surface* TTFManager::ResizeSurface(SDL_Surface* surface, int width, int heig
    SDL_Surface* sized_texture = SDL::CreateRGBSurface(surface->flags, width, height, surface->format->BitsPerPixel, surface->format->Rmask,
                                                       surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
 
-   for (int y = shift_frame_from_up; y < surface->h; y++) {
-      for (int x = 0; x < surface->w; x++) {
-         if (x < width && y - shift_frame_from_up < height) {
-            DrawPixel(sized_texture, x, y - shift_frame_from_up, ReadPixel(surface, x, y));
+   if (shift_frame < 0) {  // Shift Down
+      shift_frame *= -1;
+      for (int y = shift_frame; y < surface->h; y++) {
+         for (int x = 0; x < surface->w; x++) {
+            if (x < width && y - shift_frame < height) {
+               DrawPixel(sized_texture, x, y, ReadPixel(surface, x, y - shift_frame));
+            }
+         }
+      }
+   } else {  // Shift Up
+      for (int y = shift_frame; y < surface->h; y++) {
+         for (int x = 0; x < surface->w; x++) {
+            if (x < width && y - shift_frame < height) {
+               DrawPixel(sized_texture, x, y - shift_frame, ReadPixel(surface, x, y));
+            }
          }
       }
    }
@@ -175,7 +186,7 @@ SDL_Surface* TTFManager::GetSlicedTexture(const std::wstring& wstr)
    if (cached) {
       return cached.value().get();
    }
-   spdlog::error("some sliced texture error :{}", Utils::ws2s(wstr).c_str());
+   spdlog::error("some sliced texture error :{}", Utils::ws2s(wstr));
    return nullptr;
 }
 
@@ -207,37 +218,51 @@ SDL_Surface* TTFManager::CreateTexture(const std::string& str, SDL_Color font_co
 }
 
 // 문자열을 받아서 텍스쳐 생성 후 타일 너비에 맞게 자른 후 캐시에 저장
-int TTFManager::CreateWSTexture(const std::wstring& wstr, SDL_Color font_color)
+int TTFManager::CreateWSTexture(const std::wstring& wstr, int flag, SDL_Color font_color)
 {
    if (this->font == nullptr) {
       spdlog::error("trying to create texture before setting font");
       exit(2);
    }
    int count = 0;
+   std::wstring input(wstr);
+   if (flag > 0) input += std::to_wstring(flag);
    // 문자열 텍스쳐 캐시 확인
-   auto cached = this->ws_cache.Get(wstr);
+   auto cached = this->ws_cache.Get(input);
    if (cached) {
-      SDL_Surface* cached_tex = cached.value().get();
+      auto cached_tex = cached.value().get();
       // 문자열 텍스쳐 타일너비로 개수 계산
       count = cached_tex->w / this->frame_width + (cached_tex->w % this->frame_width != 0);
       return count;
    }
 
    // 문자열 텍스쳐 생성
-   //std::wstring wstr = Utils::s2ws(str);
+   // std::wstring wstr = Utils::s2ws(str);
    auto texture = TTF_RenderUNICODE_Blended(this->font, (Uint16*)wstr.c_str(), font_color);
    if (texture == NULL) {
       spdlog::error("texture generation error on string");
       return false;
    }
-   this->ws_cache.Put(wstr, texture);
+
+   int flag_shift = 0;
+   if (flag == 8) {  // Shift down
+      texture = ResizeSurface(texture, texture->w, texture->h, std::round(texture->h * -0.45));
+      flag_shift = this->shift_frame_from_up - 1;
+   }
+
+   if (flag == 16) {  // Shift up
+      texture = ResizeSurface(texture, texture->w, texture->h, std::round(texture->h * 0.55));
+      flag_shift = this->shift_frame_from_up * -1;
+   }
+   this->ws_cache.Put(input, texture);
 
    // 문자열 텍스쳐 자르기
    count = texture->w / this->frame_width + (texture->w % this->frame_width != 0);
    for (int x = 0; x < count; x++) {
-      auto slice_texture = SliceSurface(texture, x * this->frame_width, this->frame_height, this->frame_height, this->shift_frame_from_up);
-      std::wstring temp(wstr);
+      auto slice_texture = SliceSurface(texture, x * this->frame_width, this->frame_height, this->frame_height, this->shift_frame_from_up + flag_shift);
+      std::wstring temp(input);
       temp += std::to_wstring(x);
+      if(flag > 0) spdlog::debug("#### Input slice texture {}",Utils::ws2s(temp));
       this->sliced_ws_cache.Put(temp, slice_texture);
    }
 
