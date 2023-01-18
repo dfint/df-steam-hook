@@ -759,7 +759,7 @@ namespace Hooks {
     // translation
     // ATTACH(string_copy);
     ATTACH(string_copy_n);
-    ATTACH(string_append);
+    // ATTACH(string_append);
     // ATTACH(string_append_0);
     ATTACH(string_append_n);
     ATTACH(convert_ulong_to_string);
@@ -785,7 +785,7 @@ namespace Hooks {
     // translation
     // DETACH(string_copy);
     DETACH(string_copy_n);
-    DETACH(string_append);
+    // DETACH(string_append);
     // DETACH(string_append_0);
     DETACH(string_append_n);
     DETACH(convert_ulong_to_string);

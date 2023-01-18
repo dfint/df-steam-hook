@@ -42,7 +42,7 @@ namespace Patches {
     auto len = Align(strnlen_s(str, 100) + 1);
     auto tstr = Dictionary::GetSingleton()->Get(str);
     if (tstr) {
-      tstr.value().resize(len);
+      tstr.value().resize(len - 1);
       PatchBytes(address, tstr.value().c_str(), len);
     }
   }

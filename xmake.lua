@@ -42,3 +42,9 @@ target("dfint_launcher")
     -- set_targetdir("E:\\Games\\Dwarf Fortress Steam 50.05\\") -- build to DF dir, handy for testing
     add_files("src/launcher/*.cpp")
     add_packages("vcpkg::detours")
+
+target("dfint_peparser")
+    set_default(false)
+    set_kind("binary")
+    set_basename("dfint_peparser")
+    add_files("src/pe_parser/*.cpp")
