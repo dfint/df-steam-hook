@@ -6,14 +6,16 @@ int main(int argc, char* argv[])
 {
 
   auto parser = PEParser::GetSingleton();
-  parser->OpenFile("E:\\Games\\Dwarf Fortress Steam 50.05\\Dwarf Fortress.exe");
+  parser->OpenFile(argv[1]);
 
-  for (int i = 1; i < argc; ++i) {
+  std::puts(std::format("pe loaded: {}", argv[1]).data());
+
+  for (int i = 2; i < argc; ++i) {
     auto res = parser->FindString(argv[i]);
     if (res) {
-      std::puts(std::format("{} - {:x}", argv[i], res.value()).data());
+      std::puts(std::format("string: {} - 0x{:x}", argv[i], res.value()).data());
     } else {
-      std::puts(std::format("{} - none", argv[i]).data());
+      std::puts(std::format("string: {} - none", argv[i]).data());
     }
   }
 
