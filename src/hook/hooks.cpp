@@ -172,6 +172,9 @@ namespace Hooks {
   char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
   {
     if (src && dst && size && !convert_ulong_lock && Config::Setting::enable_translation) {
+      if (strncmp(src, const_cast<char*>("FPS:"), 4) == 0) {
+        return ORIGINAL(string_copy_n)(dst, src, size);
+      }
       auto tstr = Dictionary::GetSingleton()->Get(src);
       if (tstr) {
         return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
