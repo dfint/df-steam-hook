@@ -331,9 +331,10 @@ namespace Hook {
    {
       auto len = strnlen_s(str, 1000);
       if (gps && str && len > 0 && len < 1000 && Config::Setting::enable_translation && !ttf_injection_lock) {
-         auto translation = Dictionary::GetSingleton()->Get(str);
+         //spdlog::debug("## addcoloredst {}", str);
+         auto translation = Dictionary::GetSingleton()->GetMulti(str, gps->screenx, gps->screeny);
          if (translation) {
-            spdlog::debug("## addcoloredst {}", translation.value());
+            //spdlog::debug("## addcoloredst {}", translation.value());
             int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx, gps->screeny, justify_left, len);
             std::string blank;
             blank.resize(count, ' ');
@@ -356,8 +357,8 @@ namespace Hook {
       if (gps && !str.empty() && Config::Setting::enable_translation) {
          auto translation = Dictionary::GetSingleton()->Get(str);
          if (translation) {
-            //spdlog::debug("## addst_flag {} {} x{} y{}, a3:{}, a4:{}, some_flag {}", str, translation.value(), gps->screenx, gps->screeny, a3, a4,
-              //            some_flag);
+            // spdlog::debug("## addst_flag {} {} x{} y{}, a3:{}, a4:{}, some_flag {}", str, translation.value(), gps->screenx, gps->screeny, a3, a4,
+            //             some_flag);
             int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx, gps->screeny, justify_left, str.length(),
                                                                           some_flag);
             std::string blank;

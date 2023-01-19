@@ -25,7 +25,7 @@ namespace Watchdog {
         if ((GetAsyncKeyState(VK_CONTROL) & GetAsyncKeyState(VK_F2))) {
           logger::info("reload dictionary");
           Dictionary::GetSingleton()->Clear();
-          Dictionary::GetSingleton()->LoadCsv("./dfint_data/dfint_dictionary.csv");
+          Dictionary::GetSingleton()->LoadCsv("./dfint_data/dfint_dictionary.csv","./dfint_data/kr_regex.txt");
           MessageBoxA(nullptr, "dictionary reloaded", "dfint hook info", MB_ICONWARNING);
         }
       }

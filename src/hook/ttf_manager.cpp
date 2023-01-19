@@ -262,7 +262,6 @@ int TTFManager::CreateWSTexture(const std::wstring& wstr, int flag, SDL_Color fo
       auto slice_texture = SliceSurface(texture, x * this->frame_width, this->frame_height, this->frame_height, this->shift_frame_from_up + flag_shift);
       std::wstring temp(input);
       temp += std::to_wstring(x);
-      if(flag > 0) spdlog::debug("#### Input slice texture {}",Utils::ws2s(temp));
       this->sliced_ws_cache.Put(temp, slice_texture);
    }
 

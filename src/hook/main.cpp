@@ -29,7 +29,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       logger::info("pe checksum: 0x{:x}", Config::Metadata::checksum);
       logger::info("offsets version: {}", Config::Metadata::version);
 
-      Dictionary::GetSingleton()->LoadCsv("./dfint_data/dfint_dictionary.csv");
+      Dictionary::GetSingleton()->LoadCsv("./dfint_data/dfint_dictionary.csv", "./dfint_data/kr_regex.txt");
 
       DetourRestoreAfterWith();
       DetourTransactionBegin();
