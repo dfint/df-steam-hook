@@ -25,13 +25,12 @@ public:
       exit(2);
     }
 
-    ReadByOffset(this->dos_header, 0, sizeof(IMAGE_DOS_HEADER));
-    ReadByOffset(this->nt_headers, this->dos_header->e_lfanew, sizeof(IMAGE_NT_HEADERS64));
+    ReadByOffset(this->dos_header, 0);
+    ReadByOffset(this->nt_headers, this->dos_header->e_lfanew);
 
     for (auto i = 0; i < this->nt_headers->FileHeader.NumberOfSections; i++) {
       IMAGE_SECTION_HEADER* section = new IMAGE_SECTION_HEADER;
-      ReadByOffset(section, this->dos_header->e_lfanew + sizeof(IMAGE_NT_HEADERS) + i * sizeof(IMAGE_SECTION_HEADER),
-                   sizeof(IMAGE_DOS_HEADER));
+      ReadByOffset(section, this->dos_header->e_lfanew + sizeof(IMAGE_NT_HEADERS) + i * sizeof(IMAGE_SECTION_HEADER));
       if (strcmp((char*)section->Name, (char*)".rdata") == 0) {
         this->rdata_offset = section->PointerToRawData;
         this->rdata_size = section->SizeOfRawData;
@@ -61,7 +60,7 @@ public:
     auto it = 0;
     while (it < this->rdata_size) {
       std::vector<char> buf(length);
-      ReadByOffset(buf.data(), this->rdata_offset + it, sizeof(char), length);
+      ReadByOffset(buf.data(), this->rdata_offset + it, length);
       if (buf == target) {
         return this->rdata_offset + it + this->rdata_virtual_shift;
       }
@@ -71,11 +70,11 @@ public:
   }
 
   template <typename T>
-  void ReadByOffset(T dst, uintptr_t offset, size_t size, size_t count = 1)
+  void ReadByOffset(T* dst, uintptr_t offset, size_t count = 1)
   {
     rewind(this->file);
     fseek(this->file, offset, SEEK_SET);
-    fread(dst, size, count, this->file);
+    fread(dst, sizeof(T), count, this->file);
   }
 
 private:
