@@ -175,15 +175,7 @@ namespace Hooks {
       if (strncmp(src, const_cast<char*>("FPS:"), 4) == 0) {
         return ORIGINAL(string_copy_n)(dst, src, size);
       }
-      std::optional<std::string> tstr;
-      if (src[size] != '\0') {
-        auto buf = std::make_unique<char[]>(size + 1);
-        strncpy(buf.get(), src, size);
-        buf.get()[size] = '\0';
-        tstr = Dictionary::GetSingleton()->Get(buf.get());
-      } else {
-        tstr = Dictionary::GetSingleton()->Get(src);
-      }
+      auto tstr = Dictionary::GetSingleton()->Get(src, size);
       if (tstr) {
         return ORIGINAL(string_copy_n)(dst, tstr.value().c_str(), tstr.value().size());
       }
@@ -222,15 +214,7 @@ namespace Hooks {
   char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
   {
     if (src && dst && size && Config::Setting::enable_translation) {
-      std::optional<std::string> tstr;
-      if (src[size] != '\0') {
-        auto buf = std::make_unique<char[]>(size + 1);
-        strncpy(buf.get(), src, size);
-        buf.get()[size] = '\0';
-        tstr = Dictionary::GetSingleton()->Get(buf.get());
-      } else {
-        tstr = Dictionary::GetSingleton()->Get(src);
-      }
+      auto tstr = Dictionary::GetSingleton()->Get(src, size);
       if (tstr) {
         return ORIGINAL(string_append_n)(dst, tstr.value().c_str(), tstr.value().size());
       }

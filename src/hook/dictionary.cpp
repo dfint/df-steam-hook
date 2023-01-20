@@ -95,6 +95,31 @@ std::optional<std::string> Dictionary::Get(const char* key)
   return value;
 }
 
+std::optional<std::string> Dictionary::Get(const char* key, size_t size)
+{
+  if (!key) {
+    return std::nullopt;
+  }
+
+  std::unique_ptr<char[]> buf;
+  if (key[size] != '\0') {
+    buf = std::make_unique<char[]>(size + 1);
+    strncpy(buf.get(), key, size);
+    buf[size] = '\0';
+    logger::debug("string {}", buf.get());
+  }
+
+  if (this->dict.find(buf ? buf.get() : key) == this->dict.end()) {
+    return std::nullopt;
+  }
+
+  auto value = this->dict.at(buf ? buf.get() : key);
+  if (value.empty()) {
+    return std::nullopt;
+  }
+  return value;
+}
+
 bool Dictionary::Exist(std::string& key)
 {
   return this->dict.find(key) != this->dict.end();
