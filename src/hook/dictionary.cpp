@@ -106,7 +106,6 @@ std::optional<std::string> Dictionary::Get(const char* key, size_t size)
     buf = std::make_unique<char[]>(size + 1);
     strncpy(buf.get(), key, size);
     buf[size] = '\0';
-    logger::debug("string {}", buf.get());
   }
 
   if (this->dict.find(buf ? buf.get() : key) == this->dict.end()) {
