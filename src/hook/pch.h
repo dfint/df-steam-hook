@@ -15,10 +15,11 @@
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <cmath>
 #include <utility>
-#include <tuple>
-#include <vector>
+#include <queue>
+#include <string>
 
 /* disable unused headers from Windows.h */
 #define WIN32_LEAN_AND_MEAN

@@ -337,7 +337,7 @@ namespace Hook {
             //spdlog::debug("## addcoloredst {}", translation.value());
             int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx, gps->screeny, justify_left, len);
             std::string blank;
-            blank.resize(count, ' ');
+            blank.resize(len, ' ');
             g_main_replace = true;
             LockedCall(ttf_injection_lock, ORIGINAL(addcoloredst), gps, blank.c_str(), a3);
             g_main_replace = false;

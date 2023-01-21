@@ -1,8 +1,9 @@
-BasedOnStyle: Google
+BasedOnStyle: Microsoft
 IndentWidth: 3
 AlignAfterOpenBracket: true
 AlignOperands: true
 AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 BinPackArguments: true

@@ -1,0 +1,64 @@
+ ##value in::She has an amazing memory, very good creativity and a
+ 
+ ###TRANS IN:She has an amazing memory
+ #Value IN:그녀는 놀라운 기억력 가졌고,
+ 
+ ##value in::wasteful when working on projects. She has an active
+ 
+ ###TRANS IN:very good creativity and a wasteful when working on projects
+ #Value IN:아주 좋은 창의성 그리고 a wasteful when working on projects.
+ 
+ ##value in::abilities and an iffy sense for music.
+ 
+ ###TRANS IN:She has an active abilities and an iffy sense for music
+ #Value IN:그녀는 an active abilities and an iffy sense for music 가졌고.
+ 
+ ##value in::sum of patience, but she has poor analytical
+
+ ###TRANS IN:sum of patience
+ #No trans IN:sum of patience,
+
+ ##value in::sense of humor. She can sometimes act without
+ ###TRANS IN:but she has poor analytical sense of humor
+ #No trans IN:but she has poor analytical sense of humor.
+ ##value in::deliberation. She does not easily fall in love and
+ ###TRANS IN:She can sometimes act without deliberation
+ #No trans IN:She can sometimes act without deliberation.
+ ##value in::She is not a private person and freely shares
+ ##value in::details of her life. She tends to be a little
+ ###TRANS IN:She does not easily fall in love and She is not a private person and freely shares details of her life
+ #Value IN:She does not easily fall in love and She is not a private person 그리고 freely shares details of her life.
+ ##value in::rarely develops positive sentiments. She lives a
+ ###TRANS IN:She tends to be a little rarely develops positive sentiments
+ #No trans IN:She tends to be a little rarely develops positive sentiments.
+ ##value in::fast-paced life. She does not often feel lustful. She
+ ###TRANS IN:She lives a fast-paced life
+ #No trans IN:She lives a fast-paced life.
+ ###TRANS IN:She does not often feel lustful
+ #No trans IN:She does not often feel lustful.
+ ##value in::is not particularly interested in what others think
+ ##value in::of her.
+ ###TRANS IN:She is not particularly interested in what others think of her
+ #Value IN:그녀는 not particularly interested in what others think of her.
+ ##value in::She needs alcohol to get through the working day. She
+ ###TRANS IN:She needs alcohol to get through the working day
+ #No trans IN:She needs alcohol to get through the working day.
+ ##value in::likes working outdoors and grumbles only mildly at
+ ##value in::inclement weather.
+ ###TRANS IN:She likes working outdoors and grumbles only mildly at inclement weather
+ #Value IN:She likes working outdoors 그리고 grumbles only mildly at inclement weather.
+ 
+ 
+ 
+  She has an amazing memory, very good creativity and a sum of patience, 
+  but she has poor analytical abilities and an iffy sense for music.
+  She is not a private person and freely shares details of her life. 
+  She tends to be a little wasteful when working on projects. 
+  She has an active sense of humor. 
+  She can sometimes act without deliberation. 
+  She does not easily fall in love and rarely develops positive sentiments. 
+  She lives a fast-paced life. 
+  She does not often feel lustful. 
+  She is not particularly interested in what others think of her.
+  She needs alcohol to get through the working day. 
+  She likes working outdoors and grumbles only mildly at inclement weather.

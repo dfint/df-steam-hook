@@ -20,13 +20,7 @@ class Dictionary
    void CompleteBuffer();
 
   private:
-   Dictionary()
-   {
-      start_xy.first = -1;
-      start_xy.second = -1;
-      out_xy.first = -1;
-      out_xy.second = -1;
-   }
+   Dictionary() {}
    Dictionary(const Dictionary&) = delete;
    Dictionary(Dictionary&&) = delete;
 
@@ -39,24 +33,21 @@ class Dictionary
    std::optional<std::string> RegexSearch(const std::string& key);
    void SplitRegex(const std::string& str);
 
-   bool StoreStringBuffer(const char* key, int x, int y);
+   std::optional<std::string> StoreStringBuffer(const char* key, int x, int y);
    void PrepareBufferOut();
-   void SetStringCoord(int x, int y);
+   void InitBufferVar();
    void MakeupString();
 
-  bool buffer_ready = false;
-   const int line_limit = 54;
+   bool is_ready = false;
+   const int line_limit = 40;
+   int start_y = -1;
    int now_y = 0;
-   std::pair<int, int> start_xy;
-   std::pair<int, int> out_xy;
-
 
    std::unordered_map<std::string, std::string> dict;
    std::unordered_map<std::string, std::string> dict_log;
-   std::set<std::string> regex_set;
-   std::stringstream str_buffer;
-   std::stringstream trans_buffer;
-   std::stringstream out_buffer;
-   std::stringstream key_buffer;
-   std::vector<std::pair<std::string, int>> out_vector;
+   std::unordered_map<std::string, std::string> dict_multi;
+   std::unordered_set<std::string> regex_set;
+   
+   std::vector<std::string> key_vec;
+   std::queue<std::string> value_queue;
 };
