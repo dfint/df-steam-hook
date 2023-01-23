@@ -39,8 +39,8 @@ class TTFManager
 
   // try to figure out the best size of cache
   LRUCache<std::string, SDL_Surface*> cache = LRUCache<std::string, SDL_Surface*>(100);
-  LRUCache<std::wstring, SDL_Surface*> ws_cache = LRUCache<std::wstring, SDL_Surface*>(300);
-  LRUCache<std::wstring, SDL_Surface*> sliced_ws_cache = LRUCache<std::wstring, SDL_Surface*>(2350);
+  LRUCache<std::wstring, SDL_Surface*> ws_cache = LRUCache<std::wstring, SDL_Surface*>(2350);
+  LRUCache<std::wstring, SDL_Surface*> sliced_ws_cache = LRUCache<std::wstring, SDL_Surface*>(5700);
   TTF_Font* font;
   SDL_Surface* screen;
   int shift_frame_from_up = 0;

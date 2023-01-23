@@ -32,21 +32,22 @@ class Dictionary
 
    std::optional<std::string> RegexSearch(const std::string& key);
    void SplitRegex(const std::string& str);
+   void RegexRplace(std::string &str, bool on);
 
    std::optional<std::string> StoreStringBuffer(const char* key, int x, int y);
    void PrepareBufferOut();
    void InitBufferVar();
    void MakeupString();
 
-   bool is_ready = false;
-   const int line_limit = 40;
-   int start_y = -1;
-   int now_y = 0;
+   bool is_continuous = false;
+   const int line_limit = 48;
+   int start_line = -1;
+   int pre_line = -1;
 
    std::unordered_map<std::string, std::string> dict;
    std::unordered_map<std::string, std::string> dict_log;
    std::unordered_map<std::string, std::string> dict_multi;
-   std::unordered_set<std::string> regex_set;
+   std::vector<std::string> regex_vector;
    
    std::vector<std::string> key_vec;
    std::queue<std::string> value_queue;

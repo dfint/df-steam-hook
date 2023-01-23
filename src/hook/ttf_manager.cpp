@@ -186,7 +186,7 @@ SDL_Surface* TTFManager::GetSlicedTexture(const std::wstring& wstr)
    if (cached) {
       return cached.value().get();
    }
-   spdlog::error("some sliced texture error :{}", Utils::ws2s(wstr));
+   spdlog::error("sliced texture error cach size:{} str:{}",this->sliced_ws_cache.Size(), Utils::ws2s(wstr));
    return nullptr;
 }
 
