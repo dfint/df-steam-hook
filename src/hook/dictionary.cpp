@@ -12,6 +12,15 @@ void Dictionary::ReplaceAll(std::string &subject, const std::string &search, con
    }
 }
 
+void Dictionary::EraseFrontBackBlank(std::string &str)
+{
+   int index;
+   index = str.find_first_not_of(" ");
+   str.erase(0, index);
+   index = str.find_last_not_of(" ");
+   str.erase(index+1);
+}
+
 std::string Dictionary::Sanitize(std::string &str)
 {
    ReplaceAll(str, R"(\\)", "\\");
@@ -19,6 +28,13 @@ std::string Dictionary::Sanitize(std::string &str)
    ReplaceAll(str, R"(\r)", "\r");
    ReplaceAll(str, R"(\n)", "\n");
    ReplaceAll(str, R"(")", "\"");
+
+   std::regex r("\\[[^\\]]+\\]");
+   str = std::regex_replace(str, r, "");
+   EraseFrontBackBlank(str);
+
+   spdlog::debug("Dictionary :{}",str);
+
    return str;
 }
 
@@ -44,13 +60,13 @@ void Dictionary::RegexRplace(std::string &str, bool on)
 {
    if (on)
    {
-      ReplaceAll(str, "{s}", "([A-Za-z\\s]*)[.|,]");
+      ReplaceAll(str, "{s}", "([A-Za-z\\s].*)[.,]");
       ReplaceAll(str, "{s,}", "([A-Za-z\\s].*)");
       ReplaceAll(str, "{d}", "([\\d]*)");
    }
    else
    {
-      ReplaceAll(str, "([A-Za-z\\s]*)[.|,]", "{s}");
+      ReplaceAll(str, "([A-Za-z\\s].*)[.,]", "{s}");
       ReplaceAll(str, "([A-Za-z\\s].*)", "{s,}");
       ReplaceAll(str, "([\\d]*)", "{d}");
    }
@@ -111,13 +127,10 @@ void Dictionary::LoadCsv(const std::string &filename, const std::string &regex_f
 
 std::optional<std::string> Dictionary::RegexSearch(const std::string &key)
 {
-   // spdlog::debug("\n#Input key {}", key);
-
    std::smatch match;
    for (const auto regex_string : this->regex_vector)
    {
       std::regex r(regex_string);
-      // spdlog::debug("#regex {}", regex_string);
       if (std::regex_match(key, match, r) && match.size() > 1)
       {
          std::string find(regex_string);
@@ -128,39 +141,24 @@ std::optional<std::string> Dictionary::RegexSearch(const std::string &key)
          if (it != this->dict.end())
          {
             result = std::regex_replace(match[0].str(), r, it->second);
-            spdlog::debug("\n#FIND {}", key);
-            spdlog::debug("#REGEX {}", find);
-            spdlog::debug("#Match0 {}", result);
+            // spdlog::debug("\n#Search :{}", key);
+            // spdlog::debug("#REGEX :{}", find);
+            // spdlog::debug("#Match0 :{}", result);
 
             for (int i = 1; i < match.size(); i++)
             {
-               std::string matched(match[i].str());
-               spdlog::debug("#Match{} {}", i, matched);
+               std::string matched = match[i].str();
+               // spdlog::debug("#Match{} :{}", i, matched);
                auto it = Get(matched);
-               // if (it == this->dict.end() && matched.find(".") != std::string::npos)
-               // {
-               //    std::string temp = matched.substr(0, matched.find("."));
-               //    it = this->dict.find(temp);
-               //    spdlog::debug("#Match{} {}", i, temp);
-               // }
-               spdlog::debug("#Match{} {}", i, matched);
-
-               // if (matched.compare(".") == 0 || matched.compare(",") == 0)
-               // {
-               //    result += matched;
-               //    return result;
-               // }
-               // spdlog::debug("#REPLACE {} s{} t{} {}", matched, matched.length(), it.value().length(), match.size());
                if (it)
                {
-                  spdlog::debug("#replace???? {}", result);
+                  // spdlog::debug("#Replace :{}", result);
                   result.replace(result.find(matched), matched.length(), it.value());
                }
-
-               spdlog::debug("#Result {}", result);
+               // spdlog::debug("##Result {}", result);
             }
             this->dict_log.emplace(std::pair<std::string, std::string>(key, result));
-            spdlog::debug("#dict log input {}\n", result);
+            // spdlog::debug("##Result :{}\n", result);
             return result;
          }
          else
@@ -179,17 +177,20 @@ std::optional<std::string> Dictionary::Get(const std::string &key)
       return std::nullopt;
    }
 
-   if (this->dict_log.find(key) != this->dict_log.end())
+   std::string input(key);
+   EraseFrontBackBlank(input);
+   //spdlog::debug("Get input :{}:",input);
+
+   if (this->dict_log.find(input) != this->dict_log.end())
    {
-      return this->dict_log.at(key);
+      return this->dict_log.at(input);
    }
 
-   if (this->dict.find(key) != this->dict.end())
+   if (this->dict.find(input) != this->dict.end())
    {
-      return this->dict.at(key);
+      return this->dict.at(input);
    }
-   // spdlog::debug("regex search");
-   auto ret = RegexSearch(key);
+   auto ret = RegexSearch(input);
    if (ret) return ret;
 
    return std::nullopt;
@@ -212,7 +213,7 @@ void Dictionary::PrepareBufferOut()
             temp = "";
          }
          this->dict_multi.emplace(key_line, last_text);
-         spdlog::debug("##DICT EMPTY VALUE {} # {}", key_line, last_text);
+         // spdlog::debug("##EMPTY VALUE :{} & :{}", key_line, last_text);
          index++;
       }
       else
@@ -226,7 +227,7 @@ void Dictionary::PrepareBufferOut()
             if (wstr.length() + 1 > this->line_limit)
             {
                key_line = this->key_vec[index];
-               spdlog::debug("##DICT INPUT:{} key:{} value:{}", index, key_line, temp);
+               // spdlog::debug("   ##DICT INPUT:{}\n KEY :{} \n VALUE :{}", index, key_line, temp);
                this->dict_multi.emplace(key_line, temp);
                temp = "";
                index++;
@@ -243,7 +244,7 @@ void Dictionary::InitBufferVar()
 {
    if (!this->value_queue.empty())
    {
-      spdlog::debug("text remain {}", this->value_queue.front());
+      // spdlog::debug("text remain {}", this->value_queue.front());
       for (int i = 0; i < this->value_queue.size(); i++)
       {
          this->value_queue.pop();
@@ -254,6 +255,7 @@ void Dictionary::InitBufferVar()
    this->start_line = -1;
    this->pre_line = -1;
    this->is_continuous = false;
+   this->is_top = false;
    spdlog::debug("## Clear");
 }
 
@@ -263,9 +265,9 @@ void Dictionary::MakeupString()
    int endl = 0;
    for (auto &line : this->key_vec)
    {
-      spdlog::debug("\n#2#Line SRC in::{}", line);
+      if (temp.length() > 0) temp += " ";
       temp += line;
-      spdlog::debug("\n#2#Line + in::{}", temp);
+      spdlog::debug("# \n Src :{}", temp);
 
       if (line.find(".") != std::string::npos || line.find(",") != std::string::npos)
       {
@@ -274,44 +276,35 @@ void Dictionary::MakeupString()
          std::string word;
          while (key_line >> word)
          { // ',' '.' 기준으로 입력받은 문자열 줄을 분리
-
-            spdlog::debug("#2#while :{}", word);
-            spdlog::debug("#2#temp :{}", temp);
-
+            spdlog::debug("# Comb :{}", temp);
             if (word.find(',') != std::string::npos || word.find('.') != std::string::npos)
             {
-               // std::string comma = word.substr(word.length() - 1);
-               // word.erase(word.length() - 1);
                temp += word;
-               spdlog::debug("\n#2#SPLIT :{}", line);
                auto ret = Get(temp);
                if (ret)
                {
                   temp = ret.value(); // + comma;
                   this->value_queue.push(temp);
-                  spdlog::debug("#2#Value IN:{}", temp);
+                  spdlog::debug("# Find :{}", temp);
                }
-
                else
                {
-                  // temp += comma;
                   this->value_queue.push(temp);
-                  spdlog::debug("#2#NoTrans IN:{}", temp);
+                  spdlog::debug("# Fail :{}", temp);
                }
                temp = "";
             }
-            else
-               temp += word + " ";
+            else temp += word + " ";
          }
       }
-      else
-      {
-         spdlog::debug("\n#2#?????? in::{}", temp);
+      else if (this->is_top == false)
+      { // 한줄이하 단어는 바로 교체
          auto ret = Get(temp);
          if (ret)
          {
-            spdlog::debug("\n#2#??dict???? in::{}", ret.value());
+            // spdlog::debug("# Input Q :{}", ret.value());
             this->value_queue.push(ret.value());
+            temp = "";
          }
       }
    }
@@ -319,7 +312,7 @@ void Dictionary::MakeupString()
 
 std::optional<std::string> Dictionary::StoreStringBuffer(const char *key, int x, int y)
 {
-   std::string temp(key);
+   if (this->end_line < y) this->end_line = y;
 
    if (this->start_line != -1 && (y - this->pre_line > 1 || this->start_line == y))
    {
@@ -327,45 +320,88 @@ std::optional<std::string> Dictionary::StoreStringBuffer(const char *key, int x,
       PrepareBufferOut();
    }
 
-   if (this->start_line != -1 && this->is_continuous)
-   {
-      this->pre_line = y;
-      this->key_vec.emplace_back(key);
-      spdlog::debug("## INPUT key {}", key);
-      return std::nullopt;
-   }
-
    if (this->dict_multi.find(key) != this->dict_multi.end())
    {
       return this->dict_multi.at(key);
    }
 
-   // 문자열 확인
+   if (this->start_line != -1 && this->is_continuous)
+   {
+      this->pre_line = y;
+      this->key_vec.emplace_back(key);
+      // spdlog::debug("# Src Input :{}", key);
+      return std::nullopt;
+   }
+
    if (this->start_line == -1)
    {
+      // if(this->end_line - y > 1) return std::nullopt;
       this->start_line = y;
       this->pre_line = y;
       this->is_continuous = true;
-      spdlog::debug("START line input {}", this->pre_line);
+      // spdlog::debug("##Input Start Line {}", y);
       this->key_vec.emplace_back(key);
-      spdlog::debug("## INPUT key {}", key);
+      // spdlog::debug("# Src Input :{}", key);
    }
 
    return std::nullopt;
 }
 
-std::optional<std::string> Dictionary::GetMulti(const char *key, int x, int y)
+void Dictionary::StoreTopString(const char *key, int x, int y)
 {
+   std::string input(key);
+   if (this->top_end < y)
+   {
+      this->top_end = y;
+      return;
+   }
+
+   if (y - this->top_pre > 1)
+   {
+      //spdlog::debug("##Top String\n {}", this->top_buffer.str());
+      this->top_buffer.str("");
+      this->top_start = -1;
+      this->top_pre = -1;
+   }
+
+   if (this->top_start == -1)
+   {
+      this->top_start = y;
+      this->top_pre = y;
+      this->top_buffer << key;
+      return;
+   }
+
+   if (y - this->top_pre == 1)
+   {
+      this->top_buffer << "\n";
+   }
+
+   this->top_buffer << " " << key;
+   this->top_pre = y;
+   if (this->top_end == y) this->top_pre = -1;
+}
+
+std::optional<std::string> Dictionary::GetMulti(const char *key, int x, int y, bool top)
+{
+   this->is_top = top;
    auto len = strnlen_s(key, 1000);
    if (!key || len <= 1 || len >= 1000)
    {
       return std::nullopt;
    }
 
-   auto ret = StoreStringBuffer(key, x, y);
-   if (ret) return ret.value();
-
-   return std::nullopt;
+   if (this->is_top)
+   {
+      StoreTopString(key, x, y);
+      return std::nullopt;
+   }
+   else
+   {
+      auto ret = StoreStringBuffer(key, x, y);
+      if (ret) return ret.value();
+      return std::nullopt;
+   }
 }
 
 void Dictionary::CompleteBuffer()
