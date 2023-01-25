@@ -11,7 +11,6 @@ public:
   typedef typename std::pair<KeyType, ValueType> KeyValuePairType;
   typedef typename std::list<KeyValuePairType>::iterator ListIteratorType;
 
-  // maybe we need constructor with callback lambda?
   LRUCache(size_t max_size)
     : max_size(max_size)
   {

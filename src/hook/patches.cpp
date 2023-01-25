@@ -1,16 +1,12 @@
 #include "dictionary.h"
 
 namespace Patches {
+
   inline auto module_handle = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
   void* GetAddress(uintptr_t offset)
   {
     return reinterpret_cast<void*>(module_handle + offset);
-  }
-
-  inline void ChangeProtection(void* ptr, size_t size, DWORD& protection)
-  {
-    VirtualProtect(ptr, size, protection, &protection);
   }
 
   size_t Align(size_t n, size_t edge = 8)
@@ -25,14 +21,15 @@ namespace Patches {
     }
 
     if (reinterpret_cast<uintptr_t>(address) == 0xFFFFFFFE) {
+      logger::critical("failed while patching bytes at 0x{:x}", reinterpret_cast<uintptr_t>(address));
       MessageBoxA(nullptr, "invalid address to patch", "dfint hook error", MB_ICONERROR);
       exit(2);
     }
 
     DWORD protection = PAGE_EXECUTE_READWRITE;
-    ChangeProtection(address, size, protection);
+    VirtualProtect(address, size, protection, &protection);
     memcpy(address, bytes, size);
-    ChangeProtection(address, size, protection);
+    VirtualProtect(address, size, protection, &protection);
   }
 
   void TranslateStringByOffset(uintptr_t offset)
@@ -52,6 +49,7 @@ namespace Patches {
     TranslateStringByOffset(0x10C1D40);
     TranslateStringByOffset(0x10C1D90);
     TranslateStringByOffset(0x10C1D98);
+    // TranslateStringByOffset(0x11BCC0C); // s]
 
     logger::info("patches installed");
   }

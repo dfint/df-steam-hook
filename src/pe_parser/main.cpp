@@ -1,23 +1,39 @@
 #include "pe_parser.hpp"
+#include <filesystem>
 #include <format>
+#include <fstream>
 #include <iostream>
+
+/*
+ * first argument - path to Dwarf Fortress.exe
+ * second argument - file with strings to translate
+ */
 
 int main(int argc, char* argv[])
 {
+  std::ifstream file(argv[2]);
+  if (!file.is_open()) {
+    std::puts(std::format("unable to open strings file {}", argv[2]).data());
+    return EXIT_FAILURE;
+  }
 
   auto parser = PEParser::GetSingleton();
   parser->OpenFile(argv[1]);
-
   std::puts(std::format("pe loaded: {}", argv[1]).data());
 
-  for (int i = 2; i < argc; ++i) {
-    auto res = parser->FindString(argv[i]);
+  std::ofstream output(std::format("{}.out.txt ", argv[2]).data());
+  std::string line;
+  while (std::getline(file, line)) {
+    auto res = parser->FindString(line);
     if (res) {
-      std::puts(std::format("string: {} - 0x{:x}", argv[i], res.value()).data());
+      output << std::format("0x{:x}", res.value()).data() << "\n";
     } else {
-      std::puts(std::format("string: {} - none", argv[i]).data());
+      output << "0x0";
     }
   }
+
+  output.close();
+  file.close();
 
   return EXIT_SUCCESS;
 }
