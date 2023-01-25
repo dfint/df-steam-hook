@@ -11,11 +11,11 @@ void Dictionary::ReplaceAll(std::string& subject, const std::string& search, con
 
 std::string Dictionary::Sanitize(std::string& str)
 {
-  ReplaceAll(str, R"(\\)", "\\");
-  ReplaceAll(str, R"(\t)", "\t");
-  ReplaceAll(str, R"(\r)", "\r");
-  ReplaceAll(str, R"(\n)", "\n");
-  ReplaceAll(str, R"(")", "\"");
+  // ReplaceAll(str, R"(\\)", "\\");
+  // ReplaceAll(str, R"(\t)", "\t");
+  // ReplaceAll(str, R"(\r)", "\r");
+  // ReplaceAll(str, R"(\n)", "\n");
+  ReplaceAll(str, R"("")", "\"");
   return str;
 }
 
