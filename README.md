@@ -1,29 +1,24 @@
-# df-steam-hook
+# df-steam-hook-kr
 
 [![XMake](https://github.com/dfint/df-steam-hook/actions/workflows/xmake.yml/badge.svg)](https://github.com/dfint/df-steam-hook/actions/workflows/xmake.yml)
 [![clang-format Check](https://github.com/dfint/df-steam-hook/actions/workflows/clang-format-check.yml/badge.svg)](https://github.com/dfint/df-steam-hook/actions/workflows/clang-format-check.yml)
 
-## Basic feature:
+## 기본 기능:
 
-- Intercept text in Dwarf Fortress game and replace according to dfint_dictionary.csv
+- 드워프 포트리스 글자를 가로채서 dfint_dictionary.csv 와 kr_regex.txt를 참고해서 글자를 그림으로 생성 후에 화면에 뿌립니다.
 
-## Additional features:
+## 추가 기능:
 
-- Creates crash reports (`cr_*.txt` files) when the game crashes
-- Can support several features of DF at the same time, support of new versions is possible to add with adding a config file to `dfint_data/offset` directory;
-- Useful hotkeys:
-  - <kbd>Ctrl</kbd>+<kbd>F2</kbd> - reload csv dictionary file;
-  - <kbd>Ctrl</kbd>+<kbd>F3</kbd> - switch the translation off;
-  - <kbd>Ctrl</kbd>+<kbd>F4</kbd> - switch the translation on.
+- 게임 충돌 할 때 (`cr_*.txt` files) 파일 생성합니다
+- 적용된 번역을 상황을 보기 위해서 (dfint_log.log) 파일 생성합니다. !뭔가 잘못 오류가 생겼을때 무지막지한 용량이 됩니다 확인하세요! 
+- DF의 버전 별로 동시에 지원할 수 있으며, `dfint_data/offset` 디렉토리에 구성 파일을 추가하여 새 버전을 추가할 수 있습니다.;
+- 단축키:
+  - <kbd>Ctrl</kbd>+<kbd>F2</kbd> - csv 파일 다시 읽시;
+  - <kbd>Ctrl</kbd>+<kbd>F3</kbd> - 번역 끄기;
+  - <kbd>Ctrl</kbd>+<kbd>F4</kbd> - 번역 켜기.
+- dfint_config.toml파일에서 폰트, 사이즈 조절 가능
+## 추가 사항:
 
-## How to install:
+- 아직 많이 부족합니다만 번역에 조금이라도 도움이 되고자 업로드 합니다.
+- 능력자분들 코드 개선에 많은 도움 좀 주세요~! 
 
-Unpack `dfint-steam-hook-*.zip` to the game's directory and run `dfint_launcher.exe` file. It will run the game with translation applied.
-
-For your language you'll need to prepare csv file from the [hardcoded_steam resource on transifex](https://www.transifex.com/dwarf-fortress-translation/dwarf-fortress-steam/hardcoded_steam/). The package contains an empty csv file as a placeholder, so you'll not see any translation before you generate actual csv file for your language.
-
-To do this, you need to use tools from [df-gettext-toolkit](https://github.com/dfint/df-gettext-toolkit) repository, see the first example in "Usage examples". The last parameter must be an encoding which is relevant for your language. E.g. for Esperanto can be used `latin3`.
-
-Also you'll probably need to modify `curses_640x300.png` font in the `data/art` directory of the game according to the encoding you've chosen on the to encode csv file. You don't need to redraw the entire font just add characters which is necessary to display text in your language correctly.
-
-Later we'll add posibility to create csv file using [df-translation-client](https://github.com/dfint/df-translation-client).

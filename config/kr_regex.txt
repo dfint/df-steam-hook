@@ -1,16 +1,41 @@
 ########################
-#@문법
+#@정규식
+# ([^\\.^\\,]*)[,.] 	>> {s} 모든문자 마지막에 점,쉼표 있어야됨 탐색에는 점 제외함
+# (.*)		>> {s,} 모든문자
+# ([\\d]*)		>> {d} 숫자
+# $1,$2,$3... 매칭된 값 들어가는 곳
 ########################
+{d}nd {s}=$1번째 $2
+Early {s}=이른 $1
+Late {s}=늦은 $1
 
-She \s=그녀는 \1
-She is\s=그녀는 \1
-She has\s,=그녀는 \1 가졌고,
 
-\s and \s,=\1 그리고 \2,
+She is unfettered {s,}=그녀는 $1 영향이 없다.
+She is not distracted {s,}=그녀는 $1 산만해지지 않는다.
+She is unfocused {s,}=그녀는 $1 집중을 잃었다.
 
-He \s=그는 \1
-He is\s=그는 \1
-He has\s,=그는 \1 가졌고,
+She {s,}=그녀는 $1
+has {s,}=$1 가졌다.
+{s,} her {s,}=$2의 $1
+{s,} her=$1
+
+
+
+{s,}she is {s,}=$1그녀는 $2
+She {s,}her=그녀는 $1
+she holds {s,} {s,}=그녀는 $1(을)를 $2
+She {s,} her {s,}=그녀는 $2의 $1
+
+but she has {s,}=그렇지만 그녀는 $1
+
+{s,} and {s,}=$1 그리고 $2
+
+
+He is unfettered {s}=그는 $1 영향이 없다
+He is not distracted {s}=그는 $1 산만해지지 않는다
+He is unfocused {s}=그는 $1 집중을 잃었다
+He has {s}=그는 $1 가졌다
+Overall, he is {s}=전반적으로 그는 $1
+
 
 He=그
-
