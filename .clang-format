@@ -15,7 +15,7 @@ BraceWrapping:
   AfterStruct: true
   AfterUnion: true
 BreakBeforeBraces: Custom
-ColumnLimit: 120
+ColumnLimit: 150
 IndentPPDirectives: AfterHash
 SortUsingDeclarations: true
 SpaceAfterTemplateKeyword: true

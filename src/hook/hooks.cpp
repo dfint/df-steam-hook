@@ -69,8 +69,7 @@ namespace Hook
       }
    }
 
-   template <auto T>
-   int InjectTTFwstring(std::string &str, int x, int y, justification_ justify, int src_length = 0, int flag = 0)
+   template <auto T> int InjectTTFwstring(std::string &str, int x, int y, justification_ justify, int src_length = 0, int flag = 0)
    {
       if (ttf_injection_lock) return 0;
       if (g_textures_ptr == NULL) return 0;
@@ -119,8 +118,7 @@ namespace Hook
       if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr && g_main_replace == false)
       {
          // InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
-         auto tile =
-             ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Main>(gps->screenx, gps->screeny);
+         auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Main>(gps->screenx, gps->screeny);
          tile->tex_pos = 0;
       }
       ORIGINAL(addchar)(gps, symbol, advance);
@@ -142,11 +140,10 @@ namespace Hook
 
    // allocate screen array
    SETUP_ORIG_FUNC(gps_allocate);
-   void __fastcall HOOK(gps_allocate)(void *ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z,
-                                      int dispy_z)
+   void __fastcall HOOK(gps_allocate)(void *ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z, int dispy_z)
    {
-      logger::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy,
-                    screen_width, screen_height, dispx_z, dispy_z);
+      logger::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy, screen_width, screen_height,
+                    dispx_z, dispy_z);
       ORIGINAL(gps_allocate)(ptr, dimx, dimy, screen_width, screen_height, dispx_z, dispy_z);
       ScreenManager::GetSingleton()->AllocateScreen(dimx, dimy);
 
@@ -167,8 +164,7 @@ namespace Hook
 
    // render for main matrix
    SETUP_ORIG_FUNC(screen_to_texid);
-   Either<texture_fullid, texture_ttfid> *__fastcall HOOK(screen_to_texid)(renderer_ *renderer, __int64 a2, int x,
-                                                                           int y)
+   Either<texture_fullid, texture_ttfid> *__fastcall HOOK(screen_to_texid)(renderer_ *renderer, __int64 a2, int x, int y)
    {
       Either<texture_fullid, texture_ttfid> *texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
       if (ScreenManager::GetSingleton()->isInitialized() && g_gps_main)
@@ -184,8 +180,7 @@ namespace Hook
 
    // renderer for top screen matrix
    SETUP_ORIG_FUNC(screen_to_texid_top);
-   Either<texture_fullid, texture_ttfid> *__fastcall HOOK(screen_to_texid_top)(renderer_ *renderer, __int64 a2, int x,
-                                                                               int y)
+   Either<texture_fullid, texture_ttfid> *__fastcall HOOK(screen_to_texid_top)(renderer_ *renderer, __int64 a2, int x, int y)
    {
       Either<texture_fullid, texture_ttfid> *texture_by_id = ORIGINAL(screen_to_texid_top)(renderer, a2, x, y);
       if (ScreenManager::GetSingleton()->isInitialized() && g_gps_main)
@@ -291,8 +286,7 @@ namespace Hook
          auto translation = Dictionary::GetSingleton()->Get(str);
          if (translation)
          {
-            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx,
-                                                                          gps->screeny, justify);
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx, gps->screeny, justify);
             std::string blank;
             blank.resize(count, ' ');
             g_main_replace = true;
@@ -302,6 +296,30 @@ namespace Hook
          }
       }
       ORIGINAL(addst)(gps, str, justify, space);
+   }
+
+   // void GetCoordStringToInt(std::string &str, int &x, int &y)
+   // {
+   //    if (str.find('#') != std::string::npos)
+   //    {
+   //       std::string coord_x = str.substr(str.find('#') + 1, str.find_last_of('#') - str.find('#') - 1);
+   //       std::string coord_y = str.substr(str.find_last_of('#') + 1);
+   //       str.erase(str.find('#'));
+   //       x = std::stoi(coord_x);
+   //       y = std::stoi(coord_y);
+   //    }
+   // }
+
+   bool StringSkipCheck(std::string &str, graphicst_ *gps)
+   {
+      if (str.find("$SKIP") != std::string::npos)
+      {
+         str = " ";
+         gps->screenx = 0;
+         gps->screeny = 0;
+         return true;
+      }
+      return false;
    }
 
    // strings handling for dialog windows (top screen matrix)
@@ -315,10 +333,10 @@ namespace Hook
          if (translation)
          {
             // spdlog::debug("TOP src:{}  trans:{}  x{} y{}", str, translation.value(), gps->screenx, gps->screeny);
-            int count = InjectTTFwstring<ScreenManager::ScreenType::Top>(translation.value(), gps->screenx,
-                                                                         gps->screeny, justify_left, str.length());
-            std::string blank;
-            blank.resize(count, ' ');
+            std::string tstr(translation.value());
+            if(StringSkipCheck(tstr, gps) == false)
+               int count = InjectTTFwstring<ScreenManager::ScreenType::Top>(tstr, gps->screenx, gps->screeny, justify_left, str.length());
+            std::string blank(54,' ');
             g_top_replace = true;
             LockedCall(ttf_injection_lock, ORIGINAL(addst_top), gps, blank, a3);
             g_top_replace = false;
@@ -341,8 +359,9 @@ namespace Hook
          if (translation)
          {
             // spdlog::debug("## addcoloredst {}", translation.value());
-            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx,
-                                                                          gps->screeny, justify_left, len);
+            std::string tstr(translation.value());
+            StringSkipCheck(tstr, gps);
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(tstr, gps->screenx, gps->screeny, justify_left, len);
             std::string blank;
             blank.resize(len, ' ');
             g_main_replace = true;
@@ -370,8 +389,8 @@ namespace Hook
             // spdlog::debug("## addst_flag {} {} x{} y{}, a3:{}, a4:{}, some_flag {}", str, translation.value(),
             // gps->screenx, gps->screeny, a3, a4,
             //             some_flag);
-            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(
-                translation.value(), gps->screenx, gps->screeny, justify_left, str.length(), some_flag);
+            int count = InjectTTFwstring<ScreenManager::ScreenType::Main>(translation.value(), gps->screenx, gps->screeny, justify_left, str.length(),
+                                                                          some_flag);
             std::string blank;
             blank.resize(count, ' ');
             g_main_replace = true;
@@ -500,8 +519,7 @@ namespace Hook
 
    // main handler for input from keyboard
    SETUP_ORIG_FUNC(standardstringentry);
-   int __fastcall HOOK(standardstringentry)(std::string &str, int maxlen, unsigned int flag,
-                                            std::set<InterfaceKey> &events)
+   int __fastcall HOOK(standardstringentry)(std::string &str, int maxlen, unsigned int flag, std::set<InterfaceKey> &events)
    {
       char entry = char(1);
 

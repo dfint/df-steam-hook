@@ -17,7 +17,6 @@ class Dictionary
    void Add(std::pair<std::string, std::string> &pair);
    size_t Size();
    void Clear();
-   void CompleteBuffer();
 
  private:
    Dictionary() {}
@@ -27,7 +26,8 @@ class Dictionary
    ~Dictionary() = default;
 
    void ReplaceAll(std::string &subject, const std::string &search, const std::string &replace);
-   void EraseFrontBackBlank(std::string &str);
+   std::string EraseFrontBackBlank(std::string &str);
+   std::string EraseStringComma(std::string &str);
    std::pair<std::string, std::string> Split(const std::string &str);
    std::string Sanitize(std::string &str);
 
@@ -36,21 +36,18 @@ class Dictionary
    void RegexRplace(std::string &str, bool on);
 
    std::optional<std::string> StoreStringBuffer(const char *key, int x, int y);
-   void StoreTopString(const char *key, int x, int y);
+   // void StoreTopString(const char *key, int x, int y);
+   void InitBuffer();
+   void TranslationBuffer();
    void PrepareBufferOut();
-   void InitBufferVar();
-   void MakeupString();
+   void FlushBuffer();
+   // void MakeupString();
 
-   bool is_continuous = false;
-   const int line_limit = 35;
+   const std::string SKIP = "$SKIP";
+   const int line_limit = 32;
    int start_line = -1;
    int pre_line = -1;
-   int end_line = 0;
-
    bool is_top = false;
-   int top_start = -1;
-   int top_pre = -1;
-   int top_end = -1;
 
    std::unordered_map<std::string, std::string> dict;
    std::unordered_map<std::string, std::string> dict_log;
@@ -59,6 +56,5 @@ class Dictionary
 
    std::vector<std::string> key_vec;
    std::queue<std::string> value_queue;
-
-   std::stringstream top_buffer;
+   std::string string_buffer;
 };
