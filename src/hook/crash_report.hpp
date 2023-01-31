@@ -91,7 +91,7 @@ namespace CrashReport {
     std::string errcode = ErrCodeToString(ExceptionInfo->ExceptionRecord->ExceptionCode);
 
     if (EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode) {
-      auto cr_filename = "./dfint_data/crash_reports/cr_" + Utils::now() + ".txt";
+      auto cr_filename = Config::Setting::crash_report_dir + "cr_" + Utils::now() + ".txt";
       auto cr_file = GetCrashReportLogHandle(cr_filename);
 
       cr_file << "Version: " << Config::Metadata::version << "\n";

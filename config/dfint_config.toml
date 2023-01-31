@@ -4,5 +4,10 @@ name = "dfint localization hook"
 [settings]
 # trace - 0, debug - 1, info - 2, error - 4
 log_level = 0
+log_file = "./dfint_data/dfint_log.log"
 crash_report = true
+crash_report_dir = "./dfint_data/crash_reports/"
 enable_search = true
+enable_translation = true
+dictionary = "./dfint_data/dfint_dictionary.csv"
+watchdog = true

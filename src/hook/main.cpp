@@ -18,7 +18,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
   switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH: {
       InitLogger();
-      Watchdog::WatchKeyboard();
+      if (Config::Setting::watchdog) {
+        Watchdog::WatchKeyboard();
+      }
 
       if (Config::Metadata::name != "dfint localization hook") {
         logger::critical("unable to find config file");
@@ -29,13 +31,15 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       logger::info("pe checksum: 0x{:x}", Config::Metadata::checksum);
       logger::info("offsets version: {}", Config::Metadata::version);
 
-      Dictionary::GetSingleton()->LoadCsv("./dfint_data/dfint_dictionary.csv");
+      Dictionary::GetSingleton()->LoadCsv(Config::Setting::dictionary);
 
       DetourRestoreAfterWith();
       DetourTransactionBegin();
       DetourUpdateThread(GetCurrentThread());
 
-      Hooks::InstallTranslation();
+      if (Config::Setting::enable_translation) {
+        Hooks::InstallTranslation();
+      }
       // Hooks::InstallTTFInjection();
       // Hooks::InstallStateManager();
 
@@ -49,7 +53,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       DetourTransactionBegin();
       DetourUpdateThread(GetCurrentThread());
 
-      Hooks::UninstallTranslation();
+      if (Config::Setting::enable_translation) {
+        Hooks::UninstallTranslation();
+      }
       // Hooks::UninstallTTFInjection();
       // Hooks::UninstallStateManager();
       logger::info("hooks uninstalled");

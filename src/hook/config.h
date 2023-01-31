@@ -42,10 +42,11 @@ namespace Config {
   inline auto pe_timestamp = Config::PETimestamp("Dwarf Fortress.exe");
   inline auto offsets = Config::GetOffsetsFile(Config::pe_timestamp);
 
-  inline auto strings_patches_nodes =
-    Config::offsets["offsets"]["strings_patches"] ? Config::offsets["offsets"]["strings_patches"].as_array() : nullptr;
-  inline std::vector<uintptr_t> ConvertStringsOffsetArray()
+  inline std::vector<uintptr_t> GetStringsOffsetArray()
   {
+    auto strings_patches_nodes = Config::offsets["offsets"]["strings_patches"]
+                                   ? Config::offsets["offsets"]["strings_patches"].as_array()
+                                   : nullptr;
     std::vector<uintptr_t> strings_patches{};
     if (strings_patches_nodes) {
       for (toml::node& item : *strings_patches_nodes) {
@@ -71,9 +72,15 @@ namespace Config {
   namespace Setting {
 
     inline auto log_level = Config::config["settings"]["log_level"].value_or<int>(0);
+    inline auto log_file = Config::config["settings"]["log_file"].value_or<std::string>("./dfint_data/dfint_log.log");
     inline auto crash_report = Config::config["settings"]["crash_report"].value_or<bool>(true);
     inline auto enable_search = Config::config["settings"]["enable_search"].value_or<bool>(true);
-    inline bool enable_translation = true;
+    inline bool enable_translation = Config::config["settings"]["enable_translation"].value_or<bool>(true);
+    inline auto dictionary =
+      Config::config["settings"]["dictionary"].value_or<std::string>("./dfint_data/dfint_dictionary.csv");
+    inline auto crash_report_dir =
+      Config::config["settings"]["crash_report_dir"].value_or<std::string>("./dfint_data/crash_reports/");
+    inline auto watchdog = Config::config["settings"]["watchdog"].value_or<bool>(true);
 
   } // namespace Setting
 
@@ -115,7 +122,7 @@ namespace Config {
       Config::offsets["offsets"]["loading_world_start_new_game_loop"].value_or<uintptr_t>(0);
     inline auto menu_interface_loop = Config::offsets["offsets"]["menu_interface_loop"].value_or<uintptr_t>(0);
 
-    inline auto strings_patches = Config::ConvertStringsOffsetArray();
+    inline auto strings_patches = Config::GetStringsOffsetArray();
 
   } // namespace Offset
 } // namespace Config
