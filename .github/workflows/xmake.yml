@@ -3,8 +3,16 @@ name: XMake
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'deps/**'
+      - xmake.lua
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'deps/**'
+      - xmake.lua
 
 jobs:
   build:
