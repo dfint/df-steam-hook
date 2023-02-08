@@ -44,9 +44,8 @@ namespace Config {
 
   inline std::vector<uintptr_t> GetStringsOffsetArray()
   {
-    auto strings_patches_nodes = Config::offsets["offsets"]["strings_patches"]
-                                   ? Config::offsets["offsets"]["strings_patches"].as_array()
-                                   : nullptr;
+    auto strings_patches_nodes =
+      Config::offsets["offsets"]["string_patches"] ? Config::offsets["offsets"]["string_patches"].as_array() : nullptr;
     std::vector<uintptr_t> strings_patches{};
     if (strings_patches_nodes) {
       for (toml::node& item : *strings_patches_nodes) {
@@ -75,7 +74,8 @@ namespace Config {
     inline auto log_file = Config::config["settings"]["log_file"].value_or<std::string>("./dfint_data/dfint_log.log");
     inline auto crash_report = Config::config["settings"]["crash_report"].value_or<bool>(true);
     inline auto enable_search = Config::config["settings"]["enable_search"].value_or<bool>(true);
-    inline bool enable_translation = Config::config["settings"]["enable_translation"].value_or<bool>(true);
+    inline auto enable_translation = Config::config["settings"]["enable_translation"].value_or<bool>(true);
+    inline auto enable_patches = Config::config["settings"]["enable_patches"].value_or<bool>(true);
     inline auto dictionary =
       Config::config["settings"]["dictionary"].value_or<std::string>("./dfint_data/dfint_dictionary.csv");
     inline auto crash_report_dir =
@@ -83,6 +83,12 @@ namespace Config {
     inline auto watchdog = Config::config["settings"]["watchdog"].value_or<bool>(true);
 
   } // namespace Setting
+
+  namespace Keybinding {
+
+    inline auto shift = Config::offsets["offsets"]["keybinding"].value_or<uint32_t>(0);
+
+  } // namespace Keybinding
 
   namespace Offset {
 
@@ -122,9 +128,10 @@ namespace Config {
       Config::offsets["offsets"]["loading_world_start_new_game_loop"].value_or<uintptr_t>(0);
     inline auto menu_interface_loop = Config::offsets["offsets"]["menu_interface_loop"].value_or<uintptr_t>(0);
 
-    inline auto strings_patches = Config::GetStringsOffsetArray();
+    inline auto string_patches = Config::GetStringsOffsetArray();
 
   } // namespace Offset
+
 } // namespace Config
 
 #endif

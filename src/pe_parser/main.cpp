@@ -27,8 +27,10 @@ int main(int argc, char* argv[])
     auto res = parser->FindString(line);
     if (res) {
       output << std::format("0x{:x}", res.value()).data() << "\n";
+      std::cout << std::format("0x{:x}", res.value()).data() << " >> " << line << "\n";
     } else {
-      output << "0x0";
+      output << "0x0\n";
+      std::cout << "nothing found >> " << line << "\n";
     }
   }
 

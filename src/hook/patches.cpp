@@ -9,7 +9,7 @@ namespace Patches {
     return reinterpret_cast<void*>(module_handle + offset);
   }
 
-  size_t Align(size_t n, size_t edge = 8)
+  size_t Align(size_t n, size_t edge = 4)
   {
     return (n + edge - 1) & (-edge);
   }
@@ -44,13 +44,16 @@ namespace Patches {
     }
   }
 
+  void BatchStringPatching()
+  {
+    for (auto& offset : Config::Offset::string_patches) {
+      TranslateStringByOffset(offset);
+    }
+  }
+
   void Install()
   {
-    TranslateStringByOffset(0x10C1D40);
-    TranslateStringByOffset(0x10C1D90);
-    TranslateStringByOffset(0x10C1D98);
-    // TranslateStringByOffset(0x11BCC0C); // s]
-
+    BatchStringPatching();
     logger::info("patches installed");
   }
 

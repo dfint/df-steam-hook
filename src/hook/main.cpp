@@ -43,7 +43,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       // Hooks::InstallTTFInjection();
       // Hooks::InstallStateManager();
 
-      // Patches::Install();
+      if (Config::Setting::enable_patches) {
+        Patches::Install();
+      }
 
       DetourTransactionCommit();
       logger::info("hooks installed");

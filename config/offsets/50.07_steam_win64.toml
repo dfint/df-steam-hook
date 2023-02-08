@@ -1,0 +1,39 @@
+[metadata]
+name = "dfint localization hook offsets"
+version = "50.07 steam win64"
+checksum = 0x63e29e0c
+
+[offsets]
+# translation
+string_copy = 0xB850
+string_copy_n = 0xB870
+string_append = 0xB610
+string_append_0 = 0xB630
+string_append_n = 0xB9B0
+convert_ulong_to_string = 0x392C70
+addst = 0x7C3810
+addst_top = 0x7C38F0
+addcoloredst = 0x7C34C0
+addst_flag = 0x7C35A0
+# search
+standardstringentry = 0x8BE7D0
+simplify_string = 0x3937B0
+upper_case_string = 0x393AF0
+lower_case_string = 0x393950
+capitalize_string_words = 0x393C90
+capitalize_string_first_word = 0x393F10
+# ttf
+addchar = 0x56200
+addchar_top = 0xF3D60
+add_texture = 0xED0C70
+gps_allocate = 0x5FE030
+cleanup_arrays = 0x5FDE50
+screen_to_texid = 0x5F60C0
+screen_to_texid_top = 0x5F62B0
+# game state
+loading_world_new_game_loop = 0xA42340
+loading_world_continuing_game_loop = 0x5A0D50
+loading_world_start_new_game_loop = 0x59E9A0
+menu_interface_loop = 0x173150
+# keybinding shift
+keybinding = 370

@@ -1,0 +1,39 @@
+[metadata]
+name = "dfint localization hook offsets"
+version = "50.07 itch.io win64"
+checksum = 0x63e2a0d6
+
+[offsets]
+# translation
+string_copy = 0xB7D0
+string_copy_n = 0xB7F0
+string_append = 0xB590
+string_append_0 = 0xB5B0
+string_append_n = 0xB930
+convert_ulong_to_string = 0x390740
+addst = 0x7C0E90
+addst_top = 0x7C0F70
+addcoloredst = 0x7C0B40
+addst_flag = 0x7C0C20
+# search
+standardstringentry = 0x8BBDA0
+simplify_string = 0x3910E0
+upper_case_string = 0x391420
+lower_case_string = 0x391280
+capitalize_string_words = 0x3915C0
+capitalize_string_first_word = 0x391840
+# ttf
+addchar = 0x56180
+addchar_top = 0xF3CD0
+add_texture = 0xECC540
+gps_allocate = 0x5FB800
+cleanup_arrays = 0x5FB620
+screen_to_texid = 0x5F3890
+screen_to_texid_top = 0x5F3A80
+# game state
+loading_world_new_game_loop = 0xA3DC10
+loading_world_continuing_game_loop = 0x59E520
+loading_world_start_new_game_loop = 0x59C170
+menu_interface_loop = 0x172D10
+# keybinding shift
+keybinding = 370

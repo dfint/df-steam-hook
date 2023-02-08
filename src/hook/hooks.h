@@ -166,7 +166,6 @@ namespace Hooks {
   typedef void(__fastcall* addst_top)(graphicst_* gps, std::string& str, __int64 a3);
   typedef void(__fastcall* addcoloredst)(graphicst_* gps, const char* str, __int64 a3);
   typedef void(__fastcall* addst_flag)(graphicst_* a1, std::string& str, __int64 a3, __int64 a4, int a5);
-  typedef void(__fastcall* addst_template)(renderer_2d_base_* renderer, std::string& str);
 
   // search
   typedef int(__fastcall* standardstringentry)(std::string& str, int maxlen, unsigned int flag,

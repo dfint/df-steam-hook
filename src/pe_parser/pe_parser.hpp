@@ -12,13 +12,13 @@ public:
     return &singleton;
   }
 
-  void OpenFile(const char* filename)
+  void OpenFile(const std::string& filename)
   {
     this->filename = filename;
     if (this->file != NULL) {
       fclose(this->file);
     }
-    this->file = fopen(filename, "rb");
+    this->file = fopen(filename.c_str(), "rb");
 
     if (this->file == NULL) {
       std::cerr << "unbale to open file\n";
@@ -64,7 +64,7 @@ public:
       if (buf == target) {
         return this->rdata_offset + it + this->rdata_virtual_shift;
       }
-      it += 8;
+      it += 4;
     }
     return std::nullopt;
   }
@@ -83,7 +83,7 @@ private:
   PEParser(PEParser&&) = delete;
 
   FILE* file;
-  const char* filename;
+  std::string filename;
   IMAGE_DOS_HEADER* dos_header = new IMAGE_DOS_HEADER;
   IMAGE_NT_HEADERS64* nt_headers = new IMAGE_NT_HEADERS64;
   uintptr_t rdata_offset;

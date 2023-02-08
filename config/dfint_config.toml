@@ -9,5 +9,6 @@ crash_report = true
 crash_report_dir = "./dfint_data/crash_reports/"
 enable_search = true
 enable_translation = true
+enable_patches = false
 dictionary = "./dfint_data/dfint_dictionary.csv"
 watchdog = true

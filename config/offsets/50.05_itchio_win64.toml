@@ -15,7 +15,6 @@ addst = 0x782190
 addst_top = 0x7822E0
 addcoloredst = 0x781DC0
 addst_flag = 0x781EA0
-addst_template = 0x96BB90
 # search
 standardstringentry = 0x87C1D0
 simplify_string = 0x359F70
@@ -36,3 +35,5 @@ loading_world_new_game_loop = 0x9F8A60
 loading_world_continuing_game_loop = 0x5645B0
 loading_world_start_new_game_loop = 0x562930
 menu_interface_loop = 0x167490
+# keybinding shift
+keybinding = 357

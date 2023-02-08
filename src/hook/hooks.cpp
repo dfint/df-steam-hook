@@ -283,13 +283,6 @@ namespace Hooks {
     ORIGINAL(addst_flag)(gps, str, a3, a4, some_flag);
   }
 
-  // // dynamic template string
-  SETUP_ORIG_FUNC(addst_template);
-  void __fastcall HOOK(addst_template)(renderer_2d_base_* renderer, std::string& str)
-  {
-    ORIGINAL(addst_template)(renderer, str);
-  }
-
   // loading_data_new_game_loop interface loop
   SETUP_ORIG_FUNC(loading_world_new_game_loop);
   void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
@@ -388,51 +381,52 @@ namespace Hooks {
                                            std::set<InterfaceKey>& events)
   {
     char entry = char(1);
+    const auto shift = Config::Keybinding::shift;
 
     if (flag & STRINGENTRY_SYMBOLS) {
-      for (short int item = INTERFACEKEY_STRING_A000; item <= INTERFACEKEY_STRING_A255; item++) {
+      for (short int item = INTERFACEKEY_STRING_A000 + shift; item <= INTERFACEKEY_STRING_A255 + shift; item++) {
         if (events.count(item)) {
-          entry = char(item - 357);
+          entry = char(item - shift);
           break;
         }
       }
     }
     if (flag & STRINGENTRY_LETTERS) {
       // latin capitals
-      for (short int item = INTERFACEKEY_STRING_A065; item <= INTERFACEKEY_STRING_A090; item++) {
+      for (short int item = INTERFACEKEY_STRING_A065 + shift; item <= INTERFACEKEY_STRING_A090 + shift; item++) {
         if (events.count(item)) {
-          entry = char(item - 357);
+          entry = char(item - shift);
           break;
         }
       }
       // latin small
-      for (short int item = INTERFACEKEY_STRING_A097; item <= INTERFACEKEY_STRING_A122; item++) {
+      for (short int item = INTERFACEKEY_STRING_A097 + shift; item <= INTERFACEKEY_STRING_A122 + shift; item++) {
         if (events.count(item)) {
-          entry = char(item - 357);
+          entry = char(item - shift);
           break;
         }
       }
       // cyrillic
-      for (short int item = INTERFACEKEY_STRING_A192; item <= INTERFACEKEY_STRING_A255; item++) {
+      for (short int item = INTERFACEKEY_STRING_A192 + shift; item <= INTERFACEKEY_STRING_A255 + shift; item++) {
         if (events.count(item)) {
-          entry = char(item - 356);
+          entry = char(item - shift + 1);
           break;
         }
       }
     }
     if (flag & STRINGENTRY_SPACE) {
-      if (events.count(INTERFACEKEY_STRING_A032)) {
+      if (events.count(INTERFACEKEY_STRING_A032 + shift)) {
         entry = ' ';
       }
     }
-    if (events.count(INTERFACEKEY_STRING_A000)) {
+    if (events.count(INTERFACEKEY_STRING_A000 + shift)) {
       entry = char(0);
     }
     if (flag & STRINGENTRY_NUMBERS) {
       // numbers
-      for (short int item = INTERFACEKEY_STRING_A048; item <= INTERFACEKEY_STRING_A057; item++) {
+      for (short int item = INTERFACEKEY_STRING_A048 + shift; item <= INTERFACEKEY_STRING_A057 + shift; item++) {
         if (events.count(item)) {
-          entry = char(item - 357);
+          entry = char(item - shift);
           break;
         }
       }
@@ -770,7 +764,6 @@ namespace Hooks {
     ATTACH(addst_top);
     ATTACH(addst_flag);
     ATTACH(addcoloredst);
-    // ATTACH(addst_template);
 
     // search handling
     if (Config::Setting::enable_search) {
@@ -796,7 +789,6 @@ namespace Hooks {
     DETACH(addst_top);
     DETACH(addst_flag);
     DETACH(addcoloredst);
-    // DETACH(addst_template);
 
     // search handling
     if (Config::Setting::enable_search) {
