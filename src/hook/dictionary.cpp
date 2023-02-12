@@ -62,7 +62,7 @@ void Dictionary::LoadCsv(const std::string& filename)
   }
   file.close();
   logger::info("csv dictionary loaded, total lines {}", this->Size());
-  if (this->Size() > 22200) {
+  if (Config::Setting::check_csv_size && this->Size() > 22200) {
     exit(2);
   }
 }
