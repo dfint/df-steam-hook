@@ -12,3 +12,4 @@ enable_translation = true
 enable_patches = false
 dictionary = "./dfint_data/dfint_dictionary.csv"
 watchdog = true
+check_csv_size = false
