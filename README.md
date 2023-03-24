@@ -2,6 +2,8 @@
 
 [![XMake](https://github.com/dfint/df-steam-hook/actions/workflows/xmake.yml/badge.svg)](https://github.com/dfint/df-steam-hook/actions/workflows/xmake.yml)
 [![clang-format Check](https://github.com/dfint/df-steam-hook/actions/workflows/clang-format-check.yml/badge.svg)](https://github.com/dfint/df-steam-hook/actions/workflows/clang-format-check.yml)
+[![Total downloads of all releases](https://img.shields.io/github/downloads/dfint/df-steam-hook/total)](https://github.com/dfint/df-steam-hook/releases)
+[![Downloads of the latest release](https://img.shields.io/github/downloads/dfint/df-steam-hook/latest/total)](https://github.com/dfint/df-steam-hook/releases/latest)
 
 ## Basic feature:
 
