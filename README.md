@@ -12,7 +12,7 @@
 ## Additional features:
 
 - Creates crash reports (`cr_*.txt` files) when the game crashes
-- Supports several version of DF, support of new versions is possible to add with adding a config file to `dfint_data/offset` directory;
+- Supports several version of DF, it is possible to add support of new versions with adding a config file to `dfint_data/offset` directory;
 - Useful hotkeys:
   - <kbd>Ctrl</kbd>+<kbd>F2</kbd> - reload csv dictionary file;
   - <kbd>Ctrl</kbd>+<kbd>F3</kbd> - switch the translation off;
