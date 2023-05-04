@@ -2,6 +2,8 @@
 
 [![XMake](https://github.com/dfint/df-steam-hook/actions/workflows/xmake.yml/badge.svg)](https://github.com/dfint/df-steam-hook/actions/workflows/xmake.yml)
 [![clang-format Check](https://github.com/dfint/df-steam-hook/actions/workflows/clang-format-check.yml/badge.svg)](https://github.com/dfint/df-steam-hook/actions/workflows/clang-format-check.yml)
+[![Total downloads of all releases](https://img.shields.io/github/downloads/dfint/df-steam-hook/total)](https://github.com/dfint/df-steam-hook/releases)
+[![Downloads of the latest release](https://img.shields.io/github/downloads/dfint/df-steam-hook/latest/total)](https://github.com/dfint/df-steam-hook/releases/latest)
 
 ## Basic feature:
 
@@ -10,7 +12,7 @@
 ## Additional features:
 
 - Creates crash reports (`cr_*.txt` files) when the game crashes
-- Can support several features of DF at the same time, support of new versions is possible to add with adding a config file to `dfint_data/offset` directory;
+- Supports several version of DF; it is possible to add support of new versions with adding a config file to `dfint_data/offset` directory;
 - Useful hotkeys:
   - <kbd>Ctrl</kbd>+<kbd>F2</kbd> - reload csv dictionary file;
   - <kbd>Ctrl</kbd>+<kbd>F3</kbd> - switch the translation off;
@@ -27,3 +29,5 @@ To do this, you need to use tools from [df-gettext-toolkit](https://github.com/d
 Also you'll probably need to modify `curses_640x300.png` font in the `data/art` directory of the game according to the encoding you've chosen on the to encode csv file. You don't need to redraw the entire font just add characters which is necessary to display text in your language correctly.
 
 Later we'll add posibility to create csv file using [df-translation-client](https://github.com/dfint/df-translation-client).
+
+Here you can get a csv file for the most languages from transifex automatically updated: https://github.com/dfint/autobuild/tree/main/translation_build

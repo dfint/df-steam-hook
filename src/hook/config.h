@@ -81,7 +81,6 @@ namespace Config {
     inline auto crash_report_dir =
       Config::config["settings"]["crash_report_dir"].value_or<std::string>("./dfint_data/crash_reports/");
     inline auto watchdog = Config::config["settings"]["watchdog"].value_or<bool>(true);
-    inline auto check_csv_size = Config::config["settings"]["check_csv_size"].value_or<bool>(true);
 
   } // namespace Setting
 
