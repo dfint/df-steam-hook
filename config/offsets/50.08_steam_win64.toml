@@ -16,7 +16,7 @@ addst_top = 0x7C5300
 addcoloredst = 0x7C4ED0
 addst_flag = 0x7C4FB0
 # search
-standartstringentry = 0x8C3F80
+standardstringentry = 0x8C3F80
 simplify_string = 0x394350
 upper_case_string = 0x394690
 lower_case_string = 0x3944F0
@@ -25,7 +25,7 @@ capitalize_string_first_word = 0x394AB0
 # ttf
 addchar = 0x561E0
 addchar_top = 0xF3D10
-addtexture = 0xEDBB20
+add_texture = 0xEDBB20
 gps_allocate = 0x5FF3C0
 cleanup_arrays = 0x5FF1E0
 screen_to_texid = 0x5F7450
