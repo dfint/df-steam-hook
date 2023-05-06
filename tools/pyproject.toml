@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "search-offsets"
+version = "0.1.0"
+description = ""
+authors = ["insolor <insolor@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "search_offsets"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+more-itertools = "^9.1.0"
+typer = "^0.9.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+isort = "^5.12.0"
+
+[tool.poetry.scripts]
+search = "search_offsets.search:app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
