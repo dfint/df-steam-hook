@@ -9,3 +9,8 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+
+  - package-ecosystem: "pip"
+    directory: "/tools"
+    schedule:
+      interval: "monthly"
