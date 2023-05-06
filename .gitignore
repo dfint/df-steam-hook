@@ -12,3 +12,4 @@ build/
 *.bak
 
 .ipynb_checkpoints/
+__pycache__/
