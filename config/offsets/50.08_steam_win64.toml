@@ -1,6 +1,6 @@
 [metadata]
 name = "dfint localization hook offsets"
-version = "50.08 itch.io win64"
+version = "50.08 steam win64"
 checksum = 0x644d7fd2
 
 [offsets]
