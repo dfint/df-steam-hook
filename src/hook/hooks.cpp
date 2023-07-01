@@ -378,8 +378,10 @@ namespace Hooks {
   // main handler for input from keyboard
   SETUP_ORIG_FUNC(standardstringentry);
   int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag,
-                                           std::set<InterfaceKey>& events)
+                                           std::set<InterfaceKey>& events, __int64 a5)
   {
+    return ORIGINAL(standardstringentry)(str, maxlen, flag, events, a5);
+
     char entry = char(1);
     const auto shift = Config::Keybinding::shift;
 
@@ -459,7 +461,12 @@ namespace Hooks {
     }
 
     return 0;
-    // return ORIGINAL(standardstringentry)(str, maxlen, flag, events);
+
+    logger::debug("entry str {} maxlen {} flag {} events size {} a5 {}", str, maxlen, flag, events.size(), a5);
+    logger::debug("entry {}", entry);
+    for (auto event : events) {
+      logger::debug("event {}", event);
+    }
   }
 
   SETUP_ORIG_FUNC(simplify_string);

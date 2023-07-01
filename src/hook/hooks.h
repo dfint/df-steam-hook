@@ -169,7 +169,7 @@ namespace Hooks {
 
   // search
   typedef int(__fastcall* standardstringentry)(std::string& str, int maxlen, unsigned int flag,
-                                               std::set<InterfaceKey>& events);
+                                               std::set<InterfaceKey>& events, __int64 a5);
   typedef void(__fastcall* upper_case_string)(std::string& str);
   typedef void(__fastcall* simplify_string)(std::string& str);
   typedef void(__fastcall* lower_case_string)(std::string& str);
