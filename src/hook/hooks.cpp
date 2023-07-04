@@ -378,10 +378,8 @@ namespace Hooks {
   // main handler for input from keyboard
   SETUP_ORIG_FUNC(standardstringentry);
   int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag,
-                                           std::set<InterfaceKey>& events, __int64 a5)
+                                           std::set<InterfaceKey>& events, uint16_t* utf)
   {
-    return ORIGINAL(standardstringentry)(str, maxlen, flag, events, a5);
-
     char entry = char(1);
     const auto shift = Config::Keybinding::shift;
 
@@ -434,6 +432,14 @@ namespace Hooks {
       }
     }
 
+    // patch after 50.09 with sdl2
+    // change only if utf code is in cyrillic zone, latin have small codes
+    if (*utf > 127 && entry != 0) {
+      if (cyrillic_utf8_to_cp1251.find(*utf) != cyrillic_utf8_to_cp1251.end()) {
+        entry = char(cyrillic_utf8_to_cp1251.at(*utf));
+      }
+    }
+
     if (entry != 1) {
       if (entry == 0) {
         if (str.size() > 0) {
@@ -461,12 +467,6 @@ namespace Hooks {
     }
 
     return 0;
-
-    logger::debug("entry str {} maxlen {} flag {} events size {} a5 {}", str, maxlen, flag, events.size(), a5);
-    logger::debug("entry {}", entry);
-    for (auto event : events) {
-      logger::debug("event {}", event);
-    }
   }
 
   SETUP_ORIG_FUNC(simplify_string);
