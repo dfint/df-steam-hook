@@ -339,39 +339,97 @@ namespace Hooks {
   }
 
   // search section below
-  void Capitalize(char& s)
+  void UpperCast(char& s, bool fix = false)
   {
     // latin capitalize
-    if (s >= 'a' && s <= 'z') {
-      s -= 'a';
-      s += 'A';
+    if (s >= (char)97 && s <= (char)122) {
+      s -= (char)97;
+      s += (char)65;
     }
     // cyrillic capitalize
-    if (s >= char(0xE0) && s <= char(0xFF)) {
-      s -= char(0xE0);
-      s += char(0xC0);
+    if (s >= (char)224 && s <= (char)255) {
+      s -= char(224);
+      s += char(192);
     }
     // cyrillic ё
-    if (s == char(0xB8)) {
-      s = char(0xA8);
+    if (s == (char)184) {
+      s = (char)168;
+    }
+
+    if (fix) {
+      switch (s) {
+        case (char)129:
+          s = (char)154;
+          break;
+        case (char)164:
+          s = (char)165;
+          break;
+        case (char)132:
+          s = (char)142;
+          break;
+        case (char)134:
+          s = (char)143;
+          break;
+        case (char)130:
+          s = (char)144;
+          break;
+        case (char)148:
+          s = (char)153;
+          break;
+        case (char)135:
+          s = (char)128;
+          break;
+        case (char)145:
+          s = (char)146;
+          break;
+      }
     }
   }
 
-  void LowerCast(char& s)
+  void LowerCast(char& s, bool fix = false)
   {
     // latin lowercast
-    if (s >= 'A' && s <= 'Z') {
-      s -= 'A';
-      s += 'a';
+    if (s >= (char)65 && s <= (char)90) {
+      s -= (char)65;
+      s += (char)97;
     }
     // cyrillic lowercast
-    if (s >= char(0xC0) && s <= char(0xDF)) {
-      s -= char(0xC0);
-      s += char(0xE0);
+    if (s >= (char)192 && s <= (char)223) {
+      s -= (char)192;
+      s += (char)224;
     }
     // cyrillic ё
-    if (s == char(0xA8)) {
-      s = char(0xB8);
+    if (s == (char)168) {
+      s = (char)184;
+    }
+
+    if (fix) {
+      switch (s) {
+        case (char)154:
+          s = (char)129;
+          break;
+        case (char)165:
+          s = (char)164;
+          break;
+        case (char)142:
+          s = (char)132;
+          break;
+        case (char)143:
+          s = (char)134;
+          break;
+        case (char)144:
+          s = (char)130;
+          break;
+        case (char)153:
+          s = (char)148;
+          break;
+        case (char)128:
+          s = (char)135;
+          break;
+        case (char)146:
+          s = (char)145;
+          break;
+      }
     }
   }
 
@@ -457,7 +515,7 @@ namespace Hooks {
           str.resize(cursor + 1);
         }
         if (flag & STRINGENTRY_CAPS) {
-          Capitalize(entry);
+          UpperCast(entry);
         }
 
         str[cursor] = entry;
@@ -532,33 +590,7 @@ namespace Hooks {
   void __fastcall HOOK(upper_case_string)(std::string& str)
   {
     for (int s = 0; s < str.size(); s++) {
-      Capitalize(str[s]);
-      switch (str[s]) {
-        case (char)129:
-          str[s] = (char)154;
-          break;
-        case (char)164:
-          str[s] = (char)165;
-          break;
-        case (char)132:
-          str[s] = (char)142;
-          break;
-        case (char)134:
-          str[s] = (char)143;
-          break;
-        case (char)130:
-          str[s] = (char)144;
-          break;
-        case (char)148:
-          str[s] = (char)153;
-          break;
-        case (char)135:
-          str[s] = (char)128;
-          break;
-        case (char)145:
-          str[s] = (char)146;
-          break;
-      }
+      UpperCast(str[s], true);
     }
   }
 
@@ -566,33 +598,7 @@ namespace Hooks {
   void __fastcall HOOK(lower_case_string)(std::string& str)
   {
     for (int s = 0; s < str.size(); s++) {
-      LowerCast(str[s]);
-      switch (str[s]) {
-        case (char)154:
-          str[s] = (char)129;
-          break;
-        case (char)165:
-          str[s] = (char)164;
-          break;
-        case (char)142:
-          str[s] = (char)132;
-          break;
-        case (char)143:
-          str[s] = (char)134;
-          break;
-        case (char)144:
-          str[s] = (char)130;
-          break;
-        case (char)153:
-          str[s] = (char)148;
-          break;
-        case (char)128:
-          str[s] = (char)135;
-          break;
-        case (char)146:
-          str[s] = (char)145;
-          break;
-      }
+      LowerCast(str[s], true);
     }
   }
 
@@ -614,33 +620,7 @@ namespace Hooks {
         }
       }
       if (s == 0 || conf) {
-        Capitalize(str[s]);
-        switch (str[s]) {
-          case (char)129:
-            str[s] = (char)154;
-            break;
-          case (char)164:
-            str[s] = (char)165;
-            break;
-          case (char)132:
-            str[s] = (char)142;
-            break;
-          case (char)134:
-            str[s] = (char)143;
-            break;
-          case (char)130:
-            str[s] = (char)144;
-            break;
-          case (char)148:
-            str[s] = (char)153;
-            break;
-          case (char)135:
-            str[s] = (char)128;
-            break;
-          case (char)145:
-            str[s] = (char)146;
-            break;
-        }
+        UpperCast(str[s], true);
       }
     }
   }
@@ -663,33 +643,7 @@ namespace Hooks {
         }
       }
       if (s == 0 || conf) {
-        Capitalize(str[s]);
-        switch (str[s]) {
-          case (char)129:
-            str[s] = (char)154;
-            return;
-          case (char)164:
-            str[s] = (char)165;
-            return;
-          case (char)132:
-            str[s] = (char)142;
-            return;
-          case (char)134:
-            str[s] = (char)143;
-            return;
-          case (char)130:
-            str[s] = (char)144;
-            return;
-          case (char)148:
-            str[s] = (char)153;
-            return;
-          case (char)135:
-            str[s] = (char)128;
-            return;
-          case (char)145:
-            str[s] = (char)146;
-            return;
-        }
+        UpperCast(str[s], true);
         if (str[s] != ' ' && str[s] != '\"')
           return;
       }
