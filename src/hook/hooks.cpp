@@ -355,38 +355,9 @@ namespace Hooks {
     if (s == (char)184) {
       s = (char)168;
     }
-
-    if (fix) {
-      switch (s) {
-        case (char)129:
-          s = (char)154;
-          break;
-        case (char)164:
-          s = (char)165;
-          break;
-        case (char)132:
-          s = (char)142;
-          break;
-        case (char)134:
-          s = (char)143;
-          break;
-        case (char)130:
-          s = (char)144;
-          break;
-        case (char)148:
-          s = (char)153;
-          break;
-        case (char)135:
-          s = (char)128;
-          break;
-        case (char)145:
-          s = (char)146;
-          break;
-      }
-    }
   }
 
-  void LowerCast(char& s, bool fix = false)
+  void LowerCast(char& s)
   {
     // latin lowercast
     if (s >= (char)65 && s <= (char)90) {
@@ -401,35 +372,6 @@ namespace Hooks {
     // cyrillic ё
     if (s == (char)168) {
       s = (char)184;
-    }
-
-    if (fix) {
-      switch (s) {
-        case (char)154:
-          s = (char)129;
-          break;
-        case (char)165:
-          s = (char)164;
-          break;
-        case (char)142:
-          s = (char)132;
-          break;
-        case (char)143:
-          s = (char)134;
-          break;
-        case (char)144:
-          s = (char)130;
-          break;
-        case (char)153:
-          s = (char)148;
-          break;
-        case (char)128:
-          s = (char)135;
-          break;
-        case (char)146:
-          s = (char)145;
-          break;
-      }
     }
   }
 
@@ -590,7 +532,7 @@ namespace Hooks {
   void __fastcall HOOK(upper_case_string)(std::string& str)
   {
     for (int s = 0; s < str.size(); s++) {
-      UpperCast(str[s], true);
+      UpperCast(str[s]);
     }
   }
 
@@ -598,7 +540,7 @@ namespace Hooks {
   void __fastcall HOOK(lower_case_string)(std::string& str)
   {
     for (int s = 0; s < str.size(); s++) {
-      LowerCast(str[s], true);
+      LowerCast(str[s]);
     }
   }
 
@@ -620,7 +562,7 @@ namespace Hooks {
         }
       }
       if (s == 0 || conf) {
-        UpperCast(str[s], true);
+        UpperCast(str[s]);
       }
     }
   }
@@ -643,7 +585,7 @@ namespace Hooks {
         }
       }
       if (s == 0 || conf) {
-        UpperCast(str[s], true);
+        UpperCast(str[s]);
         if (str[s] != ' ' && str[s] != '\"')
           return;
       }
