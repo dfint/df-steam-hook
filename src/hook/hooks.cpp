@@ -351,9 +351,8 @@ namespace Hooks {
       s -= char(224);
       s += char(192);
     }
-    
-    switch (s)
-    {
+
+    switch (s) {
       // cyrillic cp1251 non-range capitalize
       case (char)0xB8: // ё -> Ё
         s = (char)0xA8;
@@ -418,9 +417,8 @@ namespace Hooks {
       s -= (char)192;
       s += (char)224;
     }
-    
-    switch (s)
-    {
+
+    switch (s) {
       // cyrillic cp1251 non-range lowercast
       case (char)0xA8: // Ё -> ё
         s = (char)0xB8;
