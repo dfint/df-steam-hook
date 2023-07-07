@@ -540,14 +540,14 @@ namespace Hooks {
         case (char)151:
         case (char)154:
         case (char)163:
-          str[s] = 'u';
+          str[s] = 'u'; // üûùÜú -> u
           break;
         case (char)152:
-          str[s] = 'y';
+          str[s] = 'y'; // ÿ -> y
           break;
         case (char)164:
         case (char)165:
-          str[s] = 'n';
+          str[s] = 'n'; // ñÑ -> n
           break;
         case (char)131:
         case (char)132:
@@ -558,7 +558,7 @@ namespace Hooks {
         case (char)145:
         case (char)146:
         case (char)160:
-          str[s] = 'a';
+          str[s] = 'a'; // âäàåÄÅæÆá -> a
           break;
         case (char)130:
         case (char)136:
@@ -571,18 +571,18 @@ namespace Hooks {
         case (char)140:
         case (char)141:
         case (char)161:
-          str[s] = 'i';
+          str[s] = 'i'; // ïîìí -> i
           break;
         case (char)147:
         case (char)148:
         case (char)149:
         case (char)153:
         case (char)162:
-          str[s] = 'o';
+          str[s] = 'o'; // ôöòÖó -> o
           break;
         case (char)128:
         case (char)135:
-          str[s] = 'c';
+          str[s] = 'c'; // Çç -> c
           break;
       }
     }
