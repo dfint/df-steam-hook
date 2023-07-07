@@ -346,40 +346,41 @@ namespace Hooks {
       s -= (char)97;
       s += (char)65;
     }
-    // cyrillic capitalize
+    // cyrillic cp1251 capitalize
     if (s >= (char)224 && s <= (char)255) {
       s -= char(224);
       s += char(192);
     }
-    // cyrillic ё
+    // cyrillic cp1251 ё
     if (s == (char)184) {
       s = (char)168;
     }
 
     if (fix) {
+      // cp437 capitalize latin characters with diacritics
       switch (s) {
-        case (char)129:
+        case (char)129: // ü -> Ü
           s = (char)154;
           break;
-        case (char)164:
+        case (char)164: // ñ -> Ñ
           s = (char)165;
           break;
-        case (char)132:
+        case (char)132: // ä -> Ä
           s = (char)142;
           break;
-        case (char)134:
+        case (char)134: // å -> Å
           s = (char)143;
           break;
-        case (char)130:
+        case (char)130: // é -> É
           s = (char)144;
           break;
-        case (char)148:
+        case (char)148: // ö -> Ö
           s = (char)153;
           break;
-        case (char)135:
+        case (char)135: // ç -> Ç
           s = (char)128;
           break;
-        case (char)145:
+        case (char)145: // æ -> Æ
           s = (char)146;
           break;
       }
@@ -393,40 +394,41 @@ namespace Hooks {
       s -= (char)65;
       s += (char)97;
     }
-    // cyrillic lowercast
+    // cyrillic cp1251 lowercast
     if (s >= (char)192 && s <= (char)223) {
       s -= (char)192;
       s += (char)224;
     }
-    // cyrillic ё
+    // cyrillic cp1251 ё
     if (s == (char)168) {
       s = (char)184;
     }
 
     if (fix) {
+      // cp437 lowercast latin characters with diacritics
       switch (s) {
-        case (char)154:
+        case (char)154: // Ü -> ü
           s = (char)129;
           break;
-        case (char)165:
+        case (char)165: // Ñ -> ñ
           s = (char)164;
           break;
-        case (char)142:
+        case (char)142: // Ä -> ä
           s = (char)132;
           break;
-        case (char)143:
+        case (char)143: // Å -> å
           s = (char)134;
           break;
-        case (char)144:
+        case (char)144: // É -> é
           s = (char)130;
           break;
-        case (char)153:
+        case (char)153: // Ö -> ö
           s = (char)148;
           break;
-        case (char)128:
+        case (char)128: // Ç -> ç
           s = (char)135;
           break;
-        case (char)146:
+        case (char)146: // Æ -> æ
           s = (char)145;
           break;
       }
