@@ -346,40 +346,59 @@ namespace Hooks {
       s -= (char)97;
       s += (char)65;
     }
-    // cyrillic capitalize
+    // cyrillic cp1251 capitalize
     if (s >= (char)224 && s <= (char)255) {
       s -= char(224);
       s += char(192);
     }
-    // cyrillic ё
-    if (s == (char)184) {
-      s = (char)168;
+
+    switch (s) {
+      // cyrillic cp1251 non-range capitalize
+      case (char)0xB8: // ё -> Ё
+        s = (char)0xA8;
+        break;
+      case (char)0xBA: // є -> Є
+        s = (char)0xAA;
+        break;
+      case (char)0xBF: // ї -> Ї
+        s = (char)0xAF;
+        break;
+      case (char)0xB3: // і -> І
+        s = (char)0xB2;
+        break;
+      case (char)0xB4: // ґ -> Ґ
+        s = (char)0xA5;
+        break;
+      case (char)0xA2: // ў -> Ў
+        s = (char)0xA1;
+        break;
     }
 
     if (fix) {
+      // cp437 capitalize latin characters with diacritics
       switch (s) {
-        case (char)129:
+        case (char)129: // ü -> Ü
           s = (char)154;
           break;
-        case (char)164:
+        case (char)164: // ñ -> Ñ
           s = (char)165;
           break;
-        case (char)132:
+        case (char)132: // ä -> Ä
           s = (char)142;
           break;
-        case (char)134:
+        case (char)134: // å -> Å
           s = (char)143;
           break;
-        case (char)130:
+        case (char)130: // é -> É
           s = (char)144;
           break;
-        case (char)148:
+        case (char)148: // ö -> Ö
           s = (char)153;
           break;
-        case (char)135:
+        case (char)135: // ç -> Ç
           s = (char)128;
           break;
-        case (char)145:
+        case (char)145: // æ -> Æ
           s = (char)146;
           break;
       }
@@ -393,40 +412,59 @@ namespace Hooks {
       s -= (char)65;
       s += (char)97;
     }
-    // cyrillic lowercast
+    // cyrillic cp1251 lowercast
     if (s >= (char)192 && s <= (char)223) {
       s -= (char)192;
       s += (char)224;
     }
-    // cyrillic ё
-    if (s == (char)168) {
-      s = (char)184;
+
+    switch (s) {
+      // cyrillic cp1251 non-range lowercast
+      case (char)0xA8: // Ё -> ё
+        s = (char)0xB8;
+        break;
+      case (char)0xAA: // Є -> є
+        s = (char)0xBA;
+        break;
+      case (char)0xAF: // Ї -> ї
+        s = (char)0xBF;
+        break;
+      case (char)0xB2: // І -> і
+        s = (char)0xB3;
+        break;
+      case (char)0xA5: // Ґ -> ґ
+        s = (char)0xB4;
+        break;
+      case (char)0xA1: // Ў -> ў
+        s = (char)0xA2;
+        break;
     }
 
     if (fix) {
+      // cp437 lowercast latin characters with diacritics
       switch (s) {
-        case (char)154:
+        case (char)154: // Ü -> ü
           s = (char)129;
           break;
-        case (char)165:
+        case (char)165: // Ñ -> ñ
           s = (char)164;
           break;
-        case (char)142:
+        case (char)142: // Ä -> ä
           s = (char)132;
           break;
-        case (char)143:
+        case (char)143: // Å -> å
           s = (char)134;
           break;
-        case (char)144:
+        case (char)144: // É -> é
           s = (char)130;
           break;
-        case (char)153:
+        case (char)153: // Ö -> ö
           s = (char)148;
           break;
-        case (char)128:
+        case (char)128: // Ç -> ç
           s = (char)135;
           break;
-        case (char)146:
+        case (char)146: // Æ -> æ
           s = (char)145;
           break;
       }
@@ -538,14 +576,14 @@ namespace Hooks {
         case (char)151:
         case (char)154:
         case (char)163:
-          str[s] = 'u';
+          str[s] = 'u'; // üûùÜú -> u
           break;
         case (char)152:
-          str[s] = 'y';
+          str[s] = 'y'; // ÿ -> y
           break;
         case (char)164:
         case (char)165:
-          str[s] = 'n';
+          str[s] = 'n'; // ñÑ -> n
           break;
         case (char)131:
         case (char)132:
@@ -556,7 +594,7 @@ namespace Hooks {
         case (char)145:
         case (char)146:
         case (char)160:
-          str[s] = 'a';
+          str[s] = 'a'; // âäàåÄÅæÆá -> a
           break;
         case (char)130:
         case (char)136:
@@ -569,18 +607,18 @@ namespace Hooks {
         case (char)140:
         case (char)141:
         case (char)161:
-          str[s] = 'i';
+          str[s] = 'i'; // ïîìí -> i
           break;
         case (char)147:
         case (char)148:
         case (char)149:
         case (char)153:
         case (char)162:
-          str[s] = 'o';
+          str[s] = 'o'; // ôöòÖó -> o
           break;
         case (char)128:
         case (char)135:
-          str[s] = 'c';
+          str[s] = 'c'; // Çç -> c
           break;
       }
     }
