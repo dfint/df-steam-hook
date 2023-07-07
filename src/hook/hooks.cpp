@@ -351,9 +351,28 @@ namespace Hooks {
       s -= char(224);
       s += char(192);
     }
-    // cyrillic cp1251 ё
-    if (s == (char)184) {
-      s = (char)168;
+    
+    switch (s)
+    {
+      // cyrillic cp1251 non-range capitalize
+      case (char)0xB8: // ё -> Ё
+        s = (char)0xA8;
+        break;
+      case (char)0xBA: // є -> Є
+        s = (char)0xAA;
+        break;
+      case (char)0xBF: // ї -> Ї
+        s = (char)0xAF;
+        break;
+      case (char)0xB3: // і -> І
+        s = (char)0xB2;
+        break;
+      case (char)0xB4: // ґ -> Ґ
+        s = (char)0xA5;
+        break;
+      case (char)0xA2: // ў -> Ў
+        s = (char)0xA1;
+        break;
     }
 
     if (fix) {
@@ -399,9 +418,28 @@ namespace Hooks {
       s -= (char)192;
       s += (char)224;
     }
-    // cyrillic cp1251 ё
-    if (s == (char)168) {
-      s = (char)184;
+    
+    switch (s)
+    {
+      // cyrillic cp1251 non-range lowercast
+      case (char)0xA8: // Ё -> ё
+        s = (char)0xB8;
+        break;
+      case (char)0xAA: // Є -> є
+        s = (char)0xBA;
+        break;
+      case (char)0xAF: // Ї -> ї
+        s = (char)0xBF;
+        break;
+      case (char)0xB2: // І -> і
+        s = (char)0xB3;
+        break;
+      case (char)0xA5: // Ґ -> ґ
+        s = (char)0xB4;
+        break;
+      case (char)0xA1: // Ў -> ў
+        s = (char)0xA2;
+        break;
     }
 
     if (fix) {
