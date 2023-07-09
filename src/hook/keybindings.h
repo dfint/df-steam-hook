@@ -5,6 +5,7 @@
 #define STRINGENTRY_NUMBERS 4
 #define STRINGENTRY_CAPS 8
 #define STRINGENTRY_SYMBOLS 16
+#define STRINGENTRY_FILENAME 32
 
 typedef long InterfaceKey;
 enum InterfaceKeyType
@@ -282,3 +283,5 @@ static std::map<int, int> cyrillic_utf8_to_cp1251{
   { 36817, 255 }, { 33232, 168 }, { 37329, 184 }, { 34000, 170 }, { 38097, 186 }, { 34768, 175 }, { 38865, 191 },
   { 34512, 178 }, { 38609, 179 }, { 37074, 165 }, { 37330, 180 }, { 36560, 161 }, { 40657, 162 }
 };
+
+static std::set<char> invalid_filename_chars = { '<', '>', ':', '"', '/', '\\', '|', '?', '*' };

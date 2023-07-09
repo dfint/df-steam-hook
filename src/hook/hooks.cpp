@@ -476,93 +476,54 @@ namespace Hooks {
   int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag,
                                            std::set<InterfaceKey>& events, uint16_t* utf)
   {
-    char entry = char(1);
-    const auto shift = Config::Keybinding::shift;
-
-    if (flag & STRINGENTRY_SYMBOLS) {
-      for (short int item = INTERFACEKEY_STRING_A000 + shift; item <= INTERFACEKEY_STRING_A255 + shift; item++) {
-        if (events.count(item)) {
-          entry = char(item - shift);
-          break;
-        }
-      }
+    if (events.contains(INTERFACEKEY_STRING_A000 + Config::Keybinding::shift) && str.size() > 0) {
+      str.pop_back();
+      events.clear();
+      return true;
     }
-    if (flag & STRINGENTRY_LETTERS) {
-      // latin capitals
-      for (short int item = INTERFACEKEY_STRING_A065 + shift; item <= INTERFACEKEY_STRING_A090 + shift; item++) {
-        if (events.count(item)) {
-          entry = char(item - shift);
-          break;
-        }
-      }
-      // latin small
-      for (short int item = INTERFACEKEY_STRING_A097 + shift; item <= INTERFACEKEY_STRING_A122 + shift; item++) {
-        if (events.count(item)) {
-          entry = char(item - shift);
-          break;
-        }
-      }
-      // cyrillic
-      for (short int item = INTERFACEKEY_STRING_A192 + shift; item <= INTERFACEKEY_STRING_A255 + shift; item++) {
-        if (events.count(item)) {
-          entry = char(item - shift + 1);
-          break;
-        }
-      }
+    // if INTERFACEKEY_SELECT || INTERFACEKEY_LEAVESCREEN
+    // lost mouse rbut here, cause it is in enabler instance
+    if (events.contains(1) || events.contains(2)) {
+      return false;
     }
-    if (flag & STRINGENTRY_SPACE) {
-      if (events.count(INTERFACEKEY_STRING_A032 + shift)) {
-        entry = ' ';
-      }
-    }
-    if (events.count(INTERFACEKEY_STRING_A000 + shift)) {
-      entry = char(0);
-    }
-    if (flag & STRINGENTRY_NUMBERS) {
-      // numbers
-      for (short int item = INTERFACEKEY_STRING_A048 + shift; item <= INTERFACEKEY_STRING_A057 + shift; item++) {
-        if (events.count(item)) {
-          entry = char(item - shift);
-          break;
-        }
-      }
+    events.clear();
+    if (str.size() >= maxlen) {
+      return false;
     }
 
-    // patch after 50.09 with sdl2
-    // change only if utf code is in cyrillic zone, latin have small codes
-    if (*utf > 127 && entry != 0) {
-      if (cyrillic_utf8_to_cp1251.find(*utf) != cyrillic_utf8_to_cp1251.end()) {
-        entry = char(cyrillic_utf8_to_cp1251.at(*utf));
-      }
-    }
-
-    if (entry != 1) {
-      if (entry == 0) {
-        if (str.size() > 0) {
-          str.resize(str.size() - 1);
-        }
+    bool any_valid = false;
+    for (size_t i = 0; i < 32; i++) {
+      char entry = 1;
+      if (utf[i] > INTERFACEKEY_STRING_A122 && cyrillic_utf8_to_cp1251.find(utf[i]) != cyrillic_utf8_to_cp1251.end()) {
+        entry = char(cyrillic_utf8_to_cp1251.at(utf[i]));
       } else {
-        int cursor = str.size();
-        if (cursor >= maxlen) {
-          cursor = maxlen - 1;
-        }
-        if (cursor < 0) {
-          cursor = 0;
-        }
-        if (str.size() < cursor + 1) {
-          str.resize(cursor + 1);
-        }
+        entry = utf[i];
+      }
+      if (entry == 0) {
+        break;
+      }
+
+      if (str.length() < maxlen && (entry == 10) ||
+          (!(flag & STRINGENTRY_FILENAME) || invalid_filename_chars.contains(entry) == false) ||
+          (flag & STRINGENTRY_SYMBOLS) ||
+          ((flag & STRINGENTRY_LETTERS) && (entry >= INTERFACEKEY_STRING_A097 && entry <= INTERFACEKEY_STRING_A122) ||
+           (entry >= INTERFACEKEY_STRING_A065 && entry <= INTERFACEKEY_STRING_A090) ||
+           (entry >= INTERFACEKEY_STRING_A192 && entry <= INTERFACEKEY_STRING_A255)) ||
+          ((flag & STRINGENTRY_SPACE) && entry == ' ') ||
+          ((flag & STRINGENTRY_NUMBERS) && (entry >= INTERFACEKEY_STRING_A048 && entry <= INTERFACEKEY_STRING_A057))) {
+
         if (flag & STRINGENTRY_CAPS) {
           UpperCast(entry);
         }
 
-        str[cursor] = entry;
+        any_valid = true;
+        str.push_back(entry);
+        if (entry == 0 || entry == 10 || str.size() >= maxlen) {
+          break;
+        }
       }
-      events.clear();
-      return 1;
     }
-
-    return 0;
+    return any_valid;
   }
 
   SETUP_ORIG_FUNC(simplify_string);
