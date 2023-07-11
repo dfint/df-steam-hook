@@ -270,7 +270,7 @@ enum InterfaceKeyType
   INTERFACEKEYNUM,
 };
 
-static std::map<int, int> cyrillic_utf8_to_cp1251{
+static const std::map<int, int> cyrillic_utf8_to_cp1251{
   { 37072, 192 }, { 37328, 193 }, { 37584, 194 }, { 37840, 195 }, { 38096, 196 }, { 38352, 197 }, { 38608, 198 },
   { 38864, 199 }, { 39120, 200 }, { 39376, 201 }, { 39632, 202 }, { 39888, 203 }, { 40144, 204 }, { 40400, 205 },
   { 40656, 206 }, { 40912, 207 }, { 41168, 208 }, { 41424, 209 }, { 41680, 210 }, { 41936, 211 }, { 42192, 212 },
@@ -284,4 +284,4 @@ static std::map<int, int> cyrillic_utf8_to_cp1251{
   { 34512, 178 }, { 38609, 179 }, { 37074, 165 }, { 37330, 180 }, { 36560, 161 }, { 40657, 162 }
 };
 
-static std::set<char> invalid_filename_chars = { '<', '>', ':', '"', '/', '\\', '|', '?', '*' };
+static const std::set<char> invalid_filename_chars{ '<', '>', ':', '"', '/', '\\', '|', '?', '*' };

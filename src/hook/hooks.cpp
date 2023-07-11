@@ -348,8 +348,8 @@ namespace Hooks {
     }
     // cyrillic cp1251 capitalize
     if (s >= (char)224 && s <= (char)255) {
-      s -= char(224);
-      s += char(192);
+      s -= (char)224;
+      s += (char)192;
     }
 
     switch (s) {
@@ -474,7 +474,7 @@ namespace Hooks {
   // main handler for input from keyboard
   SETUP_ORIG_FUNC(standardstringentry);
   int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag,
-                                           std::set<InterfaceKey>& events, uint16_t* utf)
+                                           std::set<InterfaceKey>& events, const uint32_t* utf)
   {
     if (events.contains(INTERFACEKEY_STRING_A000 + Config::Keybinding::shift) && str.size() > 0) {
       str.pop_back();
@@ -604,17 +604,29 @@ namespace Hooks {
   SETUP_ORIG_FUNC(capitalize_string_words);
   void __fastcall HOOK(capitalize_string_words)(std::string& str)
   {
-    for (int s = 0; s < str.size(); s++) {
-      char conf = 0;
+    int32_t bracket_count = 0;
+    bool conf;
+    for (int32_t s = 0; s < str.size(); s++) {
+      if (str[s] == '[') {
+        ++bracket_count;
+        continue;
+      }
+      if (str[s] == ']') {
+        --bracket_count;
+        continue;
+      }
+      if (bracket_count > 0)
+        continue;
+      conf = false;
       if (s > 0) {
         if (str[s - 1] == ' ' || str[s - 1] == '\"')
-          conf = 1;
+          conf = true;
         if (str[s - 1] == '\'') {
           if (s <= 0)
-            conf = 1;
+            conf = true;
           else if (s >= 2) {
             if (str[s - 2] == ' ' || str[s - 2] == ',')
-              conf = 1;
+              conf = true;
           }
         }
       }
@@ -627,17 +639,29 @@ namespace Hooks {
   SETUP_ORIG_FUNC(capitalize_string_first_word);
   void __fastcall HOOK(capitalize_string_first_word)(std::string& str)
   {
+    int32_t bracket_count = 0;
+    bool conf;
     for (int s = 0; s < str.size(); s++) {
-      char conf = 0;
+      if (str[s] == '[') {
+        ++bracket_count;
+        continue;
+      }
+      if (str[s] == ']') {
+        --bracket_count;
+        continue;
+      }
+      if (bracket_count > 0)
+        continue;
+      conf = false;
       if (s > 0) {
         if (str[s - 1] == ' ' || str[s - 1] == '\"')
-          conf = 1;
+          conf = true;
         if (str[s - 1] == '\'') {
           if (s <= 0)
-            conf = 1;
+            conf = true;
           else if (s >= 2) {
             if (str[s - 2] == ' ' || str[s - 2] == ',')
-              conf = 1;
+              conf = true;
           }
         }
       }
