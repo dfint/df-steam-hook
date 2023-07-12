@@ -4,8 +4,7 @@ namespace CrashReport {
 
   std::ofstream GetCrashReportLogHandle(std::string filename)
   {
-    if (!std::filesystem::is_directory("./dfint_data/crash_reports/") ||
-        !std::filesystem::exists("./dfint_data/crash_reports/")) {
+    if (!std::filesystem::is_directory("./dfint_data/crash_reports/") || !std::filesystem::exists("./dfint_data/crash_reports/")) {
       std::filesystem::create_directory("./dfint_data/crash_reports/");
     }
 
