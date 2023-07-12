@@ -26,10 +26,7 @@ public:
     this->state.store(state);
   }
 
-  void SetCallback(StateManager::GameState state, std::function<void()> callback)
-  {
-    this->callbacks.insert_or_assign(state, callback);
-  }
+  void SetCallback(StateManager::GameState state, std::function<void()> callback) { this->callbacks.insert_or_assign(state, callback); }
 
 private:
   StateManager() {}

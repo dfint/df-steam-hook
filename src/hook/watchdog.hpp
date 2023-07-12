@@ -30,7 +30,6 @@ namespace Watchdog {
 
   void WatchKeyboard()
   {
-    CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(Watchdog::Handler::Keypress), nullptr, 0,
-                 nullptr);
+    CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(Watchdog::Handler::Keypress), nullptr, 0, nullptr);
   }
 } // namespace Watchdog
