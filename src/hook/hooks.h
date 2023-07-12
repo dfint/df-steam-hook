@@ -146,9 +146,8 @@ namespace Hooks {
   inline auto module_handle = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
 #define SETUP_ORIG_FUNC_OFFSET(fn_name, shift) auto fn_name##_orig = reinterpret_cast<fn_name>(module_handle + shift);
-#define SETUP_ORIG_FUNC(fn_name)                                                                                       \
-  auto fn_name##_orig = reinterpret_cast<fn_name>(module_handle + Config::Offset::fn_name);
-#define SETUP_ORIG_FUNC_FNAME(fn_name, module_name)                                                                    \
+#define SETUP_ORIG_FUNC(fn_name) auto fn_name##_orig = reinterpret_cast<fn_name>(module_handle + Config::Offset::fn_name);
+#define SETUP_ORIG_FUNC_FNAME(fn_name, module_name)                                                                                        \
   auto fn_name##_orig = reinterpret_cast<fn_name>(GetProcAddress(GetModuleHandle(#module_name), #fn_name));
 #define GET_ADDR(shift) reinterpret_cast<void*>(module_handle + shift)
 #define ATTACH(fn_name) DetourAttach(&(reinterpret_cast<void*&>(fn_name##_orig)), (void*)fn_name##_hook);
@@ -169,8 +168,8 @@ namespace Hooks {
   typedef void(__fastcall* addst_flag)(graphicst_* a1, std::string& str, __int64 a3, __int64 a4, int a5);
 
   // search
-  typedef int(__fastcall* standardstringentry)(std::string& str, int maxlen, unsigned int flag,
-                                               std::set<InterfaceKey>& events, uint16_t* utf);
+  typedef int(__fastcall* standardstringentry)(std::string& str, int maxlen, unsigned int flag, std::set<InterfaceKey>& events,
+                                               uint16_t* utf);
   typedef void(__fastcall* upper_case_string)(std::string& str);
   typedef void(__fastcall* simplify_string)(std::string& str);
   typedef void(__fastcall* lower_case_string)(std::string& str);
@@ -183,10 +182,8 @@ namespace Hooks {
   typedef void(__fastcall* addchar_top)(graphicst_* gps, unsigned char symbol, char advance);
   typedef void(__fastcall* gps_allocate)(void* ptr, int a2, int a3, int a4, int a5, int a6, int a7);
   typedef void(__fastcall* cleanup_arrays)(void* ptr);
-  typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(renderer_* a1, __int64 a2, int a3,
-                                                                              int a4);
-  typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid_top)(renderer_* a1, __int64 a2, int a3,
-                                                                                  int a4);
+  typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid)(renderer_* a1, __int64 a2, int a3, int a4);
+  typedef Either<texture_fullid, texture_ttfid>*(__fastcall* screen_to_texid_top)(renderer_* a1, __int64 a2, int a3, int a4);
 
   // game state
   typedef void(__fastcall* loading_world_new_game_loop)(void* a1);
@@ -200,5 +197,4 @@ namespace Hooks {
   void UninstallTTFInjection();
   void InstallStateManager();
   void UninstallStateManager();
-
 }

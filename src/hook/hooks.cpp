@@ -83,12 +83,11 @@ namespace Hooks {
 
   // allocate screen array
   SETUP_ORIG_FUNC(gps_allocate);
-  void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z,
-                                     int dispy_z)
+  void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z, int dispy_z)
   {
 
-    logger::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy,
-                  screen_width, screen_height, dispx_z, dispy_z);
+    logger::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy, screen_width,
+                  screen_height, dispx_z, dispy_z);
     ORIGINAL(gps_allocate)(ptr, dimx, dimy, screen_width, screen_height, dispx_z, dispy_z);
     ScreenManager::GetSingleton()->AllocateScreen(dimx, dimy);
   }
@@ -118,8 +117,7 @@ namespace Hooks {
 
   // renderer for top screen matrix
   SETUP_ORIG_FUNC(screen_to_texid_top);
-  Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(renderer_* renderer, __int64 a2, int x,
-                                                                              int y)
+  Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(renderer_* renderer, __int64 a2, int x, int y)
   {
     Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid_top)(renderer, a2, x, y);
     if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
@@ -473,8 +471,8 @@ namespace Hooks {
 
   // main handler for input from keyboard
   SETUP_ORIG_FUNC(standardstringentry);
-  int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag,
-                                           std::set<InterfaceKey>& events, const uint32_t* utf)
+  int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag, std::set<InterfaceKey>& events,
+                                           const uint32_t* utf)
   {
     if (events.contains(INTERFACEKEY_STRING_A000 + Config::Keybinding::shift) && str.size() > 0) {
       str.pop_back();
@@ -503,8 +501,7 @@ namespace Hooks {
         break;
       }
 
-      if (str.length() < maxlen && (entry == 10) ||
-          (!(flag & STRINGENTRY_FILENAME) || invalid_filename_chars.contains(entry) == false) ||
+      if (str.length() < maxlen && (entry == 10) || (!(flag & STRINGENTRY_FILENAME) || invalid_filename_chars.contains(entry) == false) ||
           (flag & STRINGENTRY_SYMBOLS) ||
           ((flag & STRINGENTRY_LETTERS) && (entry >= INTERFACEKEY_STRING_A097 && entry <= INTERFACEKEY_STRING_A122) ||
            (entry >= INTERFACEKEY_STRING_A065 && entry <= INTERFACEKEY_STRING_A090) ||
@@ -764,7 +761,7 @@ namespace Hooks {
   {
     // translation
     // DETACH(string_copy);
-    DETACH(string_copy_n);
+    // DETACH(string_copy_n);
     // DETACH(string_append);
     // DETACH(string_append_0);
     DETACH(string_append_n);
