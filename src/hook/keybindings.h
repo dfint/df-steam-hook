@@ -8,8 +8,7 @@
 #define STRINGENTRY_FILENAME 32
 
 typedef long InterfaceKey;
-enum InterfaceKeyType
-{
+enum InterfaceKeyType {
   INTERFACEKEY_STRING_A000,
   INTERFACEKEY_STRING_A001,
   INTERFACEKEY_STRING_A002,

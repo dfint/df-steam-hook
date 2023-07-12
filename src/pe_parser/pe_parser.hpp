@@ -3,17 +3,14 @@
 #include <vector>
 #include <windows.h>
 
-class PEParser
-{
+class PEParser {
 public:
-  [[nodiscard]] static PEParser* GetSingleton()
-  {
+  [[nodiscard]] static PEParser* GetSingleton() {
     static PEParser singleton;
     return &singleton;
   }
 
-  void OpenFile(const std::string& filename)
-  {
+  void OpenFile(const std::string& filename) {
     this->filename = filename;
     if (this->file != NULL) {
       fclose(this->file);
@@ -46,15 +43,13 @@ public:
     }
   }
 
-  ~PEParser()
-  {
+  ~PEParser() {
     delete this->dos_header;
     delete this->nt_headers;
     fclose(this->file);
   }
 
-  std::optional<uintptr_t> FindString(const std::string& str)
-  {
+  std::optional<uintptr_t> FindString(const std::string& str) {
     auto length = str.size() + 1;
     std::vector<char> target(str.begin(), str.begin() + length);
     auto it = 0;
@@ -70,8 +65,7 @@ public:
   }
 
   template <typename T>
-  void ReadByOffset(T* dst, uintptr_t offset, size_t count = 1)
-  {
+  void ReadByOffset(T* dst, uintptr_t offset, size_t count = 1) {
     rewind(this->file);
     fseek(this->file, offset, SEEK_SET);
     fread(dst, sizeof(T), count, this->file);

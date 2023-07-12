@@ -2,8 +2,7 @@
 #include <cstdio>
 #include <detours/detours.h>
 
-int main()
-{
+int main() {
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
 

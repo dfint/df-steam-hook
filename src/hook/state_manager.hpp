@@ -1,22 +1,18 @@
-class StateManager
-{
+class StateManager {
 public:
-  [[nodiscard]] static StateManager* GetSingleton()
-  {
+  [[nodiscard]] static StateManager* GetSingleton() {
     static StateManager singleton;
     return &singleton;
   }
 
-  enum GameState
-  {
+  enum GameState {
     Init,
     Menu,
     Loading,
     Game
   };
 
-  void State(StateManager::GameState state)
-  {
+  void State(StateManager::GameState state) {
     if (this->state.load() != state) {
       auto it = this->callbacks.find(state);
       if (it != this->callbacks.end()) {
@@ -26,15 +22,16 @@ public:
     this->state.store(state);
   }
 
-  void SetCallback(StateManager::GameState state, std::function<void()> callback) { this->callbacks.insert_or_assign(state, callback); }
+  void SetCallback(StateManager::GameState state, std::function<void()> callback) {
+    this->callbacks.insert_or_assign(state, callback);
+  }
 
 private:
   StateManager() {}
   StateManager(const StateManager&) = delete;
   StateManager(StateManager&&) = delete;
 
-  ~StateManager()
-  {
+  ~StateManager() {
     callbacks.clear();
     delete this;
   };

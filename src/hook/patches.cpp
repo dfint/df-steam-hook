@@ -4,18 +4,15 @@ namespace Patches {
 
   inline auto module_handle = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
-  void* GetAddress(uintptr_t offset)
-  {
+  void* GetAddress(uintptr_t offset) {
     return reinterpret_cast<void*>(module_handle + offset);
   }
 
-  size_t Align(size_t n, size_t edge = 4)
-  {
+  size_t Align(size_t n, size_t edge = 4) {
     return (n + edge - 1) & (-edge);
   }
 
-  void PatchBytes(void* address, const char* bytes, size_t size)
-  {
+  void PatchBytes(void* address, const char* bytes, size_t size) {
     if (size == 0) {
       return;
     }
@@ -32,8 +29,7 @@ namespace Patches {
     VirtualProtect(address, size, protection, &protection);
   }
 
-  void TranslateStringByOffset(uintptr_t offset)
-  {
+  void TranslateStringByOffset(uintptr_t offset) {
     auto address = GetAddress(offset);
     auto str = reinterpret_cast<char*>(address);
     auto len = Align(strnlen_s(str, 100) + 1);
@@ -44,15 +40,13 @@ namespace Patches {
     }
   }
 
-  void BatchStringPatching()
-  {
+  void BatchStringPatching() {
     for (auto& offset : Config::Offset::string_patches) {
       TranslateStringByOffset(offset);
     }
   }
 
-  void Install()
-  {
+  void Install() {
     BatchStringPatching();
     logger::info("patches installed");
   }

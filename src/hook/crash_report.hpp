@@ -2,8 +2,7 @@
 
 namespace CrashReport {
 
-  std::ofstream GetCrashReportLogHandle(std::string filename)
-  {
+  std::ofstream GetCrashReportLogHandle(std::string filename) {
     if (!std::filesystem::is_directory("./dfint_data/crash_reports/") || !std::filesystem::exists("./dfint_data/crash_reports/")) {
       std::filesystem::create_directory("./dfint_data/crash_reports/");
     }
@@ -12,8 +11,7 @@ namespace CrashReport {
     return file;
   }
 
-  std::string ErrCodeToString(DWORD code)
-  {
+  std::string ErrCodeToString(DWORD code) {
     std::string errcode;
 
     switch (code) {
@@ -85,8 +83,7 @@ namespace CrashReport {
     return errcode;
   }
 
-  LONG WINAPI Handler(EXCEPTION_POINTERS* ExceptionInfo)
-  {
+  LONG WINAPI Handler(EXCEPTION_POINTERS* ExceptionInfo) {
     std::string errcode = ErrCodeToString(ExceptionInfo->ExceptionRecord->ExceptionCode);
 
     if (EXCEPTION_STACK_OVERFLOW != ExceptionInfo->ExceptionRecord->ExceptionCode) {
@@ -114,8 +111,7 @@ namespace CrashReport {
     return EXCEPTION_EXECUTE_HANDLER;
   }
 
-  void Install()
-  {
+  void Install() {
     ::SetUnhandledExceptionFilter(Handler);
   }
 

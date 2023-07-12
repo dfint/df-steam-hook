@@ -1,10 +1,10 @@
 #pragma once
 
 #include "keybindings.h"
+
 namespace Hooks {
 
-  enum curses_color_ : uint8_t
-  {
+  enum curses_color_ : uint8_t {
     Black,
     Blue,
     Green,
@@ -15,8 +15,7 @@ namespace Hooks {
     White,
   };
 
-  enum justification_ : uint8_t
-  {
+  enum justification_ : uint8_t {
     justify_left,
     justify_center,
     justify_right,
@@ -24,8 +23,7 @@ namespace Hooks {
     not_truetype
   };
 
-  struct graphicst_
-  {
+  struct graphicst_ {
     char dump[129];
     long screenx;
     long screeny;
@@ -55,8 +53,7 @@ namespace Hooks {
     int32_t dimy;
   };
 
-  struct renderer_2d_base_
-  {
+  struct renderer_2d_base_ {
     char dump[240];
     // SDL_Surface* screen;          // 8
     void* screen;                 // 8
@@ -78,8 +75,7 @@ namespace Hooks {
     int32_t natural_h;            // 4
   };
 
-  class renderer_
-  {
+  class renderer_ {
   public:
     unsigned char* screen;
     long* screentexpos;
@@ -96,14 +92,12 @@ namespace Hooks {
     unsigned char* screentexpos_cbr_old;
   };
 
-  struct texture_fullid
-  {
+  struct texture_fullid {
     int texpos;
     float r, g, b;
     float br, bg, bb;
 
-    bool operator<(const struct texture_fullid& other) const
-    {
+    bool operator<(const struct texture_fullid& other) const {
       if (texpos != other.texpos)
         return texpos < other.texpos;
       if (r != other.r)
@@ -123,21 +117,17 @@ namespace Hooks {
   typedef int texture_ttfid; // Just the texpos
 
   template <typename L, typename R>
-  struct Either
-  {
+  struct Either {
     bool isL;
-    union
-    {
+    union {
       L left;
       R right;
     };
-    Either(const L& l)
-    {
+    Either(const L& l) {
       isL = true;
       left = l;
     }
-    Either(const R& r)
-    {
+    Either(const R& r) {
       isL = false;
       right = r;
     }

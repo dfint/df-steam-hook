@@ -9,8 +9,7 @@
  * second argument - file with strings to translate
  */
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   std::ifstream file(argv[2]);
   if (!file.is_open()) {
     std::puts(std::format("unable to open strings file {}", argv[2]).data());

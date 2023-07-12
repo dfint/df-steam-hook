@@ -1,7 +1,6 @@
 #include "dictionary.h"
 
-void Dictionary::ReplaceAll(std::string& subject, const std::string& search, const std::string& replace)
-{
+void Dictionary::ReplaceAll(std::string& subject, const std::string& search, const std::string& replace) {
   size_t pos = 0;
   while ((pos = subject.find(search, pos)) != std::string::npos) {
     subject.replace(pos, search.length(), replace);
@@ -9,14 +8,12 @@ void Dictionary::ReplaceAll(std::string& subject, const std::string& search, con
   }
 }
 
-std::string Dictionary::Sanitize(std::string& str)
-{
+std::string Dictionary::Sanitize(std::string& str) {
   ReplaceAll(str, R"("")", "\"");
   return str;
 }
 
-std::pair<std::string, std::string> Dictionary::Split(const std::string& str)
-{
+std::pair<std::string, std::string> Dictionary::Split(const std::string& str) {
   std::string delimiter = "\",\"";
   auto delimiter_pos = str.find(delimiter);
   auto key = str.substr(1, delimiter_pos - 1);
@@ -25,8 +22,7 @@ std::pair<std::string, std::string> Dictionary::Split(const std::string& str)
 }
 
 // C code would be faster here, but we need to load just once
-void Dictionary::LoadCsv(const std::string& filename)
-{
+void Dictionary::LoadCsv(const std::string& filename) {
   logger::info("trying to load dictionary from csv file {}", filename);
   std::ifstream file(filename);
   if (!file.is_open()) {
@@ -45,8 +41,7 @@ void Dictionary::LoadCsv(const std::string& filename)
   logger::info("csv dictionary loaded, total lines {}", this->Size());
 }
 
-std::optional<std::string> Dictionary::Get(const std::string& key)
-{
+std::optional<std::string> Dictionary::Get(const std::string& key) {
   if (key.empty()) {
     return std::nullopt;
   }
@@ -60,8 +55,7 @@ std::optional<std::string> Dictionary::Get(const std::string& key)
   return value;
 }
 
-std::optional<std::string> Dictionary::Get(const char* key)
-{
+std::optional<std::string> Dictionary::Get(const char* key) {
   auto len = strnlen_s(key, 1000);
   if (!key || len <= 0 || len >= 1000) {
     return std::nullopt;
@@ -76,8 +70,7 @@ std::optional<std::string> Dictionary::Get(const char* key)
   return value;
 }
 
-std::optional<std::string> Dictionary::Get(const char* key, size_t size)
-{
+std::optional<std::string> Dictionary::Get(const char* key, size_t size) {
   if (!key) {
     return std::nullopt;
   }
@@ -97,27 +90,22 @@ std::optional<std::string> Dictionary::Get(const char* key, size_t size)
   return value;
 }
 
-bool Dictionary::Exist(std::string& key)
-{
+bool Dictionary::Exist(std::string& key) {
   return this->dict.find(key) != this->dict.end();
 }
 
-void Dictionary::Add(std::string& key, std::string& value)
-{
+void Dictionary::Add(std::string& key, std::string& value) {
   this->dict.emplace(std::make_pair(key, value));
 }
 
-void Dictionary::Add(std::pair<std::string, std::string>& pair)
-{
+void Dictionary::Add(std::pair<std::string, std::string>& pair) {
   this->dict.emplace(pair);
 }
 
-size_t Dictionary::Size()
-{
+size_t Dictionary::Size() {
   return this->dict.size();
 }
 
-void Dictionary::Clear()
-{
+void Dictionary::Clear() {
   this->dict.clear();
 }

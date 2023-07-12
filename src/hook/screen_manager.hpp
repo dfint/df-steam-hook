@@ -1,15 +1,12 @@
-class ScreenManager
-{
+class ScreenManager {
 public:
-  [[nodiscard]] static ScreenManager* GetSingleton()
-  {
+  [[nodiscard]] static ScreenManager* GetSingleton() {
     static ScreenManager singleton;
     return &singleton;
   }
 
   // TODO: figure out exact struct
-  struct ScreenTile
-  {
+  struct ScreenTile {
     uint8_t screen;
     uint8_t screen_limit;
     long tex_pos;
@@ -20,15 +17,13 @@ public:
     uint32_t texpos_flag;
   };
 
-  enum ScreenType
-  {
+  enum ScreenType {
     Main,
     Top
   };
 
   template <ScreenType screen_type>
-  ScreenTile* GetTile(int x, int y)
-  {
+  ScreenTile* GetTile(int x, int y) {
     if (screen_type == ScreenType::Top) {
       return reinterpret_cast<ScreenTile*>(this->screen_top + x * this->dimy * 4 + y * 4);
     } else {
@@ -37,8 +32,7 @@ public:
   }
 
   template <ScreenType screen_type>
-  ScreenTile* GetOffset(int offset)
-  {
+  ScreenTile* GetOffset(int offset) {
     if (screen_type == ScreenType::Top) {
       return reinterpret_cast<ScreenTile*>(this->screen_top + offset * 4);
     } else {
@@ -46,8 +40,7 @@ public:
     }
   }
 
-  void AllocateScreen(int x, int y)
-  {
+  void AllocateScreen(int x, int y) {
     this->dimx = x;
     this->dimy = y;
     this->screen = new unsigned long[x * y * 14];
@@ -55,8 +48,7 @@ public:
   }
 
   template <ScreenType screen_type>
-  void ClearScreen()
-  {
+  void ClearScreen() {
     if (screen_type == ScreenType::Top) {
       if (this->screen_top != nullptr) {
         delete[] this->screen_top;
@@ -71,8 +63,7 @@ public:
   }
 
   template <ScreenType screen_type>
-  void ResetScreen()
-  {
+  void ResetScreen() {
     this->ClearScreen<screen_type>();
     if (screen_type == ScreenType::Top) {
       this->screen_top = new unsigned long[this->dimx * this->dimy * 14];
@@ -81,15 +72,16 @@ public:
     }
   }
 
-  bool isInitialized() { return this->screen != nullptr && this->screen_top != nullptr; }
+  bool isInitialized() {
+    return this->screen != nullptr && this->screen_top != nullptr;
+  }
 
 private:
   ScreenManager() {}
   ScreenManager(const ScreenManager&) = delete;
   ScreenManager(ScreenManager&&) = delete;
 
-  ~ScreenManager()
-  {
+  ~ScreenManager() {
     delete[] this->screen;
     delete[] this->screen_top;
     delete this;

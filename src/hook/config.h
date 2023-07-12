@@ -3,8 +3,7 @@
 
 namespace Config {
 
-  inline time_t PETimestamp(const std::string filename)
-  {
+  inline time_t PETimestamp(const std::string filename) {
     std::ifstream file(filename);
 
     if (!file.is_open()) {
@@ -20,8 +19,7 @@ namespace Config {
     return nt_header->FileHeader.TimeDateStamp;
   }
 
-  inline toml::v3::ex::parse_result GetOffsetsFile(time_t target_checksum)
-  {
+  inline toml::v3::ex::parse_result GetOffsetsFile(time_t target_checksum) {
     for (const auto& filepath : std::filesystem::recursive_directory_iterator("./dfint_data/offsets/")) {
       auto file = toml::parse_file(filepath.path().c_str());
       if (target_checksum == file["metadata"]["checksum"].value_or<time_t>(0)) {
@@ -41,8 +39,7 @@ namespace Config {
   inline auto pe_timestamp = Config::PETimestamp("Dwarf Fortress.exe");
   inline auto offsets = Config::GetOffsetsFile(Config::pe_timestamp);
 
-  inline std::vector<uintptr_t> GetStringsOffsetArray()
-  {
+  inline std::vector<uintptr_t> GetStringsOffsetArray() {
     auto strings_patches_nodes =
       Config::offsets["offsets"]["string_patches"] ? Config::offsets["offsets"]["string_patches"].as_array() : nullptr;
     std::vector<uintptr_t> strings_patches{};

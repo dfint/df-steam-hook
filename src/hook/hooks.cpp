@@ -27,8 +27,7 @@ namespace Hooks {
   // }
 
   template <typename T, typename... Args>
-  void LockedCall(std::atomic<bool>& flag, T& func, Args&&... args)
-  {
+  void LockedCall(std::atomic<bool>& flag, T& func, Args&&... args) {
     flag = true;
     func(args...);
     flag = false;
@@ -36,8 +35,7 @@ namespace Hooks {
 
   // swap texture of specific char in chosen screen matrix (main/top)
   template <auto T>
-  void InjectTTFChar(unsigned char symbol, int x, int y)
-  {
+  void InjectTTFChar(unsigned char symbol, int x, int y) {
     if (ttf_injection_lock)
       return;
 
@@ -62,8 +60,7 @@ namespace Hooks {
 
   // addchar used fot main windows chars drawing
   SETUP_ORIG_FUNC(addchar);
-  void __fastcall HOOK(addchar)(graphicst_* gps, wchar_t symbol, char advance)
-  {
+  void __fastcall HOOK(addchar)(graphicst_* gps, wchar_t symbol, char advance) {
     g_graphics_ptr = gps;
     if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
       // InjectTTFChar<ScreenManager::ScreenType::Main>(symbol, gps->screenx, gps->screeny);
@@ -73,8 +70,7 @@ namespace Hooks {
 
   // addchar_top used for dialog windows
   SETUP_ORIG_FUNC(addchar_top);
-  void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance)
-  {
+  void __fastcall HOOK(addchar_top)(graphicst_* gps, wchar_t symbol, char advance) {
     if (ScreenManager::GetSingleton()->isInitialized() && g_textures_ptr != nullptr) {
       // InjectTTFChar<ScreenManager::ScreenType::Top>(symbol, gps->screenx, gps->screeny);
     }
@@ -83,8 +79,7 @@ namespace Hooks {
 
   // allocate screen array
   SETUP_ORIG_FUNC(gps_allocate);
-  void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z, int dispy_z)
-  {
+  void __fastcall HOOK(gps_allocate)(void* ptr, int dimx, int dimy, int screen_width, int screen_height, int dispx_z, int dispy_z) {
 
     logger::debug("gps allocate: dimx {} dimy {} screen_width {} screen_height {} dispx_z {} dispy_z {}", dimx, dimy, screen_width,
                   screen_height, dispx_z, dispy_z);
@@ -94,8 +89,7 @@ namespace Hooks {
 
   // clean screen array here
   SETUP_ORIG_FUNC(cleanup_arrays);
-  void __fastcall HOOK(cleanup_arrays)(void* ptr)
-  {
+  void __fastcall HOOK(cleanup_arrays)(void* ptr) {
     ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Main>();
     ScreenManager::GetSingleton()->ClearScreen<ScreenManager::ScreenType::Top>();
     ORIGINAL(cleanup_arrays)(ptr);
@@ -103,8 +97,7 @@ namespace Hooks {
 
   // render for main matrix
   SETUP_ORIG_FUNC(screen_to_texid);
-  Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y)
-  {
+  Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid)(renderer_* renderer, __int64 a2, int x, int y) {
     Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid)(renderer, a2, x, y);
     if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
       auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Main>(x, y);
@@ -117,8 +110,7 @@ namespace Hooks {
 
   // renderer for top screen matrix
   SETUP_ORIG_FUNC(screen_to_texid_top);
-  Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(renderer_* renderer, __int64 a2, int x, int y)
-  {
+  Either<texture_fullid, texture_ttfid>* __fastcall HOOK(screen_to_texid_top)(renderer_* renderer, __int64 a2, int x, int y) {
     Either<texture_fullid, texture_ttfid>* texture_by_id = ORIGINAL(screen_to_texid_top)(renderer, a2, x, y);
     if (ScreenManager::GetSingleton()->isInitialized() && g_graphics_ptr) {
       auto tile = ScreenManager::GetSingleton()->GetTile<ScreenManager::ScreenType::Top>(x, y);
@@ -154,8 +146,7 @@ namespace Hooks {
 
   // strcpy
   SETUP_ORIG_FUNC(string_copy);
-  char* __cdecl HOOK(string_copy)(char* dst, const char* src)
-  {
+  char* __cdecl HOOK(string_copy)(char* dst, const char* src) {
     if (src && dst && Config::Setting::enable_translation) {
       auto tstr = Dictionary::GetSingleton()->Get(src);
       if (tstr) {
@@ -167,8 +158,7 @@ namespace Hooks {
 
   // strncpy
   SETUP_ORIG_FUNC(string_copy_n);
-  char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size)
-  {
+  char* __cdecl HOOK(string_copy_n)(char* dst, const char* src, size_t size) {
     if (src && dst && size && !convert_ulong_lock && Config::Setting::enable_translation) {
       if (strncmp(src, const_cast<char*>("FPS:"), 4) == 0) {
         return ORIGINAL(string_copy_n)(dst, src, size);
@@ -183,8 +173,7 @@ namespace Hooks {
 
   // strcat
   SETUP_ORIG_FUNC(string_append);
-  char* __cdecl HOOK(string_append)(char* dst, const char* src)
-  {
+  char* __cdecl HOOK(string_append)(char* dst, const char* src) {
     if (src && dst && Config::Setting::enable_translation) {
       auto tstr = Dictionary::GetSingleton()->Get(src);
       if (tstr) {
@@ -196,8 +185,7 @@ namespace Hooks {
 
   // strcat_0
   SETUP_ORIG_FUNC(string_append_0);
-  char* __cdecl HOOK(string_append_0)(char* dst, const char* src)
-  {
+  char* __cdecl HOOK(string_append_0)(char* dst, const char* src) {
     if (src && dst && Config::Setting::enable_translation) {
       auto tstr = Dictionary::GetSingleton()->Get(src);
       if (tstr) {
@@ -209,8 +197,7 @@ namespace Hooks {
 
   // strncat
   SETUP_ORIG_FUNC(string_append_n);
-  char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size)
-  {
+  char* __cdecl HOOK(string_append_n)(char* dst, const char* src, size_t size) {
     if (src && dst && size && Config::Setting::enable_translation) {
       auto tstr = Dictionary::GetSingleton()->Get(src, size);
       if (tstr) {
@@ -223,14 +210,12 @@ namespace Hooks {
   // convert_ulong_to_string
   // locked cause we don't want call hooked strncpy inside it
   SETUP_ORIG_FUNC(convert_ulong_to_string);
-  void __fastcall HOOK(convert_ulong_to_string)(uint32_t n, std::string& str)
-  {
+  void __fastcall HOOK(convert_ulong_to_string)(uint32_t n, std::string& str) {
     LockedCall(convert_ulong_lock, ORIGINAL(convert_ulong_to_string), n, str);
   }
 
   SETUP_ORIG_FUNC(addst);
-  void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space)
-  {
+  void __fastcall HOOK(addst)(graphicst_* gps, std::string& str, justification_ justify, int space) {
     if (gps && !str.empty() && Config::Setting::enable_translation) {
       auto translation = Dictionary::GetSingleton()->Get(str);
       if (translation) {
@@ -242,8 +227,7 @@ namespace Hooks {
 
   // strings handling for dialog windows (top screen matrix)
   SETUP_ORIG_FUNC(addst_top);
-  void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3)
-  {
+  void __fastcall HOOK(addst_top)(graphicst_* gps, std::string& str, __int64 a3) {
     if (gps && !str.empty() && Config::Setting::enable_translation) {
       auto translation = Dictionary::GetSingleton()->Get(str);
       if (translation) {
@@ -256,8 +240,7 @@ namespace Hooks {
   // some colored string with color not from enum
   // not see it
   SETUP_ORIG_FUNC(addcoloredst);
-  void __fastcall HOOK(addcoloredst)(graphicst_* gps, const char* str, __int64 a3)
-  {
+  void __fastcall HOOK(addcoloredst)(graphicst_* gps, const char* str, __int64 a3) {
     auto len = strnlen_s(str, 1000);
     if (gps && str && len > 0 && len < 1000 && Config::Setting::enable_translation) {
       auto translation = Dictionary::GetSingleton()->Get(str);
@@ -270,8 +253,7 @@ namespace Hooks {
 
   // render through different procedure, not like addst or addst_top
   SETUP_ORIG_FUNC(addst_flag);
-  void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, __int64 a4, int some_flag)
-  {
+  void __fastcall HOOK(addst_flag)(graphicst_* gps, std::string& str, __int64 a3, __int64 a4, int some_flag) {
     if (gps && !str.empty() && Config::Setting::enable_translation) {
       auto translation = Dictionary::GetSingleton()->Get(str);
       if (translation) {
@@ -283,8 +265,7 @@ namespace Hooks {
 
   // loading_data_new_game_loop interface loop
   SETUP_ORIG_FUNC(loading_world_new_game_loop);
-  void __fastcall HOOK(loading_world_new_game_loop)(void* a1)
-  {
+  void __fastcall HOOK(loading_world_new_game_loop)(void* a1) {
     ORIGINAL(loading_world_new_game_loop)(a1);
     // offset of stage may changed!
     auto state = (int*)((uintptr_t)a1 + 292);
@@ -299,8 +280,7 @@ namespace Hooks {
   // loading_world_continuing_game_loop interface loop
   // Loading world and continuing active game
   SETUP_ORIG_FUNC(loading_world_continuing_game_loop);
-  void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1)
-  {
+  void __fastcall HOOK(loading_world_continuing_game_loop)(__int64 a1) {
     ORIGINAL(loading_world_continuing_game_loop)(a1);
     // offset of stage may changed!
     auto state = (int*)((uintptr_t)a1 + 32);
@@ -315,8 +295,7 @@ namespace Hooks {
   // loading_world_start_new_game_loop interface loop
   // Loading world to start new game
   SETUP_ORIG_FUNC(loading_world_start_new_game_loop);
-  void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1)
-  {
+  void __fastcall HOOK(loading_world_start_new_game_loop)(__int64 a1) {
     ORIGINAL(loading_world_start_new_game_loop)(a1);
     // offset of stage may changed!
     auto state = (int*)((uintptr_t)a1 + 360);
@@ -330,15 +309,13 @@ namespace Hooks {
 
   // menu_interface_loop main menu interface loop
   SETUP_ORIG_FUNC(menu_interface_loop);
-  void __fastcall HOOK(menu_interface_loop)(__int64 a1)
-  {
+  void __fastcall HOOK(menu_interface_loop)(__int64 a1) {
     ORIGINAL(menu_interface_loop)(a1);
     StateManager::GetSingleton()->State(StateManager::Menu);
   }
 
   // search section below
-  void UpperCast(char& s, bool fix = false)
-  {
+  void UpperCast(char& s, bool fix = false) {
     // latin capitalize
     if (s >= (char)97 && s <= (char)122) {
       s -= (char)97;
@@ -403,8 +380,7 @@ namespace Hooks {
     }
   }
 
-  void LowerCast(char& s, bool fix = false)
-  {
+  void LowerCast(char& s, bool fix = false) {
     // latin lowercast
     if (s >= (char)65 && s <= (char)90) {
       s -= (char)65;
@@ -472,8 +448,7 @@ namespace Hooks {
   // main handler for input from keyboard
   SETUP_ORIG_FUNC(standardstringentry);
   int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag, std::set<InterfaceKey>& events,
-                                           const uint32_t* utf)
-  {
+                                           const uint32_t* utf) {
     if (events.contains(INTERFACEKEY_STRING_A000 + Config::Keybinding::shift) && str.size() > 0) {
       str.pop_back();
       events.clear();
@@ -524,8 +499,7 @@ namespace Hooks {
   }
 
   SETUP_ORIG_FUNC(simplify_string);
-  void __fastcall HOOK(simplify_string)(std::string& str)
-  {
+  void __fastcall HOOK(simplify_string)(std::string& str) {
     for (int s = 0; s < str.size(); s++) {
       LowerCast(str[s]);
       switch (str[s]) {
@@ -583,24 +557,21 @@ namespace Hooks {
   }
 
   SETUP_ORIG_FUNC(upper_case_string);
-  void __fastcall HOOK(upper_case_string)(std::string& str)
-  {
+  void __fastcall HOOK(upper_case_string)(std::string& str) {
     for (int s = 0; s < str.size(); s++) {
       UpperCast(str[s], true);
     }
   }
 
   SETUP_ORIG_FUNC(lower_case_string);
-  void __fastcall HOOK(lower_case_string)(std::string& str)
-  {
+  void __fastcall HOOK(lower_case_string)(std::string& str) {
     for (int s = 0; s < str.size(); s++) {
       LowerCast(str[s], true);
     }
   }
 
   SETUP_ORIG_FUNC(capitalize_string_words);
-  void __fastcall HOOK(capitalize_string_words)(std::string& str)
-  {
+  void __fastcall HOOK(capitalize_string_words)(std::string& str) {
     int32_t bracket_count = 0;
     bool conf;
     for (int32_t s = 0; s < str.size(); s++) {
@@ -634,8 +605,7 @@ namespace Hooks {
   }
 
   SETUP_ORIG_FUNC(capitalize_string_first_word);
-  void __fastcall HOOK(capitalize_string_first_word)(std::string& str)
-  {
+  void __fastcall HOOK(capitalize_string_first_word)(std::string& str) {
     int32_t bracket_count = 0;
     bool conf;
     for (int s = 0; s < str.size(); s++) {
@@ -673,8 +643,7 @@ namespace Hooks {
   // init TTFManager
   // should call init() for TTFInit and SDL function load from dll
   // then should load font for drawing text
-  void InstallTTFInjection()
-  {
+  void InstallTTFInjection() {
     // auto ttf = TTFManager::GetSingleton();
     // ttf->Init();
     // ttf->LoadFont("terminus_bold.ttf", 14, 2);
@@ -689,8 +658,7 @@ namespace Hooks {
     ATTACH(cleanup_arrays);
   }
 
-  void UninstallTTFInjection()
-  {
+  void UninstallTTFInjection() {
     DETACH(addchar);
     DETACH(addchar_top);
     // DETACH(add_texture);
@@ -702,8 +670,7 @@ namespace Hooks {
 
   // init StateManager, set callback to reset textures cache;
   // StateManager used for tracking game state in case of ttf usage (resetting cache)
-  void InstallStateManager()
-  {
+  void InstallStateManager() {
     auto state = StateManager::GetSingleton();
     state->SetCallback(StateManager::Menu, [&](void) { logger::debug("game state changed to StateManager::Menu"); });
     state->SetCallback(StateManager::Loading, [&](void) {
@@ -724,8 +691,7 @@ namespace Hooks {
     ATTACH(menu_interface_loop);
   }
 
-  void UninstallStateManager()
-  {
+  void UninstallStateManager() {
     DETACH(loading_world_new_game_loop);
     DETACH(loading_world_continuing_game_loop);
     DETACH(loading_world_start_new_game_loop);
@@ -733,8 +699,7 @@ namespace Hooks {
   }
 
   // translation
-  void InstallTranslation()
-  {
+  void InstallTranslation() {
 
     // ATTACH(string_copy);
     ATTACH(string_copy_n);
@@ -748,8 +713,7 @@ namespace Hooks {
     ATTACH(addcoloredst);
   }
 
-  void UninstallTranslation()
-  {
+  void UninstallTranslation() {
     // translation
     // DETACH(string_copy);
     // DETACH(string_copy_n);
@@ -764,8 +728,7 @@ namespace Hooks {
   }
 
   // text entry
-  void InstallTextEntry()
-  {
+  void InstallTextEntry() {
     ATTACH(standardstringentry);
     ATTACH(simplify_string);
     ATTACH(upper_case_string);
@@ -774,8 +737,7 @@ namespace Hooks {
     ATTACH(capitalize_string_first_word);
   }
 
-  void UninstallTextEntry()
-  {
+  void UninstallTextEntry() {
     DETACH(standardstringentry);
     DETACH(simplify_string);
     DETACH(upper_case_string);

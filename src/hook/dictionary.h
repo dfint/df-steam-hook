@@ -1,10 +1,8 @@
 #pragma once
 
-class Dictionary
-{
+class Dictionary {
 public:
-  [[nodiscard]] static Dictionary* GetSingleton()
-  {
+  [[nodiscard]] static Dictionary* GetSingleton() {
     static Dictionary singleton;
     return &singleton;
   }

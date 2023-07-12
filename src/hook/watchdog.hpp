@@ -3,8 +3,7 @@
 namespace Watchdog {
   namespace Handler {
 
-    void Keypress()
-    {
+    void Keypress() {
       while (true) {
         Sleep(10);
         if ((GetAsyncKeyState(VK_CONTROL) & GetAsyncKeyState(VK_F3)) && Config::Setting::enable_translation == true) {
@@ -28,8 +27,7 @@ namespace Watchdog {
 
   } // namespace Handler
 
-  void WatchKeyboard()
-  {
+  void WatchKeyboard() {
     CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(Watchdog::Handler::Keypress), nullptr, 0, nullptr);
   }
 } // namespace Watchdog

@@ -5,12 +5,9 @@
 #include "patches.h"
 #include "watchdog.hpp"
 
-extern "C" __declspec(dllexport) VOID NullExport(VOID)
-{
-}
+extern "C" __declspec(dllexport) VOID NullExport(VOID) {}
 
-void ProcessAttach()
-{
+void ProcessAttach() {
   InitLogger();
   if (Config::Setting::watchdog) {
     Watchdog::WatchKeyboard();
@@ -48,8 +45,7 @@ void ProcessAttach()
   logger::info("hooks installed");
 }
 
-void ProcessDetach()
-{
+void ProcessDetach() {
   DetourTransactionBegin();
   DetourUpdateThread(GetCurrentThread());
 
@@ -66,8 +62,7 @@ void ProcessDetach()
   DetourTransactionCommit();
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-{
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
   if (Config::Setting::crash_report) {
     CrashReport::Install();
   }

@@ -2,18 +2,13 @@ BasedOnStyle: Mozilla
 IndentWidth: 2
 AlignAfterOpenBracket: true
 AlignOperands: true
-AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortEnumsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 BinPackArguments: true
 BinPackParameters: true
-BraceWrapping:
-  AfterClass: true
-  AfterEnum: true
-  AfterFunction: true
-  AfterStruct: true
-  AfterUnion: true
-BreakBeforeBraces: Custom
+BreakBeforeBraces: Attach
 ColumnLimit: 140
 IndentPPDirectives: AfterHash
 SortUsingDeclarations: true
