@@ -732,9 +732,10 @@ namespace Hooks {
     DETACH(menu_interface_loop);
   }
 
+  // translation
   void InstallTranslation()
   {
-    // translation
+
     // ATTACH(string_copy);
     ATTACH(string_copy_n);
     // ATTACH(string_append);
@@ -745,16 +746,6 @@ namespace Hooks {
     ATTACH(addst_top);
     ATTACH(addst_flag);
     ATTACH(addcoloredst);
-
-    // search handling
-    if (Config::Setting::enable_search) {
-      ATTACH(standardstringentry);
-      ATTACH(simplify_string);
-      ATTACH(upper_case_string);
-      ATTACH(lower_case_string);
-      ATTACH(capitalize_string_words);
-      ATTACH(capitalize_string_first_word);
-    }
   }
 
   void UninstallTranslation()
@@ -770,16 +761,27 @@ namespace Hooks {
     DETACH(addst_top);
     DETACH(addst_flag);
     DETACH(addcoloredst);
+  }
 
-    // search handling
-    if (Config::Setting::enable_search) {
-      DETACH(standardstringentry);
-      DETACH(simplify_string);
-      DETACH(upper_case_string);
-      DETACH(lower_case_string);
-      DETACH(capitalize_string_words);
-      DETACH(capitalize_string_first_word);
-    }
+  // text entry
+  void InstallTextEntry()
+  {
+    ATTACH(standardstringentry);
+    ATTACH(simplify_string);
+    ATTACH(upper_case_string);
+    ATTACH(lower_case_string);
+    ATTACH(capitalize_string_words);
+    ATTACH(capitalize_string_first_word);
+  }
+
+  void UninstallTextEntry()
+  {
+    DETACH(standardstringentry);
+    DETACH(simplify_string);
+    DETACH(upper_case_string);
+    DETACH(lower_case_string);
+    DETACH(capitalize_string_words);
+    DETACH(capitalize_string_first_word);
   }
 
 } // namespace Hook

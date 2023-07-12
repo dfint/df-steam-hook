@@ -9,6 +9,63 @@ extern "C" __declspec(dllexport) VOID NullExport(VOID)
 {
 }
 
+void ProcessAttach()
+{
+  InitLogger();
+  if (Config::Setting::watchdog) {
+    Watchdog::WatchKeyboard();
+  }
+
+  if (Config::Metadata::name != "dfint localization hook") {
+    logger::critical("unable to find config file");
+    MessageBoxA(nullptr, "unable to find config file", "dfint hook error", MB_ICONERROR);
+    exit(2);
+  }
+  logger::info("hook version: {}", Config::Metadata::hook_version);
+  logger::info("pe checksum: 0x{:x}", Config::Metadata::checksum);
+  logger::info("offsets version: {}", Config::Metadata::version);
+
+  Dictionary::GetSingleton()->LoadCsv(Config::Setting::dictionary);
+
+  DetourRestoreAfterWith();
+  DetourTransactionBegin();
+  DetourUpdateThread(GetCurrentThread());
+
+  if (Config::Setting::enable_translation) {
+    Hooks::InstallTranslation();
+  }
+  if (Config::Setting::enable_search) {
+    Hooks::InstallTextEntry();
+  }
+  // Hooks::InstallTTFInjection();
+  // Hooks::InstallStateManager();
+
+  if (Config::Setting::enable_patches) {
+    Patches::Install();
+  }
+
+  DetourTransactionCommit();
+  logger::info("hooks installed");
+}
+
+void ProcessDetach()
+{
+  DetourTransactionBegin();
+  DetourUpdateThread(GetCurrentThread());
+
+  if (Config::Setting::enable_translation) {
+    Hooks::UninstallTranslation();
+  }
+  if (Config::Setting::enable_search) {
+    Hooks::UninstallTextEntry();
+  }
+  // Hooks::UninstallTTFInjection();
+  // Hooks::UninstallStateManager();
+  logger::info("hooks uninstalled");
+
+  DetourTransactionCommit();
+}
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {
   if (Config::Setting::crash_report) {
@@ -16,58 +73,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
   }
 
   switch (ul_reason_for_call) {
-    case DLL_PROCESS_ATTACH: {
-      InitLogger();
-      if (Config::Setting::watchdog) {
-        Watchdog::WatchKeyboard();
-      }
-
-      if (Config::Metadata::name != "dfint localization hook") {
-        logger::critical("unable to find config file");
-        MessageBoxA(nullptr, "unable to find config file", "dfint hook error", MB_ICONERROR);
-        exit(2);
-      }
-      logger::info("hook version: {}", Config::Metadata::hook_version);
-      logger::info("pe checksum: 0x{:x}", Config::Metadata::checksum);
-      logger::info("offsets version: {}", Config::Metadata::version);
-
-      Dictionary::GetSingleton()->LoadCsv(Config::Setting::dictionary);
-
-      DetourRestoreAfterWith();
-      DetourTransactionBegin();
-      DetourUpdateThread(GetCurrentThread());
-
-      if (Config::Setting::enable_translation) {
-        Hooks::InstallTranslation();
-      }
-      // Hooks::InstallTTFInjection();
-      // Hooks::InstallStateManager();
-
-      if (Config::Setting::enable_patches) {
-        Patches::Install();
-      }
-
-      DetourTransactionCommit();
-      logger::info("hooks installed");
+    case DLL_PROCESS_ATTACH:
+      ProcessAttach();
       break;
-    }
-    case DLL_PROCESS_DETACH: {
-      DetourTransactionBegin();
-      DetourUpdateThread(GetCurrentThread());
-
-      if (Config::Setting::enable_translation) {
-        Hooks::UninstallTranslation();
-      }
-      // Hooks::UninstallTTFInjection();
-      // Hooks::UninstallStateManager();
-      logger::info("hooks uninstalled");
-
-      DetourTransactionCommit();
-      break;
-    }
-    case DLL_THREAD_ATTACH:
-      break;
-    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+      ProcessDetach();
       break;
   }
   return TRUE;

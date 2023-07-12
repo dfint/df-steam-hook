@@ -193,6 +193,8 @@ namespace Hooks {
 
   void InstallTranslation();
   void UninstallTranslation();
+  void InstallTextEntry();
+  void UninstallTextEntry();
   void InstallTTFInjection();
   void UninstallTTFInjection();
   void InstallStateManager();
