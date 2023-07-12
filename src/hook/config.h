@@ -29,8 +29,7 @@ namespace Config {
       }
     }
 
-    std::string message =
-      std::format("unable to find offsets file for current version of DF (checksum 0x{:x})", target_checksum);
+    std::string message = std::format("unable to find offsets file for current version of DF (checksum 0x{:x})", target_checksum);
 
     MessageBoxA(nullptr, message.c_str(), "dfint hook error", MB_ICONERROR);
     exit(2);
@@ -76,10 +75,8 @@ namespace Config {
     inline auto enable_search = Config::config["settings"]["enable_search"].value_or<bool>(true);
     inline auto enable_translation = Config::config["settings"]["enable_translation"].value_or<bool>(true);
     inline auto enable_patches = Config::config["settings"]["enable_patches"].value_or<bool>(true);
-    inline auto dictionary =
-      Config::config["settings"]["dictionary"].value_or<std::string>("./dfint_data/dfint_dictionary.csv");
-    inline auto crash_report_dir =
-      Config::config["settings"]["crash_report_dir"].value_or<std::string>("./dfint_data/crash_reports/");
+    inline auto dictionary = Config::config["settings"]["dictionary"].value_or<std::string>("./dfint_data/dfint_dictionary.csv");
+    inline auto crash_report_dir = Config::config["settings"]["crash_report_dir"].value_or<std::string>("./dfint_data/crash_reports/");
     inline auto watchdog = Config::config["settings"]["watchdog"].value_or<bool>(true);
 
   } // namespace Setting
@@ -109,8 +106,7 @@ namespace Config {
     inline auto upper_case_string = Config::offsets["offsets"]["upper_case_string"].value_or<uintptr_t>(0);
     inline auto lower_case_string = Config::offsets["offsets"]["lower_case_string"].value_or<uintptr_t>(0);
     inline auto capitalize_string_words = Config::offsets["offsets"]["capitalize_string_words"].value_or<uintptr_t>(0);
-    inline auto capitalize_string_first_word =
-      Config::offsets["offsets"]["capitalize_string_first_word"].value_or<uintptr_t>(0);
+    inline auto capitalize_string_first_word = Config::offsets["offsets"]["capitalize_string_first_word"].value_or<uintptr_t>(0);
 
     inline auto addchar = Config::offsets["offsets"]["addchar"].value_or<uintptr_t>(0);
     inline auto addchar_top = Config::offsets["offsets"]["addchar_top"].value_or<uintptr_t>(0);
@@ -120,12 +116,10 @@ namespace Config {
     inline auto screen_to_texid = Config::offsets["offsets"]["screen_to_texid"].value_or<uintptr_t>(0);
     inline auto screen_to_texid_top = Config::offsets["offsets"]["screen_to_texid_top"].value_or<uintptr_t>(0);
 
-    inline auto loading_world_new_game_loop =
-      Config::offsets["offsets"]["loading_world_new_game_loop"].value_or<uintptr_t>(0);
+    inline auto loading_world_new_game_loop = Config::offsets["offsets"]["loading_world_new_game_loop"].value_or<uintptr_t>(0);
     inline auto loading_world_continuing_game_loop =
       Config::offsets["offsets"]["loading_world_continuing_game_loop"].value_or<uintptr_t>(0);
-    inline auto loading_world_start_new_game_loop =
-      Config::offsets["offsets"]["loading_world_start_new_game_loop"].value_or<uintptr_t>(0);
+    inline auto loading_world_start_new_game_loop = Config::offsets["offsets"]["loading_world_start_new_game_loop"].value_or<uintptr_t>(0);
     inline auto menu_interface_loop = Config::offsets["offsets"]["menu_interface_loop"].value_or<uintptr_t>(0);
 
     inline auto string_patches = Config::GetStringsOffsetArray();

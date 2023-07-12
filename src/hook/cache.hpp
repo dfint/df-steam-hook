@@ -55,10 +55,7 @@ public:
     }
   }
 
-  void SetEraseCallback(std::function<void(const KeyType& key, ValueType& value)> callback)
-  {
-    this->erase_callback = callback;
-  }
+  void SetEraseCallback(std::function<void(const KeyType& key, ValueType& value)> callback) { this->erase_callback = callback; }
 
   bool Exists(const KeyType& key) const { return items_map.find(key) != items_map.end(); }
 
