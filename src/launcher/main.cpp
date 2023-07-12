@@ -13,7 +13,7 @@ int main()
   si.cb = sizeof(si);
 
   // spawn a DLL injected process
-  const BOOL status = DetourCreateProcessWithDllEx(L"Dwarf Fortress.exe",         // application name
+  const BOOL status = DetourCreateProcessWithDllEx("Dwarf Fortress.exe",          // application name
                                                    nullptr,                       // full command line + arguments
                                                    nullptr,                       // process attributes
                                                    nullptr,                       // thread attributes
