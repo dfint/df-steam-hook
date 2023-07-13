@@ -36,8 +36,7 @@ namespace Hooks {
   // swap texture of specific char in chosen screen matrix (main/top)
   template <auto T>
   void InjectTTFChar(unsigned char symbol, int x, int y) {
-    if (ttf_injection_lock)
-      return;
+    if (ttf_injection_lock) return;
 
     auto tile = ScreenManager::GetSingleton()->GetTile<T>(x, y);
 
@@ -583,18 +582,15 @@ namespace Hooks {
         --bracket_count;
         continue;
       }
-      if (bracket_count > 0)
-        continue;
+      if (bracket_count > 0) continue;
       conf = false;
       if (s > 0) {
-        if (str[s - 1] == ' ' || str[s - 1] == '\"')
-          conf = true;
+        if (str[s - 1] == ' ' || str[s - 1] == '\"') conf = true;
         if (str[s - 1] == '\'') {
           if (s <= 0)
             conf = true;
           else if (s >= 2) {
-            if (str[s - 2] == ' ' || str[s - 2] == ',')
-              conf = true;
+            if (str[s - 2] == ' ' || str[s - 2] == ',') conf = true;
           }
         }
       }
@@ -617,25 +613,21 @@ namespace Hooks {
         --bracket_count;
         continue;
       }
-      if (bracket_count > 0)
-        continue;
+      if (bracket_count > 0) continue;
       conf = false;
       if (s > 0) {
-        if (str[s - 1] == ' ' || str[s - 1] == '\"')
-          conf = true;
+        if (str[s - 1] == ' ' || str[s - 1] == '\"') conf = true;
         if (str[s - 1] == '\'') {
           if (s <= 0)
             conf = true;
           else if (s >= 2) {
-            if (str[s - 2] == ' ' || str[s - 2] == ',')
-              conf = true;
+            if (str[s - 2] == ' ' || str[s - 2] == ',') conf = true;
           }
         }
       }
       if (s == 0 || conf) {
         UpperCast(str[s], true);
-        if (str[s] != ' ' && str[s] != '\"')
-          return;
+        if (str[s] != ' ' && str[s] != '\"') return;
       }
     }
   }

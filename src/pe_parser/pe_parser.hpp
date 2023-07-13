@@ -4,6 +4,7 @@
 #include <windows.h>
 
 class PEParser {
+
 public:
   [[nodiscard]] static PEParser* GetSingleton() {
     static PEParser singleton;

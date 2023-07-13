@@ -98,18 +98,12 @@ namespace Hooks {
     float br, bg, bb;
 
     bool operator<(const struct texture_fullid& other) const {
-      if (texpos != other.texpos)
-        return texpos < other.texpos;
-      if (r != other.r)
-        return r < other.r;
-      if (g != other.g)
-        return g < other.g;
-      if (b != other.b)
-        return b < other.b;
-      if (br != other.br)
-        return br < other.br;
-      if (bg != other.bg)
-        return bg < other.bg;
+      if (texpos != other.texpos) return texpos < other.texpos;
+      if (r != other.r) return r < other.r;
+      if (g != other.g) return g < other.g;
+      if (b != other.b) return b < other.b;
+      if (br != other.br) return br < other.br;
+      if (bg != other.bg) return bg < other.bg;
       return bb < other.bb;
     }
   };
@@ -136,13 +130,13 @@ namespace Hooks {
   inline auto module_handle = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
 #define SETUP_ORIG_FUNC_OFFSET(fn_name, shift) auto fn_name##_orig = reinterpret_cast<fn_name>(module_handle + shift);
-#define SETUP_ORIG_FUNC(fn_name) auto fn_name##_orig = reinterpret_cast<fn_name>(module_handle + Config::Offset::fn_name);
+#define SETUP_ORIG_FUNC(fn_name)               auto fn_name##_orig = reinterpret_cast<fn_name>(module_handle + Config::Offset::fn_name);
 #define SETUP_ORIG_FUNC_FNAME(fn_name, module_name)                                                                                        \
   auto fn_name##_orig = reinterpret_cast<fn_name>(GetProcAddress(GetModuleHandle(#module_name), #fn_name));
-#define GET_ADDR(shift) reinterpret_cast<void*>(module_handle + shift)
-#define ATTACH(fn_name) DetourAttach(&(reinterpret_cast<void*&>(fn_name##_orig)), (void*)fn_name##_hook);
-#define DETACH(fn_name) DetourDetach(&(reinterpret_cast<void*&>(fn_name##_orig)), (void*)fn_name##_hook);
-#define HOOK(fn_name) fn_name##_hook
+#define GET_ADDR(shift)   reinterpret_cast<void*>(module_handle + shift)
+#define ATTACH(fn_name)   DetourAttach(&(reinterpret_cast<void*&>(fn_name##_orig)), (void*)fn_name##_hook);
+#define DETACH(fn_name)   DetourDetach(&(reinterpret_cast<void*&>(fn_name##_orig)), (void*)fn_name##_hook);
+#define HOOK(fn_name)     fn_name##_hook
 #define ORIGINAL(fn_name) fn_name##_orig
 
   // translation
@@ -159,7 +153,7 @@ namespace Hooks {
 
   // search
   typedef int(__fastcall* standardstringentry)(std::string& str, int maxlen, unsigned int flag, std::set<InterfaceKey>& events,
-                                               uint16_t* utf);
+                                               const uint32_t* utf);
   typedef void(__fastcall* upper_case_string)(std::string& str);
   typedef void(__fastcall* simplify_string)(std::string& str);
   typedef void(__fastcall* lower_case_string)(std::string& str);

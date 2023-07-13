@@ -24,20 +24,12 @@ public:
 
   template <ScreenType screen_type>
   ScreenTile* GetTile(int x, int y) {
-    if (screen_type == ScreenType::Top) {
-      return reinterpret_cast<ScreenTile*>(this->screen_top + x * this->dimy * 4 + y * 4);
-    } else {
-      return reinterpret_cast<ScreenTile*>(this->screen + x * this->dimy * 4 + y * 4);
-    }
+    return reinterpret_cast<ScreenTile*>((screen_type == ScreenType::Top ? this->screen_top : this->screen) + x * this->dimy * 4 + y * 4);
   }
 
   template <ScreenType screen_type>
   ScreenTile* GetOffset(int offset) {
-    if (screen_type == ScreenType::Top) {
-      return reinterpret_cast<ScreenTile*>(this->screen_top + offset * 4);
-    } else {
-      return reinterpret_cast<ScreenTile*>(this->screen + offset * 4);
-    }
+    return reinterpret_cast<ScreenTile*>((screen_type == ScreenType::Top ? this->screen_top : this->screen) + offset * 4);
   }
 
   void AllocateScreen(int x, int y) {
@@ -49,17 +41,11 @@ public:
 
   template <ScreenType screen_type>
   void ClearScreen() {
-    if (screen_type == ScreenType::Top) {
-      if (this->screen_top != nullptr) {
-        delete[] this->screen_top;
-      }
-      this->screen_top = nullptr;
-    } else {
-      if (this->screen != nullptr) {
-        delete[] this->screen;
-      }
-      this->screen = nullptr;
+    auto& screen = screen_type == ScreenType::Top ? this->screen_top : this->screen;
+    if (screen != nullptr) {
+      delete[] screen;
     }
+    screen = nullptr;
   }
 
   template <ScreenType screen_type>

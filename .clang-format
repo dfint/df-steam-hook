@@ -2,8 +2,10 @@ BasedOnStyle: Mozilla
 IndentWidth: 2
 AlignAfterOpenBracket: true
 AlignOperands: true
+AlignConsecutiveMacros: true
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortEnumsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: WithoutElse
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 BinPackArguments: true
