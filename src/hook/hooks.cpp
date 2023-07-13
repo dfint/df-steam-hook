@@ -500,22 +500,22 @@ namespace Hooks {
 
   SETUP_ORIG_FUNC(simplify_string);
   void __fastcall HOOK(simplify_string)(std::string& str) {
-    for (int s = 0; s < str.size(); s++) {
-      LowerCast(str[s]);
-      switch (str[s]) {
+    for (auto& s : str) {
+      LowerCast(s);
+      switch (s) {
         case (char)129:
         case (char)150:
         case (char)151:
         case (char)154:
         case (char)163:
-          str[s] = 'u'; // üûùÜú -> u
+          s = 'u'; // üûùÜú -> u
           break;
         case (char)152:
-          str[s] = 'y'; // ÿ -> y
+          s = 'y'; // ÿ -> y
           break;
         case (char)164:
         case (char)165:
-          str[s] = 'n'; // ñÑ -> n
+          s = 'n'; // ñÑ -> n
           break;
         case (char)131:
         case (char)132:
@@ -526,31 +526,31 @@ namespace Hooks {
         case (char)145:
         case (char)146:
         case (char)160:
-          str[s] = 'a'; // âäàåÄÅæÆá -> a
+          s = 'a'; // âäàåÄÅæÆá -> a
           break;
         case (char)130:
         case (char)136:
         case (char)137:
         case (char)138:
         case (char)144:
-          str[s] = 'e';
+          s = 'e';
           break;
         case (char)139:
         case (char)140:
         case (char)141:
         case (char)161:
-          str[s] = 'i'; // ïîìí -> i
+          s = 'i'; // ïîìí -> i
           break;
         case (char)147:
         case (char)148:
         case (char)149:
         case (char)153:
         case (char)162:
-          str[s] = 'o'; // ôöòÖó -> o
+          s = 'o'; // ôöòÖó -> o
           break;
         case (char)128:
         case (char)135:
-          str[s] = 'c'; // Çç -> c
+          s = 'c'; // Çç -> c
           break;
       }
     }
@@ -558,15 +558,15 @@ namespace Hooks {
 
   SETUP_ORIG_FUNC(upper_case_string);
   void __fastcall HOOK(upper_case_string)(std::string& str) {
-    for (int s = 0; s < str.size(); s++) {
-      UpperCast(str[s], true);
+    for (auto& s : str) {
+      UpperCast(s, true);
     }
   }
 
   SETUP_ORIG_FUNC(lower_case_string);
   void __fastcall HOOK(lower_case_string)(std::string& str) {
-    for (int s = 0; s < str.size(); s++) {
-      LowerCast(str[s], true);
+    for (auto& s : str) {
+      LowerCast(s, true);
     }
   }
 
@@ -574,7 +574,7 @@ namespace Hooks {
   void __fastcall HOOK(capitalize_string_words)(std::string& str) {
     int32_t bracket_count = 0;
     bool conf;
-    for (int32_t s = 0; s < str.size(); s++) {
+    for (int s = 0; s < str.size(); s++) {
       if (str[s] == '[') {
         ++bracket_count;
         continue;
@@ -716,7 +716,7 @@ namespace Hooks {
   void UninstallTranslation() {
     // translation
     // DETACH(string_copy);
-    // DETACH(string_copy_n);
+    DETACH(string_copy_n);
     // DETACH(string_append);
     // DETACH(string_append_0);
     DETACH(string_append_n);
