@@ -28,6 +28,8 @@ jobs:
       with:
         msbuild-architecture: x64
         vs-prerelease: true
+    
+    - name: Check cl version
       run: clver
 
     # Force xmake to a specific folder (for cache)
