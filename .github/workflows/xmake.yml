@@ -26,6 +26,7 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
       with:
+        msbuild-architecture: x64
         vs-prerelease: true
 
     # Force xmake to a specific folder (for cache)
