@@ -40,8 +40,7 @@ public:
   }
 
   std::optional<std::reference_wrapper<ValueType>> Get(const KeyType& key) {
-    auto it = items_map.find(key);
-    if (it == items_map.end()) {
+    if (auto it = items_map.find(key); it == items_map.end()) {
       return std::nullopt;
     } else {
       items_list.splice(items_list.begin(), items_list, it->second);

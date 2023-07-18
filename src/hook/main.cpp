@@ -7,7 +7,7 @@
 
 extern "C" __declspec(dllexport) VOID NullExport(VOID) {}
 
-void ProcessAttach() {
+BOOL ProcessAttach() {
   InitLogger();
   if (Config::Setting::watchdog) {
     Watchdog::WatchKeyboard();
@@ -40,12 +40,13 @@ void ProcessAttach() {
   if (Config::Setting::enable_patches) {
     Patches::Install();
   }
-
   DetourTransactionCommit();
   logger::info("hooks installed");
+
+  return TRUE;
 }
 
-void ProcessDetach() {
+BOOL ProcessDetach() {
   DetourTransactionBegin();
   DetourUpdateThread(GetCurrentThread());
 
@@ -58,8 +59,9 @@ void ProcessDetach() {
   // Hooks::UninstallTTFInjection();
   // Hooks::UninstallStateManager();
   logger::info("hooks uninstalled");
-
   DetourTransactionCommit();
+
+  return TRUE;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
@@ -69,11 +71,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
   switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
-      ProcessAttach();
-      break;
+      return ProcessAttach();
     case DLL_PROCESS_DETACH:
-      ProcessDetach();
-      break;
+      return ProcessDetach();
+    default:
+      return TRUE;
   }
-  return TRUE;
 }

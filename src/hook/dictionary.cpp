@@ -45,14 +45,12 @@ std::optional<std::string> Dictionary::Get(const std::string& key) {
   if (key.empty()) {
     return std::nullopt;
   }
-  if (this->dict.find(key) == this->dict.end()) {
-    return std::nullopt;
+  if (auto it = this->dict.find(key); it != this->dict.end()) {
+    if (auto value = it->second; !value.empty()) {
+      return value;
+    }
   }
-  auto value = this->dict.at(key);
-  if (value.empty()) {
-    return std::nullopt;
-  }
-  return value;
+  return std::nullopt;
 }
 
 std::optional<std::string> Dictionary::Get(const char* key) {
@@ -60,14 +58,12 @@ std::optional<std::string> Dictionary::Get(const char* key) {
   if (!key || len <= 0 || len >= 1000) {
     return std::nullopt;
   }
-  if (this->dict.find(key) == this->dict.end()) {
-    return std::nullopt;
+  if (auto it = this->dict.find(key); it != this->dict.end()) {
+    if (auto value = it->second; !value.empty()) {
+      return value;
+    }
   }
-  auto value = this->dict.at(key);
-  if (value.empty()) {
-    return std::nullopt;
-  }
-  return value;
+  return std::nullopt;
 }
 
 std::optional<std::string> Dictionary::Get(const char* key, size_t size) {
@@ -80,18 +76,16 @@ std::optional<std::string> Dictionary::Get(const char* key, size_t size) {
     strncpy(buf.get(), key, size);
     buf[size] = '\0';
   }
-  if (this->dict.find(buf ? buf.get() : key) == this->dict.end()) {
-    return std::nullopt;
+  if (auto it = this->dict.find(buf ? buf.get() : key); it != this->dict.end()) {
+    if (auto value = it->second; !value.empty()) {
+      return value;
+    }
   }
-  auto value = this->dict.at(buf ? buf.get() : key);
-  if (value.empty()) {
-    return std::nullopt;
-  }
-  return value;
+  return std::nullopt;
 }
 
 bool Dictionary::Exist(std::string& key) {
-  return this->dict.find(key) != this->dict.end();
+  return this->dict.contains(key);
 }
 
 void Dictionary::Add(std::string& key, std::string& value) {

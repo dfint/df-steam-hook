@@ -455,13 +455,9 @@ namespace Hooks {
     }
     // if INTERFACEKEY_SELECT || INTERFACEKEY_LEAVESCREEN
     // lost mouse rbut here, cause it is in enabler instance
-    if (events.contains(1) || events.contains(2)) {
-      return false;
-    }
+    if (events.contains(1) || events.contains(2)) return false;
     events.clear();
-    if (str.size() >= maxlen) {
-      return false;
-    }
+    if (str.size() >= maxlen) return false;
 
     bool any_valid = false;
     for (size_t i = 0; i < 32; i++) {
@@ -471,15 +467,13 @@ namespace Hooks {
       } else {
         entry = utf[i];
       }
-      if (entry == 0) {
-        break;
-      }
+      if (entry == 0) break;
 
-      if (str.length() < maxlen && (entry == 10) || (!(flag & STRINGENTRY_FILENAME) || invalid_filename_chars.contains(entry) == false) ||
+      if (str.size() < maxlen && (entry == 10) || (!(flag & STRINGENTRY_FILENAME) || !invalid_filename_chars.contains(entry)) ||
           (flag & STRINGENTRY_SYMBOLS) ||
-          ((flag & STRINGENTRY_LETTERS) && (entry >= INTERFACEKEY_STRING_A097 && entry <= INTERFACEKEY_STRING_A122) ||
-           (entry >= INTERFACEKEY_STRING_A065 && entry <= INTERFACEKEY_STRING_A090) ||
-           (entry >= INTERFACEKEY_STRING_A192 && entry <= INTERFACEKEY_STRING_A255)) ||
+          ((flag & STRINGENTRY_LETTERS) && ((entry >= INTERFACEKEY_STRING_A097 && entry <= INTERFACEKEY_STRING_A122) ||
+                                            (entry >= INTERFACEKEY_STRING_A065 && entry <= INTERFACEKEY_STRING_A090) ||
+                                            (entry >= INTERFACEKEY_STRING_A192 && entry <= INTERFACEKEY_STRING_A255))) ||
           ((flag & STRINGENTRY_SPACE) && entry == ' ') ||
           ((flag & STRINGENTRY_NUMBERS) && (entry >= INTERFACEKEY_STRING_A048 && entry <= INTERFACEKEY_STRING_A057))) {
 
@@ -489,11 +483,10 @@ namespace Hooks {
 
         any_valid = true;
         str.push_back(entry);
-        if (entry == 0 || entry == 10 || str.size() >= maxlen) {
-          break;
-        }
+        if (entry == 0 || entry == 10 || str.size() >= maxlen) break;
       }
     }
+
     return any_valid;
   }
 

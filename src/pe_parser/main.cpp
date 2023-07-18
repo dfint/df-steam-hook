@@ -1,8 +1,9 @@
-#include "pe_parser.hpp"
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <iostream>
+
+#include "pe_parser.hpp"
 
 /*
  * first argument - path to Dwarf Fortress.exe

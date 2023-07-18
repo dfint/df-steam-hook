@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 
 /* disable unused headers from Windows.h */
 #define WIN32_LEAN_AND_MEAN
