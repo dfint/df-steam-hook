@@ -1,5 +1,4 @@
 #include "dictionary.h"
-#include <future>
 
 namespace Watchdog {
   namespace Handler {
