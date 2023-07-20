@@ -3,6 +3,11 @@
 
 namespace Config {
 
+  constexpr const auto PATH_OFFSETS = "./dfint_data/offsets/";
+  constexpr const auto PATH_LOG = "./dfint_data/dfint_log.log";
+  constexpr const auto PATH_DICTIONARY = "./dfint_data/dfint_dictionary.csv";
+  constexpr const auto PATH_REPORTS = "./dfint_data/crash_reports/";
+
   inline time_t PETimestamp(const std::string filename) {
     std::ifstream file(filename);
 
@@ -20,7 +25,7 @@ namespace Config {
   }
 
   inline toml::v3::ex::parse_result GetOffsetsFile(time_t target_checksum) {
-    for (const auto& filepath : std::filesystem::recursive_directory_iterator("./dfint_data/offsets/")) {
+    for (const auto& filepath : std::filesystem::recursive_directory_iterator(PATH_OFFSETS)) {
       auto file = toml::parse_file(filepath.path().c_str());
       if (target_checksum == file["metadata"]["checksum"].value_or<time_t>(0)) {
         return file;
@@ -67,13 +72,13 @@ namespace Config {
   namespace Setting {
 
     inline auto log_level = Config::config["settings"]["log_level"].value_or<int>(0);
-    inline auto log_file = Config::config["settings"]["log_file"].value_or<std::string>("./dfint_data/dfint_log.log");
+    inline auto log_file = Config::config["settings"]["log_file"].value_or<std::string>(PATH_LOG);
     inline auto crash_report = Config::config["settings"]["crash_report"].value_or<bool>(true);
     inline auto enable_search = Config::config["settings"]["enable_search"].value_or<bool>(true);
     inline auto enable_translation = Config::config["settings"]["enable_translation"].value_or<bool>(true);
     inline auto enable_patches = Config::config["settings"]["enable_patches"].value_or<bool>(true);
-    inline auto dictionary = Config::config["settings"]["dictionary"].value_or<std::string>("./dfint_data/dfint_dictionary.csv");
-    inline auto crash_report_dir = Config::config["settings"]["crash_report_dir"].value_or<std::string>("./dfint_data/crash_reports/");
+    inline auto dictionary = Config::config["settings"]["dictionary"].value_or<std::string>(PATH_DICTIONARY);
+    inline auto crash_report_dir = Config::config["settings"]["crash_report_dir"].value_or<std::string>(PATH_REPORTS);
     inline auto watchdog = Config::config["settings"]["watchdog"].value_or<bool>(true);
 
   } // namespace Setting

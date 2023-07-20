@@ -2,7 +2,7 @@
 
 namespace CrashReport {
 
-  constinit const auto PATH_REPORTS = "./dfint_data/crash_reports/";
+  constexpr const auto PATH_REPORTS = "./dfint_data/crash_reports/";
 
   std::ofstream GetCrashReportLogHandle(const std::string& filename) {
     if (!std::filesystem::is_directory(PATH_REPORTS) || !std::filesystem::exists(PATH_REPORTS)) {
