@@ -1,4 +1,5 @@
 #include "dictionary.h"
+#include <future>
 
 namespace Watchdog {
   namespace Handler {
@@ -51,6 +52,6 @@ namespace Watchdog {
   } // namespace Handler
 
   void WatchKeyboard() {
-    CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(Watchdog::Handler::Keypress), nullptr, 0, nullptr);
+    std::thread{ std::ref(Watchdog::Handler::Keypress) }.detach();
   }
 } // namespace Watchdog
