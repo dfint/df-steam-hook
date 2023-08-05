@@ -26,6 +26,6 @@ The package contains an empty translation file `dfint_dictionary.csv`, which you
 
 Also you'll probably need to modify `curses_640x300.png` font in the `data/art` directory of the game according to the encoding you've chosen on the to encode csv file. You don't need to redraw the entire font just add characters which is necessary to display text in your language correctly.
 
-Keep in mind, that some languages cannot be used with Dwarf Fortress at the moment: in particular, no languages with rigt-to-left and hieroglyphic wrighting systems are supported.
+Keep in mind, that some languages cannot be used with Dwarf Fortress at the moment (at least with our version of **df-steam-hook**): in particular, no languages with rigt-to-left and hieroglyphic wrighting systems are supported.
 
 There are forks of **df-steam-hook** for [Korean](https://github.com/Kheeman/df-steam-hook) and [Chinese](https://github.com/trotsky1997/df-steam-hook), so for these languages try to contact owners of these repositories.
