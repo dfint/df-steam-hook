@@ -20,14 +20,8 @@
 
 ## How to install:
 
-Unpack `dfint-steam-hook-*.zip` to the game's directory and run `dfint_launcher.exe` file. It will run the game with translation applied.
+Download an `dfint-steam-hook-*.zip` archive from the [latest release](https://github.com/dfint/df-steam-hook/releases/latest), unpack it to the game's directory (with replacement of all files).
 
-For your language you'll need to prepare csv file from the [hardcoded_steam resource on transifex](https://www.transifex.com/dwarf-fortress-translation/dwarf-fortress-steam/hardcoded_steam/). The package contains an empty csv file as a placeholder, so you'll not see any translation before you generate actual csv file for your language.
-
-To do this, you need to use tools from [df-gettext-toolkit](https://github.com/dfint/df-gettext-toolkit) repository, see the first example in "Usage examples". The last parameter must be an encoding which is relevant for your language. E.g. for Esperanto can be used `latin3`.
+The package contains an empty translation file `dfint_dictionary.csv`, which you need to replace with a file for your language. There are ready to use files in the https://github.com/dfint/autobuild repository in the `translation_build` directory. To download a file, you need open it (click on the file in the file list), then press "Download raw file" icon button in the top right corner of the file area.
 
 Also you'll probably need to modify `curses_640x300.png` font in the `data/art` directory of the game according to the encoding you've chosen on the to encode csv file. You don't need to redraw the entire font just add characters which is necessary to display text in your language correctly.
-
-Later we'll add posibility to create csv file using [df-translation-client](https://github.com/dfint/df-translation-client).
-
-Here you can get a csv file for the most languages from transifex automatically updated: https://github.com/dfint/autobuild/tree/main/translation_build
