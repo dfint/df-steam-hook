@@ -34,4 +34,4 @@ Keep in mind, that some languages cannot be used with Dwarf Fortress at the mome
 
 There are forks of **df-steam-hook** for [Korean](https://github.com/Kheeman/df-steam-hook) and [Chinese](https://github.com/trotsky1997/df-steam-hook), so for these languages try to contact owners of these repositories.
 
-Languages with Latin and Cyrillic writing systems are supported. Other languages with compact alphabets (e.g., Greek) also can be supported, you just need to draw a font for it (and request addition of the language on transifex). Also, text entry and search for alternative alphabets needs additional development. For now, Cyrillic is the only alternative alphabet, for which is implemented text entry and search.
+Languages with Latin and Cyrillic writing systems are supported. Other languages with compact alphabets (e.g., Greek) also can be supported, you just need to draw a font for it (and request addition of the language on transifex). Also, text entry and search for alternative alphabets needs additional development. For now, Cyrillic is the only alternative alphabet, for which text entry and search is implemented.
