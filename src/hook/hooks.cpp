@@ -448,7 +448,7 @@ namespace Hooks {
   SETUP_ORIG_FUNC(standardstringentry);
   int __fastcall HOOK(standardstringentry)(std::string& str, int maxlen, unsigned int flag, std::set<InterfaceKey>& events,
                                            const uint32_t* utf) {
-    if (events.contains(INTERFACEKEY_STRING_A000 + Config::Keybinding::shift) && str.size() > 0) {
+    if (events.contains(INTERFACEKEY_STRING_A001 + Config::Keybinding::shift) && str.size() > 0) {
       str.pop_back();
       events.clear();
       return true;
