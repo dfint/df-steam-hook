@@ -65,9 +65,9 @@ BOOL ProcessDetach() {
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-  // if (Config::Setting::crash_report) {
-  //   CrashReport::Install();
-  // }
+  if (Config::Setting::crash_report) {
+    CrashReport::Install();
+  }
 
   switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH:
