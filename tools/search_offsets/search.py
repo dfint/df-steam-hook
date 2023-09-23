@@ -50,10 +50,7 @@ app = typer.Typer()
 
 
 @app.command()
-def main(path: Optional[Path] = typer.Option(None)):
-    if path is None:
-        path = Path("/mnt/second/SteamLibrary/steamapps/common/Dwarf Fortress/Dwarf Fortress.exe")
-
+def main(path: Path):
     patterns = load_patterns()
     found = search(path, patterns)
     print_found(map(attrgetter("name"), patterns), found)
