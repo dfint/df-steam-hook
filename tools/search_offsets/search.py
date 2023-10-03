@@ -32,9 +32,7 @@ def search(path: str, patterns: list[Pattern]):
     return found
 
 
-def print_found(patternt_names: Iterable[str], found: Mapping[str, int]):
-    diff_to_rva = 0xC00
-
+def print_found(pe: PortableExecutable, patternt_names: Iterable[str], found: Mapping[str, int]):
     for pattern in patternt_names:
         if not found[pattern]:
             print(f"{pattern}: NOT FOUND")
@@ -45,7 +43,9 @@ def print_found(patternt_names: Iterable[str], found: Mapping[str, int]):
             name = pattern + suffix
             if name == "addchar_0":
                 name = "addchar_top"
-            print(f"{name} = 0x{offset + diff_to_rva:X}")
+            
+            rva = pe.section_table.offset_to_rva(offset)
+            print(f"{name} = 0x{rva:X}")
 
 
 app = typer.Typer()
@@ -60,7 +60,7 @@ def main(path: Path):
         print(f"checksum = 0x{pe.file_header.timedate_stamp:X}")
     
     found = search(path, patterns)
-    print_found(map(attrgetter("name"), patterns), found)
+    print_found(pe, map(attrgetter("name"), patterns), found)
 
 
 if __name__ == "__main__":
