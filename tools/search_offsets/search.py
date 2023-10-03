@@ -1,7 +1,7 @@
 from collections import defaultdict
 from operator import attrgetter
 from pathlib import Path
-from typing import Iterable, Mapping, Optional
+from collections.abc import Iterable, Mapping
 
 import typer
 
