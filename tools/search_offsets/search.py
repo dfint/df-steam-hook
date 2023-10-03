@@ -3,6 +3,8 @@ from operator import attrgetter
 from pathlib import Path
 from collections.abc import Iterable, Mapping
 
+from peclasses.portable_executable import PortableExecutable
+
 import typer
 
 from search_offsets.patterns import (
@@ -52,6 +54,11 @@ app = typer.Typer()
 @app.command()
 def main(path: Path):
     patterns = load_patterns()
+    
+    with open(path, "rb") as exe:
+        pe = PortableExecutable(exe)
+        print(f"checksum = 0x{pe.file_header.timedate_stamp:X}")
+    
     found = search(path, patterns)
     print_found(map(attrgetter("name"), patterns), found)
 
