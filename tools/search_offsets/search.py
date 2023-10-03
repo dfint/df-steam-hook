@@ -1,11 +1,10 @@
 from collections import defaultdict
+from collections.abc import Iterable, Mapping
 from operator import attrgetter
 from pathlib import Path
-from collections.abc import Iterable, Mapping
-
-from peclasses.portable_executable import PortableExecutable
 
 import typer
+from peclasses.portable_executable import PortableExecutable, SectionTable
 
 from search_offsets.patterns import (
     Pattern,
@@ -32,7 +31,7 @@ def search(path: str, patterns: list[Pattern]):
     return found
 
 
-def print_found(pe: PortableExecutable, patternt_names: Iterable[str], found: Mapping[str, int]):
+def print_found(section_table: SectionTable, patternt_names: Iterable[str], found: Mapping[str, int]):
     for pattern in patternt_names:
         if not found[pattern]:
             print(f"{pattern}: NOT FOUND")
@@ -43,8 +42,8 @@ def print_found(pe: PortableExecutable, patternt_names: Iterable[str], found: Ma
             name = pattern + suffix
             if name == "addchar_0":
                 name = "addchar_top"
-            
-            rva = pe.section_table.offset_to_rva(offset)
+
+            rva = section_table.offset_to_rva(offset)
             print(f"{name} = 0x{rva:X}")
 
 
@@ -54,13 +53,14 @@ app = typer.Typer()
 @app.command()
 def main(path: Path):
     patterns = load_patterns()
-    
+
     with open(path, "rb") as exe:
         pe = PortableExecutable(exe)
         print(f"checksum = 0x{pe.file_header.timedate_stamp:X}")
-    
+        section_table = pe.section_table
+
     found = search(path, patterns)
-    print_found(pe, map(attrgetter("name"), patterns), found)
+    print_found(section_table, map(attrgetter("name"), patterns), found)
 
 
 if __name__ == "__main__":

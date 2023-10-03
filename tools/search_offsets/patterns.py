@@ -1,6 +1,6 @@
 from collections import defaultdict
-from dataclasses import dataclass
 from collections.abc import Mapping
+from dataclasses import dataclass
 
 from more_itertools import chunked
 
