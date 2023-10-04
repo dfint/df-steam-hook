@@ -3,10 +3,10 @@
 
 namespace Config {
 
-  constexpr const auto PATH_OFFSETS = "./dfint_data/offsets/";
-  constexpr const auto PATH_LOG = "./dfint_data/dfint_log.log";
-  constexpr const auto PATH_DICTIONARY = "./dfint_data/dfint_dictionary.csv";
-  constexpr const auto PATH_REPORTS = "./dfint_data/crash_reports/";
+  const std::filesystem::path PATH_OFFSETS{ "./dfint_data/offsets/" };
+  const std::filesystem::path PATH_LOG{ "./dfint_data/dfint_log.log" };
+  const std::filesystem::path PATH_DICTIONARY{ "./dfint_data/dfint_dictionary.csv" };
+  const std::filesystem::path PATH_REPORTS{ "./dfint_data/crash_reports/" };
 
   inline time_t PETimestamp(const std::string filename) {
     std::ifstream file(filename);
@@ -72,13 +72,13 @@ namespace Config {
   namespace Setting {
 
     inline auto log_level = Config::config["settings"]["log_level"].value_or<int>(0);
-    inline auto log_file = Config::config["settings"]["log_file"].value_or<std::string>(PATH_LOG);
+    inline auto log_file = Config::config["settings"]["log_file"].value_or<std::string>(PATH_LOG.string());
     inline auto crash_report = Config::config["settings"]["crash_report"].value_or<bool>(true);
     inline auto enable_search = Config::config["settings"]["enable_search"].value_or<bool>(true);
     inline auto enable_translation = Config::config["settings"]["enable_translation"].value_or<bool>(true);
     inline auto enable_patches = Config::config["settings"]["enable_patches"].value_or<bool>(true);
-    inline auto dictionary = Config::config["settings"]["dictionary"].value_or<std::string>(PATH_DICTIONARY);
-    inline auto crash_report_dir = Config::config["settings"]["crash_report_dir"].value_or<std::string>(PATH_REPORTS);
+    inline auto dictionary = Config::config["settings"]["dictionary"].value_or<std::string>(PATH_DICTIONARY.string());
+    inline auto crash_report_dir = Config::config["settings"]["crash_report_dir"].value_or<std::string>(PATH_REPORTS.string());
     inline auto watchdog = Config::config["settings"]["watchdog"].value_or<bool>(true);
 
   } // namespace Setting

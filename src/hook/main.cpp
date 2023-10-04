@@ -5,8 +5,6 @@
 #include "patches.h"
 #include "watchdog.hpp"
 
-extern "C" __declspec(dllexport) VOID NullExport(VOID) {}
-
 BOOL ProcessAttach() {
   InitLogger();
   if (Config::Setting::watchdog) {
@@ -64,7 +62,7 @@ BOOL ProcessDetach() {
   return TRUE;
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+extern "C" __declspec(dllexport) BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
   if (Config::Setting::crash_report) {
     CrashReport::Install();
   }
