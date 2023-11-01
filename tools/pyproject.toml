@@ -14,7 +14,7 @@ typer = "^0.9.0"
 peclasses = {version = "^0.4.0", source = "dfint"}
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.9.1"
+black = "^23.10.1"
 isort = "^5.12.0"
 ruff = "^0.1.3"
 
