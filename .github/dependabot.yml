@@ -21,3 +21,4 @@ updates:
           - "black"
           - "isort"
           - "mypy"
+          - "ruff"
