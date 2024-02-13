@@ -15,6 +15,7 @@ on:
       - 'src/**'
       - 'deps/**'
       - xmake.lua
+  workflow_dispatch:
 
 jobs:
   build:
