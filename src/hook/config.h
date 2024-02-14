@@ -28,7 +28,7 @@ namespace Config {
     for (const auto& filepath : std::filesystem::recursive_directory_iterator(PATH_OFFSETS)) {
       auto file = toml::parse_file(filepath.path().c_str());
       if (target_checksum == file["metadata"]["checksum"].value_or<time_t>(0)) {
-        return file;
+        return *file.as_table();
       }
     }
 
