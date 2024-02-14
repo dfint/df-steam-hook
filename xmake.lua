@@ -20,7 +20,7 @@ add_includedirs("deps/include")
 --3rd party remote libs
 add_requires("spdlog")
 add_requires("vcpkg::detours")
-add_requires("toml++ 3.3.0")
+add_requires("toml++")
 
 option("hook_version")
     set_default("not-defined")
