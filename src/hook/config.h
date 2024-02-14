@@ -24,9 +24,9 @@ namespace Config {
     return nt_header->FileHeader.TimeDateStamp;
   }
 
-  inline toml::v3::ex::parse_result GetOffsetsFile(time_t target_checksum) {
+  inline toml::parse_result GetOffsetsFile(time_t target_checksum) {
     for (const auto& filepath : std::filesystem::recursive_directory_iterator(PATH_OFFSETS)) {
-      auto file = toml::v3::parse_file(filepath.path().c_str());
+      auto file = toml::parse_file(filepath.path().c_str());
       if (target_checksum == file["metadata"]["checksum"].value_or<time_t>(0)) {
         return file;
       }
@@ -37,7 +37,7 @@ namespace Config {
     MessageBoxA(nullptr, message.c_str(), "dfint hook error", MB_ICONERROR);
     exit(2);
 
-    return toml::v3::ex::parse_result{};
+    return toml::parse_result{};
   }
 
   inline auto config = toml::parse_file("./dfint_data/dfint_config.toml");
