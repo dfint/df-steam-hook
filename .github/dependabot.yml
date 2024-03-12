@@ -8,17 +8,3 @@ updates:
       github-actions:
         patterns:
           - "*"
-
-  - package-ecosystem: "pip"
-    directory: "/tools"
-    schedule:
-      interval: "monthly"
-    groups:
-      dev-dependencies:
-        patterns:
-          - "pytest*"
-          - "flake8*"
-          - "black"
-          - "isort"
-          - "mypy"
-          - "ruff"
