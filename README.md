@@ -5,7 +5,9 @@
 [![Total downloads of all releases](https://img.shields.io/github/downloads/dfint/df-steam-hook/total)](https://github.com/dfint/df-steam-hook/releases)
 [![Downloads of the latest release](https://img.shields.io/github/downloads/dfint/df-steam-hook/latest/total)](https://github.com/dfint/df-steam-hook/releases/latest)
 
-> [!Note]
+> [!Warning]
+> This project is discontinued.
+> 
 > For Dwarf Fortress 50.12 versions and newer use [localization installer/updater](https://github.com/dfint/installer), which installs new [df-steam-hook-rs](https://github.com/dfint/df-steam-hook-rs).
 
 ## Basic feature:
