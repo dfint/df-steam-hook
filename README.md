@@ -8,7 +8,7 @@
 > [!Warning]
 > This project (df-steam-hook) is discontinued.
 > 
-> For Dwarf Fortress 50.12 versions and newer use [localization installer/updater](https://github.com/dfint/installer), which installs new [df-steam-hook-rs](https://github.com/dfint/df-steam-hook-rs).
+> For Dwarf Fortress 50.12 versions and newer use [localization installer/updater](https://github.com/dfint/installer).
 
 ## Basic feature:
 
